@@ -1,0 +1,79 @@
+/* Contenedor principal del perfil */
+.profile-container {
+    max-width: 600px; /* Ancho máximo para que no se vea gigante en pantallas grandes */
+    margin: 40px auto;
+    background: white;
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0 3px 8px rgba(0,0,0,0.1);
+}
+
+/* Foto de perfil */
+.profile-container img.profile-pic {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    object-fit: cover;
+    display: block;
+    margin: 0 auto 20px auto;
+    border: 3px solid var(--primary-color); /* Borde circular con color principal */
+}
+
+/* Nombre del usuario */
+.profile-container h2 {
+    text-align: center;
+    color: var(--primary-color);
+    margin-bottom: 10px;
+}
+
+/* Información adicional del perfil */
+.profile-info {
+    text-align: center;
+    color: #555;
+    font-size: 0.95rem;
+    margin-bottom: 20px;
+}
+
+/* Botones de acción (editar perfil, seguir, etc.) */
+.profile-actions {
+    display: flex; /* Flexbox para alinear los botones horizontalmente */
+    justify-content: center;
+    gap: 15px;
+}
+
+.profile-actions button {
+    padding: 8px 16px;
+    border: none;
+    border-radius: 8px;
+    background-color: var(--primary-color);
+    color: white;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.profile-actions button:hover {
+    background-color: #e5533d; /* Cambio de color a un tono más oscuro al pasar el mouse */
+}
+
+/* Lista de recetas subidas por el usuario */
+.user-recipes {
+    margin-top: 30px;
+}
+
+.user-recipes h3 {
+    color: var(--primary-color);  /* Títulos de sección con color principal */
+    margin-bottom: 15px;
+}
+
+.user-recipes ul {
+    list-style: none;  /* Quita los puntos de la lista */
+    padding: 0;
+}
+
+.user-recipes li {
+    background: #f9f9f9;
+    padding: 15px;
+    margin-bottom: 10px;
+    border-radius: 8px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+}
