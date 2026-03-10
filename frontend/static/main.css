@@ -1,0 +1,50 @@
+/* Variables para cambiar colores fácilmente en toda la web */
+:root {
+    --primary-color: #ff6347; /* Color tomate/naranja */
+    --bg-color: #f8f9fa;
+    --text-color: #333;
+    --bar-bg: #ffffff;
+}
+
+body {
+    font-family: 'Segoe UI', sans-serif;
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    margin: 0;
+    padding: 0;
+    /* Dejamos espacio abajo para que la barra no tape el contenido */
+    padding-bottom: 70px; 
+}
+
+/* Estilos para la Bottom Bar (Asegúrate de que tu bottom_bar.html use estas clases) */
+.bottom-nav {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 60px;
+    background-color: var(--bar-bg);
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+    z-index: 1000;
+}
+
+.nav-item {
+    text-decoration: none;
+    color: #888;
+    font-size: 0.8rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.nav-item.active {
+    color: var(--primary-color);
+}
+
+.nav-item i {
+    font-size: 1.2rem;
+    margin-bottom: 2px;
+}
