@@ -1,0 +1,46 @@
+h1 {
+    text-align: center;
+    color: var(--primary-color);
+    margin-top: 20px;
+}
+
+/* Lista del feed de recetas */
+#feed-list {
+    list-style: none;
+    padding: 0;
+    width: 90%;
+    max-width: 500px;
+    margin: 20px auto;
+}
+
+/* Tarjeta de cada receta dentro del feed*/
+#feed-list li {
+    background: white;
+    margin-bottom: 15px;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    transition: transform 0.2s;
+}
+
+/* Efecto de hover sobre cada tarjeta*/
+#feed-list li:hover {
+    transform: scale(1.02);  /* Aumenta ligeramente la tarjeta al pasar el mouse */
+}
+
+/* Título de receta */
+#feed-list strong {
+    color: var(--primary-color);
+    font-size: 1.2rem;
+}
+
+/* Tags de cada receta */
+.tag {
+    display: inline-block;
+    background: #e0e0e0;
+    border-radius: 6px;
+    padding: 4px 8px;
+    font-size: 0.75rem;
+    margin-top: 10px;
+    margin-right: 5px;
+}
