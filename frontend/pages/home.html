@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Feed</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+<h1>Feed de recetas</h1>
+
+<ul id="feed-list"></ul>
+
+{% include 'bottom_bar.html' %}
+
+<script>
+async function loadFeed() {
+    const response = await fetch('/home/feed');
+    const feed = await response.json();
+    const feedList = document.getElementById('feed-list');
+    feedList.innerHTML = '';
+    feed.forEach(item => {
+        const li = document.createElement('li');
+        li.innerHTML = `<strong>${item.title}</strong> - ${item.description} <br>Tags: ${item.tags.join(", ")}`;
+        feedList.appendChild(li);
+    });
+}
+
+loadFeed();
+</script>
+
+</body>
+</html>
