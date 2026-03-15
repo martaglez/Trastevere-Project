@@ -1,18 +1,151 @@
 <!DOCTYPE html>
-<html>
+
+<html lang="es">
 <head>
-    <title>Crear publicación</title>
-    <meta charset="UTF-8">
-    <link rel="stylesheet" href="{{ url_for('static', filename='main.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='create.css') }}">
+<meta charset="UTF-8">
+<title>Crear receta</title>
+
+<link rel="stylesheet" href="{{ url_for('static', filename='main.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='create.css') }}">
+
 </head>
-</head>
+
 <body>
 
-<h1>Crear receta</h1>
-<p>Aquí podrás crear una nueva publicación.</p>
+{% include 'top_bar.html' %}
+
+<div class="create-container">
+
+<!-- FOTOS -->
+
+<div class="image-grid">
+
+<label class="img-upload large">
+<input type="file" accept="image/*">
+<span>+</span>
+</label>
+
+<div class="right-images">
+
+<label class="img-upload">
+<input type="file" accept="image/*">
+<span>+</span>
+</label>
+
+<label class="img-upload">
+<input type="file" accept="image/*">
+<span>+</span>
+</label>
+
+</div>
+
+</div>
+
+<!-- TITULO -->
+
+<input class="title-input" placeholder="Título de la receta">
+
+<!-- USUARIO -->
+
+<input class="user-input" placeholder="Tu nombre">
+
+<!-- DESCRIPCION -->
+
+<textarea class="description-input" placeholder="Descripción de la receta"></textarea>
+
+<!-- INGREDIENTES -->
+
+<h3>Ingredientes</h3>
+
+<div id="ingredients"></div>
+
+<button onclick="addIngredient()">Añadir ingrediente</button>
+
+<!-- TAGS -->
+
+<h3>Tags</h3>
+
+<input class="tags-input" placeholder="Ej: pasta, italiano, queso">
+
+<!-- PASOS -->
+
+<h3>Pasos (opcional)</h3>
+
+<div id="steps"></div>
+
+<button onclick="addStep()">Añadir paso</button>
+
+<!-- PUBLICAR -->
+
+<button class="publish-btn" onclick="publishRecipe()">Publicar</button>
+
+</div>
 
 {% include 'bottom_bar.html' %}
+
+<script>
+
+function addIngredient(){
+
+const div = document.createElement("div");
+
+div.innerHTML = `<input class="ingredient-input" placeholder="Ingrediente">`;
+
+document.getElementById("ingredients").appendChild(div);
+
+}
+
+
+function addStep(){
+
+const div = document.createElement("div");
+
+div.innerHTML = `<input class="step-input" placeholder="Paso">`;
+
+document.getElementById("steps").appendChild(div);
+
+}
+
+
+async function publishRecipe(){
+
+const title = document.querySelector(".title-input").value;
+
+const description = document.querySelector(".description-input").value;
+
+const user = document.querySelector(".user-input").value;
+
+const tags = document.querySelector(".tags-input").value.split(",");
+
+const ingredients = [...document.querySelectorAll(".ingredient-input")]
+.map(i => i.value);
+
+const steps = [...document.querySelectorAll(".step-input")]
+.map(s => s.value);
+
+const data = {
+title,
+description,
+user,
+tags,
+ingredients,
+steps,
+images:["/static/pasta.jpg"]
+};
+
+await fetch('/publications/create', {
+method:'POST',
+headers:{'Content-Type':'application/json'},
+body:JSON.stringify(data)
+});
+
+alert("Receta publicada");
+
+window.location.href="/";
+
+}
+
+</script>
 
 </body>
 </html>

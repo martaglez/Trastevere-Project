@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Table</title>
+
+<link rel="stylesheet" href="{{ url_for('static', filename='main.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='home.css') }}">
+
+</head>
+
+<body>
+
+{% include 'top_bar.html' %}
+
+<h1 id="table-name"></h1>
+
+<div class="feed-container" id="recipes"></div>
+
+{% include 'bottom_bar.html' %}
+
+<script>
+
+async function loadTable(){
+
+    const path = window.location.pathname.split('/');
+    const id = path[path.length-1];
+
+    const res = await fetch('/tables/' + id);
+    const data = await res.json();
+
+    document.getElementById("table-name").innerText = data.name;
+
+    const container = document.getElementById("recipes");
+
+    container.innerHTML = "";
+
+    data.publications.forEach(pub => {
+
+        const card = document.createElement("div");
+        card.className = "recipe-card";
+
+        card.innerHTML = `
+            <img src="/static/pasta.jpg" class="recipe-img">
+            <div class="recipe-info">
+                <h3>${pub.title}</h3>
+            </div>
+        `;
+
+        card.onclick = () => {
+            window.location.href = "/publications/view/" + pub.id;
+        };
+
+        container.appendChild(card);
+
+    });
+
+}
+
+loadTable();
+
+</script>
+
+</body>
+</html>

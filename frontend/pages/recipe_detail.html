@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Detalle de receta</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='main.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='recipe_detail.css') }}">
+</head>
+<body>
+
+{% include 'top_bar.html' %}
+
+<div class="recipe-detail" id="recipe-detail"></div>
+
+{% include 'bottom_bar.html' %}
+
+<script>
+async function loadRecipe() {
+
+    const path = window.location.pathname.split('/');
+    const id = path[path.length - 1];
+
+    const response = await fetch('/publications/' + id);
+    const data = await response.json();
+
+    const container = document.getElementById('recipe-detail');
+
+    if(data.error){
+        container.innerHTML = '<p>Receta no encontrada</p>';
+        return;
+    }
+
+    const images = data.images || [];
+
+    container.innerHTML = `
+
+    <div class="image-grid">
+
+        <img src="${images[0] || '/static/default_recipe.jpg'}" class="img-large">
+
+        <div class="img-right">
+            <img src="${images[1] || images[0] || '/static/default_recipe.jpg'}">
+            <img src="${images[2] || images[0] || '/static/default_recipe.jpg'}">
+        </div>
+
+    </div>
+
+    <div class="recipe-content">
+
+        <button class="save-btn" onclick="saveToTable()">Guardar en Table</button>
+
+        <h1>${data.title}</h1>
+
+        <p class="user">Por ${data.user || "Usuario"}</p>
+
+        <p class="description">${data.description || ""}</p>
+
+        <h3>Ingredientes</h3>
+        <ul>
+            ${(data.ingredients || []).map(i => `<li>${i}</li>`).join("")}
+        </ul>
+
+        <div class="tags">
+            ${(data.tags || []).map(tag => `<span class="tag">${tag}</span>`).join("")}
+        </div>
+
+        ${
+            data.steps && data.steps.length
+            ? `
+            <h3>Pasos</h3>
+            <ol>
+                ${data.steps.map(s => `<li>${s}</li>`).join("")}
+            </ol>
+            `
+            : ""
+        }
+
+    </div>
+
+    `;
+}
+
+loadRecipe();
+function saveToTable(){
+
+const path = window.location.pathname.split('/');
+const id = path[path.length - 1];
+
+fetch('/tables/add', {
+    method: 'POST',
+    headers: {
+        'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+        table_id: 1,
+        publication_id: parseInt(id)
+    })
+})
+.then(res => res.json())
+.then(data => {
+    alert("Receta guardada en tu Table");
+});
+}
+
+</script>
+
+</body>
+</html>
