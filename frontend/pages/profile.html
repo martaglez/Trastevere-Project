@@ -1,19 +1,61 @@
 <!DOCTYPE html>
-<html>
+<html lang="es">
 <head>
-    <title>Perfil</title>
+    <title>Perfil de Usuario - Trastevere</title>
     <meta charset="UTF-8">
     <link rel="stylesheet" href="{{ url_for('static', filename='main.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='profile.css') }}">
 </head>
-</head>
 <body>
-{% include 'top_bar.html' %}   
+    {% include 'top_bar.html' %}   
 
-<h1>Perfil de usuario</h1>
-<p>Aquí podrás editar tu perfil.</p>
+    <div class="profile-container">
+        <img id="user-pic" src="/static/default_user.jpg" alt="Foto de perfil" class="profile-pic">
+        
+        <h2 id="user-name">Cargando nombre...</h2>
+        
+        <div class="profile-info">
+            <p><strong>Email:</strong> <span id="user-email">Cargando...</span></p>
+            <p><strong>Teléfono:</strong> <span id="user-phone"></span></p>
+            <p><strong>DNI:</strong> <span id="user-dni"></span></p>
+            <p><strong>Suscripción:</strong> <span id="user-sub" style="font-weight: bold; color: var(--primary-color);"></span></p>
+        </div>
 
-{% include 'bottom_bar.html' %}
+        <div class="profile-actions">
+            <button onclick="alert('Editar perfil próximamente...')">Editar Perfil</button>
+            <button style="background-color: #666;" onclick="window.location.href='/auth/logout'">Cerrar Sesión</button>
+        </div>
+    </div>
 
+    {% include 'bottom_bar.html' %}
+
+    <script>
+        async function loadProfile() {
+            try {
+                // Llamamos al endpoint
+                const response = await fetch('/user/profile');
+                if (!response.ok) throw new Error("No se pudo obtener el perfil");
+                
+                const user = await response.json();
+                
+                // Mapeamos los datos del JSON a los elementos del HTML
+                document.getElementById('user-name').innerText = user.name;
+                document.getElementById('user-email').innerText = user.email;
+                document.getElementById('user-phone').innerText = user.phone;
+                document.getElementById('user-dni').innerText = user.dni;
+                document.getElementById('user-sub').innerText = user.subscription.toUpperCase();
+                
+                // Si se puso una foto, la usamos, si no, se queda la de por defecto
+                if (user.profile_pic && user.profile_pic !== "foto.jpg") {
+                    document.getElementById('user-pic').src = "/static/" + user.profile_pic;
+                }
+            } catch (error) {
+                console.error("Error al cargar datos del perfil:", error);
+            }
+        }
+
+        // Ejecutar al cargar la página
+        window.onload = loadProfile;
+    </script>
 </body>
 </html>
