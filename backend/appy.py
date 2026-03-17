@@ -5,6 +5,7 @@ from routes.user import user_bp
 from routes.tables import tables_bp
 from routes.publications import publications_bp
 from routes.premium import premium_bp
+from routes.auth import auth_bp
 
 
 # Le decimos a Flask que busque los HTML en la carpeta 'frontend' que está un nivel arriba
@@ -16,6 +17,7 @@ app.register_blueprint(user_bp, url_prefix='/user')
 app.register_blueprint(tables_bp, url_prefix='/tables')
 app.register_blueprint(publications_bp, url_prefix='/publications')
 app.register_blueprint(premium_bp, url_prefix='/premium')
+app.register_blueprint(auth_bp, url_prefix='/auth')
 
 # Principal page
 @app.route('/')

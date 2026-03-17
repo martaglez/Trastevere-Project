@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Registro - Trastevere</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='main.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='auth.css') }}">
+</head>
+<body>
+    <div class="auth-container">
+        <h1>Crear Cuenta</h1>
+        <input type="text" id="reg-name" placeholder="Nombre completo">
+        <input type="email" id="reg-email" placeholder="Email">
+        <input type="password" id="reg-pass" placeholder="Contraseña">
+        <button onclick="handleRegister()" class="btn-main">Registrarse</button>
+        <p>¿Ya tienes cuenta? <a href="{{ url_for('auth.login') }}">Inicia sesión</a></p>
+    </div>
+
+    <script>
+        async function handleRegister() {
+            const name = document.getElementById('reg-name').value;
+            const email = document.getElementById('reg-email').value;
+            const pass = document.getElementById('reg-pass').value;
+
+            const response = await fetch('/auth/register', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({name, email, password: pass})
+            });
+
+            if (response.ok) {
+                alert("Cuenta creada con éxito");
+                window.location.href = "/auth/login";
+            }
+        }
+    </script>
+</body>
+</html>
