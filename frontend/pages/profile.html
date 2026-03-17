@@ -6,11 +6,24 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='main.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='profile.css') }}">
 </head>
-</head>
 <body>
 {% include 'top_bar.html' %}   
 
 <h1>Perfil de usuario</h1>
+
+<div class="profile-card">
+    <p><strong>Username:</strong> {{ user.username }}</p>
+    <p><strong>Email:</strong> {{ user.email }}</p>
+    <p><strong>Subscription:</strong> {{ user.subscription_type }}</p>
+    <p><strong>Phone:</strong> {{ user.phone }}</p>
+
+    {% if user.photo %}
+        <img src="{{ user.photo }}" alt="Foto de perfil" width="150">
+    {% else %}
+        <p>No profile photo uploaded.</p>
+    {% endif %}
+</div>
+
 <p>Aquí podrás editar tu perfil.</p>
 
 {% include 'bottom_bar.html' %}

@@ -18,11 +18,22 @@ from .database import Base
 
 class User(Base):
     __tablename__ = "users"
+    __table_args__ = (
+        CheckConstraint(
+            "subscription_type IN ('basic', 'premium')",
+            name = "ck_users_subscription_type",
+        ),
+    )
 
     id = Column(Integer, primary_key=True, index=True)
     email = Column(String, unique=True, index=True, nullable=False)
     username = Column(String, unique=True, index=True, nullable=False)
     password_hash = Column(String, nullable=False)
+
+    subscription_type = Column(String, nullable=False, server_default="basic")
+    phone = Column(String, nullable=True)
+    photo = Column(String, nullable=True)
+
     stars = Column(Float, nullable=False, server_default="0")
     signup_date = Column(DateTime(timezone=True), nullable=False, server_default=func.now())
 
