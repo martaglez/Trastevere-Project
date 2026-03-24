@@ -47,7 +47,18 @@ async function loadRecipe() {
 
     <div class="recipe-content">
 
-        <button class="save-btn" onclick="saveToTable()">Guardar en Table</button>
+        <div class="save-container" style="margin-bottom:15px;">
+        <button class="save-btn" onclick="openTableModal()">Guardar en Table</button>
+        </div>
+
+        <!-- MODAL PARA SELECCIONAR TABLE -->
+        <div id="table-modal" class="modal" style="display:none;">
+            <div class="modal-content">
+                <span class="close" onclick="closeTableModal()">&times;</span>
+                <h3>Selecciona una table</h3>
+                <div id="modal-tables-container"></div>
+            </div>
+        </div>
 
         <h1>${data.title}</h1>
 
@@ -100,6 +111,56 @@ fetch('/tables/add', {
 .then(data => {
     alert("Receta guardada en tu Table");
 });
+}
+
+
+let tablesList = []; // guardamos las tables al cargar la receta
+
+// abrir modal
+async function openTableModal(){
+    if(tablesList.length === 0){
+        const res = await fetch('/tables/');
+        tablesList = await res.json();
+    }
+
+    const modalContainer = document.getElementById('modal-tables-container');
+    modalContainer.innerHTML = "";
+
+    if(tablesList.length === 0){
+        modalContainer.innerHTML = "<p>No tienes tables. Crea una primero.</p>";
+    } else {
+        tablesList.forEach(t => {
+            const btn = document.createElement("button");
+            btn.innerText = t.name;
+            btn.onclick = () => saveToTable(t.id, t.name);
+            modalContainer.appendChild(btn);
+        });
+    }
+
+    document.getElementById('table-modal').style.display = 'flex';
+}
+
+// cerrar modal
+function closeTableModal(){
+    document.getElementById('table-modal').style.display = 'none';
+}
+
+// guardar receta en table
+async function saveToTable(tableId, tableName){
+    const path = window.location.pathname.split('/');
+    const pubId = path[path.length - 1];
+
+    await fetch('/tables/add', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            table_id: tableId,
+            publication_id: parseInt(pubId)
+        })
+    });
+
+    alert(`Receta guardada en la table "${tableName}"`);
+    closeTableModal();
 }
 
 </script>
