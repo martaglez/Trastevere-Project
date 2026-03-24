@@ -45,10 +45,6 @@
 
 <input class="title-input" placeholder="Título de la receta">
 
-<!-- USUARIO -->
-
-<input class="user-input" placeholder="Tu nombre">
-
 <!-- DESCRIPCION -->
 
 <textarea class="description-input" placeholder="Descripción de la receta"></textarea>
@@ -86,63 +82,64 @@
 <script>
 
 function addIngredient(){
-
-const div = document.createElement("div");
-
-div.innerHTML = `<input class="ingredient-input" placeholder="Ingrediente">`;
-
-document.getElementById("ingredients").appendChild(div);
-
+    const div = document.createElement("div");
+    div.innerHTML = `<input class="ingredient-input" placeholder="Ingrediente">`;
+    document.getElementById("ingredients").appendChild(div);
 }
-
 
 function addStep(){
-
-const div = document.createElement("div");
-
-div.innerHTML = `<input class="step-input" placeholder="Paso">`;
-
-document.getElementById("steps").appendChild(div);
-
+    const div = document.createElement("div");
+    div.innerHTML = `<input class="step-input" placeholder="Paso">`;
+    document.getElementById("steps").appendChild(div);
 }
 
-
 async function publishRecipe(){
+    const title = document.querySelector(".title-input").value;
+    const description = document.querySelector(".description-input").value;
+    const tags = document.querySelector(".tags-input").value
+                    .split(",")
+                    .map(t => t.trim())
+                    .filter(t => t);
+    const ingredients = [...document.querySelectorAll(".ingredient-input")]
+                        .map(i => i.value)
+                        .filter(i => i);
+    const steps = [...document.querySelectorAll(".step-input")]
+                        .map(s => s.value)
+                        .filter(s => s);
 
-const title = document.querySelector(".title-input").value;
+    if(!title){
+        alert("Pon un título para la receta");
+        return;
+    }
 
-const description = document.querySelector(".description-input").value;
+    const data = {
+        title,
+        description,
+        tags,
+        ingredients,
+        steps,
+        images: ["/static/pasta.jpg"] // reemplazar luego por fotos subidas
+    };
 
-const user = document.querySelector(".user-input").value;
+    try {
+        const res = await fetch('/publications/create', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data)
+        });
 
-const tags = document.querySelector(".tags-input").value.split(",");
+        const result = await res.json();
 
-const ingredients = [...document.querySelectorAll(".ingredient-input")]
-.map(i => i.value);
-
-const steps = [...document.querySelectorAll(".step-input")]
-.map(s => s.value);
-
-const data = {
-title,
-description,
-user,
-tags,
-ingredients,
-steps,
-images:["/static/pasta.jpg"]
-};
-
-await fetch('/publications/create', {
-method:'POST',
-headers:{'Content-Type':'application/json'},
-body:JSON.stringify(data)
-});
-
-alert("Receta publicada");
-
-window.location.href="/";
-
+        if(res.ok){
+            alert("Receta publicada correctamente");
+            window.location.href = "/"; 
+        } else {
+            alert("Error al publicar: " + (result.message || "Error desconocido"));
+        }
+    } catch(err){
+        console.error(err);
+        alert("Error al conectar con el servidor");
+    }
 }
 
 </script>

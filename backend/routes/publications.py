@@ -1,5 +1,6 @@
 from flask import Blueprint, request, jsonify
 from flask import render_template
+#from flask_login import current_user
 
 
 publications_bp = Blueprint('publications', __name__)
@@ -68,19 +69,26 @@ publications += [
 def all_publications():
     return jsonify(publications)
 
+
 @publications_bp.route('/create', methods=['POST'])
 def create_publication():
     data = request.json
     pub_id = len(publications) + 1
+
+    # Usuario por defecto si no hay login
+    user_name = "Usuario"
+
     pub = {
         "id": pub_id,
         "title": data.get('title'),
         "description": data.get('description'),
+        "user": user_name,  # se añade aquí
         "ingredients": data.get('ingredients'),
         "steps": data.get('steps'),
         "images": data.get('images'),
         "tags": data.get('tags')
     }
+
     publications.append(pub)
     return jsonify({"message": "Publicación creada", "publication": pub}), 201
 
@@ -94,3 +102,4 @@ def publication_detail(pub_id):
 @publications_bp.route('/view/<int:pub_id>')
 def publication_view(pub_id):
     return render_template("recipe_detail.html")
+

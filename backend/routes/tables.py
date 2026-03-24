@@ -48,3 +48,47 @@ def add_to_table():
 @tables_bp.route('/view/<int:table_id>')
 def view_table(table_id):
     return render_template("table_detail.html")
+
+
+@tables_bp.route('/create', methods=['POST'])
+def create_table():
+    data = request.json
+    name = data.get("name")
+
+    if not name:
+        return jsonify({"error": "Nombre vacío"}), 400
+
+    new_id = max([t["id"] for t in tables]) + 1 if tables else 1
+
+    tables.append({
+        "id": new_id,
+        "name": name,
+        "publications": []
+    })
+
+    return jsonify({"message": "Table creada"})
+
+@tables_bp.route('/delete/<int:table_id>', methods=['DELETE'])
+def delete_table(table_id):
+    global tables
+    tables = [t for t in tables if t["id"] != table_id]
+
+    return jsonify({"message": "Table eliminada"})
+
+
+@tables_bp.route('/remove', methods=['POST'])
+def remove_from_table():
+    data = request.json
+    table_id = data.get("table_id")
+    publication_id = data.get("publication_id")
+
+    table = next((t for t in tables if t["id"] == table_id), None)
+
+    if not table:
+        return jsonify({"error": "No encontrada"}), 404
+
+    table["publications"] = [
+        p for p in table["publications"] if p != publication_id
+    ]
+
+    return jsonify({"message": "Receta eliminada"})
