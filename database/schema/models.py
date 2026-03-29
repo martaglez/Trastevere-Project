@@ -1,4 +1,5 @@
 from sqlalchemy import (
+    Boolean,
     CheckConstraint,
     Column,
     DateTime,
@@ -13,7 +14,7 @@ from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 
-from .database import Base
+from database.database import Base
 
 
 class User(Base):
@@ -45,6 +46,11 @@ class User(Base):
         back_populates="following",
         cascade="all, delete-orphan",
     )
+    # Añadidas las nuevas características ~Hugo
+    dni = Column(String, unique=True, nullable=True)
+    phone_number = Column(String, nullable=True)
+    card_number = Column(Integer, nullable=True)
+    is_premium = Column(Boolean, server_default="false")
 
 
 class Publication(Base):

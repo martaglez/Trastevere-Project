@@ -4,7 +4,7 @@
 <head>
 <meta charset="UTF-8">
 <title>Crear receta</title>
-
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 <link rel="stylesheet" href="{{ url_for('static', filename='main.css') }}">
 <link rel="stylesheet" href="{{ url_for('static', filename='create.css') }}">
 
@@ -106,43 +106,49 @@ document.getElementById("steps").appendChild(div);
 
 }
 
-
 async function publishRecipe(){
+    // 1. Obtenemos el título y creamos el 'slug' (ej: "Pizza Casera" -> "pizza_casera")
+    const titleInput = document.querySelector(".title-input").value;
+    const slug = titleInput.trim().toLowerCase()
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "") // Quita tildes (convierte 'ó' en 'o')
+        .replace(/ñ/g, "n")            // Convierte 'ñ' en 'n'
+        .replace(/\s+/g, "_")           // Sustituye espacios por _
+        .replace(/[^a-z0-9_]/g, "");    // Quita todo lo que no sea letra, número o _
 
-const title = document.querySelector(".title-input").value;
+    // 2. Lógica Inteligente de Imágenes:
+    // Miramos los tres inputs de archivo (accept="image/*")
+    const fileInputs = document.querySelectorAll('input[type="file"]');
+    
+    // Si el usuario ha seleccionado un archivo en el input 0, usamos su nombre de slug.
+    // Si no, usamos la default. (Simulando la subida real).
+    const img0 = fileInputs[0].files.length ? `/static/${slug}_1.jpg` : "/static/default_recipe.jpg";
+    
+    // Repetimos para el hueco 2 y 3.
+    const img1 = fileInputs[1].files.length ? `/static/${slug}_2.jpg` : "/static/default_recipe.jpg";
+    const img2 = fileInputs[2].files.length ? `/static/${slug}_3.jpg` : "/static/default_recipe.jpg";
 
-const description = document.querySelector(".description-input").value;
+    const data = {
+        title: titleInput,
+        description: document.querySelector(".description-input").value,
+        user: document.querySelector(".user-input").value,
+        tags: document.querySelector(".tags-input").value.split(","),
+        ingredients: [...document.querySelectorAll(".ingredient-input")].map(i => i.value),
+        steps: [...document.querySelectorAll(".step-input")].map(s => s.value),
+        
+        // Guardamos las rutas que hemos decidido
+        images: [img0, img1, img2]
+    };
 
-const user = document.querySelector(".user-input").value;
+    await fetch('/publications/create', {
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify(data)
+    });
 
-const tags = document.querySelector(".tags-input").value.split(",");
+    alert("Receta publicada");
 
-const ingredients = [...document.querySelectorAll(".ingredient-input")]
-.map(i => i.value);
-
-const steps = [...document.querySelectorAll(".step-input")]
-.map(s => s.value);
-
-const data = {
-title,
-description,
-user,
-tags,
-ingredients,
-steps,
-images:["/static/pasta.jpg"]
-};
-
-await fetch('/publications/create', {
-method:'POST',
-headers:{'Content-Type':'application/json'},
-body:JSON.stringify(data)
-});
-
-alert("Receta publicada");
-
-window.location.href="/";
-
+    window.location.href="/";
 }
 
 </script>

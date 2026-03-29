@@ -4,3 +4,14 @@ venv/
 # Python cache
 __pycache__/
 *.py[cod]
+
+# Base de datos local (SQLite)
+*.db
+*.db-journal
+
+# Variables de entorno (Contraseñas y URLs)
+.env
+
+# Archivos de sistema
+.DS_Store
+Thumbs.db

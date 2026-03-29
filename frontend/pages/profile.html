@@ -3,6 +3,7 @@
 <head>
     <title>Perfil de Usuario - Trastevere</title>
     <meta charset="UTF-8">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="{{ url_for('static', filename='main.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='profile.css') }}">
 </head>
@@ -46,8 +47,11 @@
                 document.getElementById('user-sub').innerText = user.subscription.toUpperCase();
                 
                 // Si se puso una foto, la usamos, si no, se queda la de por defecto
+                const profilePic = document.getElementById('user-pic');
                 if (user.profile_pic && user.profile_pic !== "foto.jpg") {
                     document.getElementById('user-pic').src = "/static/" + user.profile_pic;
+                } else {
+                    profilePic.src = "/static/default_user.jpg";
                 }
             } catch (error) {
                 console.error("Error al cargar datos del perfil:", error);

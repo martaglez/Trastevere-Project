@@ -1,17 +1,37 @@
 <nav class="bottom-nav">
-    <a href="/" class="nav-item active">
-        <span>Inicio</span>
+    <a href="/" class="nav-item" title="Inicio">
+        <i class="fa-solid fa-house"></i>
     </a>
-    <a href="/search" class="nav-item">
-        <span>Buscar</span>
+    <a href="/search" class="nav-item" title="Buscar">
+        <i class="fa-solid fa-magnifying-glass"></i>
     </a>
-    <a href="/create" class="nav-item">
-        <span>Crear</span>
+    <a href="/create" class="nav-item" title="Crear">
+        <i class="fa-solid fa-plus-square"></i>
     </a>
-    <a href="/tables" class="nav-item">
-        <span>Tables</span>
+    <a href="/tables" class="nav-item" title="Tablas">
+        <i class="fa-solid fa-table"></i>
     </a>
-    <a href="/profile" class="nav-item">
-        <span>Perfil</span>
+    <a href="/profile" class="nav-item" title="Mi Perfil">
+        <i class="fa-solid fa-user"></i>
     </a>
 </nav>
+
+<script>
+    // Detectamos en qué página estamos
+    const currentPath = window.location.pathname;
+    
+    // Buscamos todos los botones de la barra
+    const navItems = document.querySelectorAll('.nav-item');
+
+    navItems.forEach(item => {
+        const linkPath = item.getAttribute('href');
+
+        // Si la ruta coincide, le ponemos la clase active
+        // Usamos una comparación sencilla para empezar
+        if (currentPath === linkPath) {
+            item.classList.add('active');
+        } else {
+            item.classList.remove('active');
+        }
+    });
+</script>

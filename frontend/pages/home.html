@@ -20,16 +20,32 @@
             const feed = await response.json();
             const feedList = document.getElementById('feed-list');
             feedList.innerHTML = '';
-        
+
             feed.forEach(item => {
                 const card = document.createElement('div');
                 card.className = 'recipe-card';
+    
+                // Generamos el nombre del archivo basado en el título, igual que en 'create'
+                // "Pasta Carbonara" -> "pasta_carbonara"
+                const slug = item.title.trim().toLowerCase()
+                    .normalize("NFD")
+                    .replace(/[\u0300-\u036f]/g, "") // Esto elimina las tildes
+                    .replace(/\s+/g, "_")           // Espacios por guiones
+                    .replace(/[^a-z0-9_]/g, "");    // Quita símbolos raros
+    
+                // Forzamos a que busque el formato que acordamos: nombre_1.jpg
+                const imagePath = `/static/${slug}_1.jpg`;
+
                 card.innerHTML = `
-                    <img src="${item.image || '/static/default_recipe.jpg'}" alt="${item.title}" class="recipe-img">
+                    <img src="${imagePath}" 
+                    onerror="this.onerror=null;this.src='/static/default_recipe.jpg';" 
+                    alt="${item.title}" 
+                    class="recipe-img">
                     <div class="recipe-info">
                         <h3>${item.title}</h3>
                     </div>
                 `;
+    
                 card.addEventListener('click', () => {
                     window.location.href = '/publications/view/' + item.id;
                 });

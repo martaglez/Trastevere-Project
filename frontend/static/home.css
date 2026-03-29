@@ -6,11 +6,13 @@ h1 {
 
 /* Lista del feed de recetas */
 #feed-list {
-    list-style: none;
-    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr); 
+    gap: 25px;            /* Más separación entre tarjetas */
     width: 90%;
-    max-width: 500px;
-    margin: 20px auto;
+    max-width: 1100px;    /* <--- Antes era 800px, ahora expandimos */
+    margin: 30px auto;
+    padding-bottom: 80px; /* Espacio para que la barra no tape la última fila */
 }
 
 /* Tarjeta de cada receta dentro del feed*/
@@ -45,21 +47,12 @@ h1 {
     margin-right: 5px;
 }
 
-
-/* Detalle de receta */
-.recipe-detail {
-    max-width: 700px;
-    margin: 20px auto;
-    background: white;
-    padding: 20px;
-    border-radius: 12px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-}
-
-.recipe-detail-img {
-    width: 100%;
-    height: 300px;
-    object-fit: cover;
-    border-radius: 12px;
-    margin-bottom: 15px;
+.recipe-info h3 {
+    margin: 0;
+    font-size: 1.4rem;    /* <--- Letra más grande y legible */
+    font-weight: 700;
+    color: var(--primary-color);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }

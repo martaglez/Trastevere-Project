@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <title>Detalle de receta</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="{{ url_for('static', filename='main.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='recipe_detail.css') }}">
 </head>
@@ -16,7 +17,6 @@
 
 <script>
 async function loadRecipe() {
-
     const path = window.location.pathname.split('/');
     const id = path[path.length - 1];
 
@@ -30,23 +30,33 @@ async function loadRecipe() {
         return;
     }
 
-    const images = data.images || [];
+    // 1. Lógica del SLUG para encontrar tus fotos por nombre
+    const slug = data.title.trim().toLowerCase()
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "") // Esto elimina las tildes
+        .replace(/\s+/g, "_")           // Espacios por guiones
+        .replace(/[^a-z0-9_]/g, "");    // Quita símbolos raros
+        
+    const img1 = `/static/${slug}_1.jpg`;
+    const img2 = `/static/${slug}_2.jpg`;
+    const img3 = `/static/${slug}_3.jpg`;
 
+    // 2. UN SOLO innerHTML con toda la información
     container.innerHTML = `
-
     <div class="image-grid">
-
-        <img src="${images[0] || '/static/default_recipe.jpg'}" class="img-large">
+        <img src="${img1}" 
+             onerror="this.onerror=null;this.src='/static/default_recipe.jpg';" 
+             class="img-large">
 
         <div class="img-right">
-            <img src="${images[1] || images[0] || '/static/default_recipe.jpg'}">
-            <img src="${images[2] || images[0] || '/static/default_recipe.jpg'}">
+            <img src="${img2}" 
+                 onerror="this.onerror=null;this.src='/static/default_recipe.jpg';">
+            <img src="${img3}" 
+                 onerror="this.onerror=null;this.src='/static/default_recipe.jpg';">
         </div>
-
     </div>
 
     <div class="recipe-content">
-
         <button class="save-btn" onclick="saveToTable()">Guardar en Table</button>
 
         <h1>${data.title}</h1>
@@ -74,34 +84,31 @@ async function loadRecipe() {
             `
             : ""
         }
-
     </div>
-
     `;
 }
 
 loadRecipe();
+
 function saveToTable(){
+    const path = window.location.pathname.split('/');
+    const id = path[path.length - 1];
 
-const path = window.location.pathname.split('/');
-const id = path[path.length - 1];
-
-fetch('/tables/add', {
-    method: 'POST',
-    headers: {
-        'Content-Type': 'application/json'
-    },
-    body: JSON.stringify({
-        table_id: 1,
-        publication_id: parseInt(id)
+    fetch('/tables/add', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            table_id: 1,
+            publication_id: parseInt(id)
+        })
     })
-})
-.then(res => res.json())
-.then(data => {
-    alert("Receta guardada en tu Table");
-});
+    .then(res => res.json())
+    .then(data => {
+        alert("Receta guardada en tu Table");
+    });
 }
-
 </script>
 
 </body>
