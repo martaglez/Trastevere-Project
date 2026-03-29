@@ -102,3 +102,4 @@ def publication_detail(pub_id):
 @publications_bp.route('/view/<int:pub_id>')
 def publication_view(pub_id):
     return render_template("recipe_detail.html")
+

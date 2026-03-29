@@ -45,10 +45,6 @@
 
 <input class="title-input" placeholder="Título de la receta">
 
-<!-- USUARIO -->
-
-<input class="user-input" placeholder="Tu nombre">
-
 <!-- DESCRIPCION -->
 
 <textarea class="description-input" placeholder="Descripción de la receta"></textarea>
@@ -86,24 +82,15 @@
 <script>
 
 function addIngredient(){
-
-const div = document.createElement("div");
-
-div.innerHTML = `<input class="ingredient-input" placeholder="Ingrediente">`;
-
-document.getElementById("ingredients").appendChild(div);
-
+    const div = document.createElement("div");
+    div.innerHTML = `<input class="ingredient-input" placeholder="Ingrediente">`;
+    document.getElementById("ingredients").appendChild(div);
 }
 
-
 function addStep(){
-
-const div = document.createElement("div");
-
-div.innerHTML = `<input class="step-input" placeholder="Paso">`;
-
-document.getElementById("steps").appendChild(div);
-
+    const div = document.createElement("div");
+    div.innerHTML = `<input class="step-input" placeholder="Paso">`;
+    document.getElementById("steps").appendChild(div);
 }
 
 async function publishRecipe(){
