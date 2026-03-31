@@ -1,27 +1,62 @@
-.search-container{
-    width:90%;
-    max-width:500px;
-    margin:20px auto;
-    display:flex;
-    gap:10px;
+/* Contenedor principal con más aire */
+.search-hero {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 40px 20px; 
+    background-color: transparent;
 }
 
-#search-input{
-    flex:1;
-    padding:10px;
-    border-radius:8px;
-    border:1px solid #ccc;
+/* La caja de búsqueda: más ancha, redondeada y con sombra */
+.search-box {
+    display: flex;
+    align-items: center;
+    width: 95%;
+    max-width: 800px; /* Aquí está el cambio de tamaño */
+    background: white;
+    padding: 6px 12px;
+    border-radius: 50px; 
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08); 
+    border: 1px solid #eee;
+    transition: box-shadow 0.3s ease;
 }
 
-#search-btn{
-    padding:10px 15px;
-    border:none;
-    background:var(--primary-color);
-    color:white;
-    border-radius:8px;
-    cursor:pointer;
+.search-box:focus-within {
+    box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+    border-color: var(--primary-color);
 }
 
-#search-btn:hover{
-    opacity:0.9;
+/* Icono de lupa */
+.search-icon {
+    color: #999;
+    margin-left: 10px;
+    margin-right: 10px;
+    font-size: 1.1rem;
+}
+
+/* El input sin bordes feos */
+#search-input {
+    flex: 1;
+    border: none;
+    outline: none;
+    font-size: 1.1rem;
+    padding: 12px 5px;
+    background: transparent;
+}
+
+/* El botón usando tu variable de color */
+#search-btn {
+    padding: 10px 25px;
+    border: none;
+    background: var(--primary-color);
+    color: white;
+    border-radius: 25px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: transform 0.2s, opacity 0.2s;
+}
+
+#search-btn:hover {
+    transform: scale(1.05);
+    opacity: 0.9;
 }

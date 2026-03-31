@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Detalle de receta</title>
+    <title>Detalle de receta - Trastevere</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="{{ url_for('static', filename='main.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='recipe_detail.css') }}">
@@ -11,7 +11,8 @@
 
 {% include 'top_bar.html' %}
 
-<div class="recipe-detail" id="recipe-detail"></div>
+<div class="recipe-detail" id="recipe-detail">
+    </div>
 
 {% include 'bottom_bar.html' %}
 
@@ -26,43 +27,36 @@ async function loadRecipe() {
     const container = document.getElementById('recipe-detail');
 
     if(data.error){
-        container.innerHTML = '<p>Receta no encontrada</p>';
+        container.innerHTML = '<p style="text-align:center; margin-top:50px;">Receta no encontrada</p>';
         return;
     }
 
-    // 1. Lógica del SLUG para encontrar tus fotos por nombre
-    const slug = data.title.trim().toLowerCase()
-        .normalize("NFD")
-        .replace(/[\u0300-\u036f]/g, "") // Esto elimina las tildes
-        .replace(/\s+/g, "_")           // Espacios por guiones
-        .replace(/[^a-z0-9_]/g, "");    // Quita símbolos raros
+    // 1. Gestión de imágenes
+    const photos = data.images || [];
+    const img1 = photos[0] || '/storage/images/default_photo.jpg';
+    const img2 = photos[1] || '/storage/images/default_photo.jpg';
+    const img3 = photos[2] || '/storage/images/default_photo.jpg';
 
-    const img1 = `/static/${slug}_1.jpg`;
-    const img2 = `/static/${slug}_2.jpg`;
-    const img3 = `/static/${slug}_3.jpg`;
-
-    // 2. UN SOLO innerHTML con toda la información
+    // 2. Renderizado (HE ELIMINADO EL BLOQUE DUPLICADO DE TAGS)
     container.innerHTML = `
     <div class="image-grid">
         <img src="${img1}" 
-             onerror="this.onerror=null;this.src='/static/default_recipe.jpg';" 
+             onerror="this.src='/storage/images/default_photo.jpg';" 
              class="img-large">
 
         <div class="img-right">
-            <img src="${img2}" 
-                 onerror="this.onerror=null;this.src='/static/default_recipe.jpg';">
-            <img src="${img3}" 
-                 onerror="this.onerror=null;this.src='/static/default_recipe.jpg';">
+            <img src="${img2}" onerror="this.src='/storage/images/default_photo.jpg';">
+            <img src="${img3}" onerror="this.src='/storage/images/default_photo.jpg';">
         </div>
     </div>
 
     <div class="recipe-content">
-
         <div class="save-container" style="margin-bottom:15px;">
-        <button class="save-btn" onclick="openTableModal()">Guardar en Table</button>
+            <button class="save-btn" onclick="openTableModal()">
+                <i class="fas fa-bookmark"></i> Guardar en Table
+            </button>
         </div>
 
-        <!-- MODAL PARA SELECCIONAR TABLE -->
         <div id="table-modal" class="modal" style="display:none;">
             <div class="modal-content">
                 <span class="close" onclick="closeTableModal()">&times;</span>
@@ -71,75 +65,59 @@ async function loadRecipe() {
             </div>
         </div>
 
-        <h1>${data.title}</h1>
+        <h1 style="color: var(--primary-color);">${data.title}</h1>
 
-        <p class="user">Por ${data.user || "Usuario"}</p>
+        <p class="user"><i class="fas fa-user-circle"></i> Por ${data.author || "Cocinero Anónimo"}</p>
 
-        <p class="description">${data.description || ""}</p>
+        <p class="description">${data.description || "Sin descripción disponible."}</p>
 
-        <h3>Ingredientes</h3>
-        <ul>
-            ${(data.ingredients || []).map(i => `<li>${i}</li>`).join("")}
-        </ul>
-
-        <div class="tags">
-            ${(data.tags || []).map(tag => `<span class="tag">${tag}</span>`).join("")}
+        <div style="display: flex; gap: 40px; margin-top: 30px;">
+            <div style="flex: 1;">
+                <h3 style="color: var(--primary-color);"><i class="fas fa-list-ul"></i> Ingredientes</h3>
+                <ul>
+                    ${(data.ingredients || []).map(i => `<li>${i}</li>`).join("")}
+                </ul>
+            </div>
+            <div style="flex: 1;">
+                <h3 style="color: var(--primary-color);"><i class="fas fa-utensils"></i> Pasos</h3>
+                <ol>
+                    ${(data.steps || []).map(s => `<li>${s}</li>`).join("")}
+                </ol>
+            </div>
         </div>
 
-        ${
-            data.steps && data.steps.length
-            ? `
-            <h3>Pasos</h3>
-            <ol>
-                ${data.steps.map(s => `<li>${s}</li>`).join("")}
-            </ol>
-            `
-            : ""
-        }
+        <div class="tags" style="margin-top: 20px;">
+            ${(data.tags && data.tags.length > 0) 
+                ? [...new Set(data.tags)].map(tag => `<span class="tag">#${tag}</span>`).join("") 
+                : ""}
+        </div>
     </div>
     `;
 }
 
 loadRecipe();
 
-function saveToTable(){
-    const path = window.location.pathname.split('/');
-    const id = path[path.length - 1];
-
-    fetch('/tables/add', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-            table_id: 1,
-            publication_id: parseInt(id)
-        })
-    })
-    .then(res => res.json())
-    .then(data => {
-        alert("Receta guardada en tu Table");
-    });
-}
-
-
-let tablesList = []; // guardamos las tables al cargar la receta
-
-// abrir modal
+// --- LÓGICA DE TABLES ---
 async function openTableModal(){
-    if(tablesList.length === 0){
-        const res = await fetch('/tables/');
-        tablesList = await res.json();
+    const res = await fetch('/user/profile');
+    if (res.status === 401) {
+        alert("Inicia sesión para guardar recetas");
+        window.location.href = "/auth/login";
+        return;
     }
+
+    const tablesRes = await fetch('/tables/'); 
+    const tablesList = await tablesRes.json();
 
     const modalContainer = document.getElementById('modal-tables-container');
     modalContainer.innerHTML = "";
 
-    if(tablesList.length === 0){
-        modalContainer.innerHTML = "<p>No tienes tables. Crea una primero.</p>";
+    if(!tablesList || tablesList.length === 0){
+        modalContainer.innerHTML = "<p>No tienes tables aún.</p><button onclick='window.location.href=\"/tables\"' class='btn-main'>Crear mi primera Table</button>";
     } else {
         tablesList.forEach(t => {
             const btn = document.createElement("button");
+            btn.className = "modal-table-btn";
             btn.innerText = t.name;
             btn.onclick = () => saveToTable(t.id, t.name);
             modalContainer.appendChild(btn);
@@ -149,17 +127,15 @@ async function openTableModal(){
     document.getElementById('table-modal').style.display = 'flex';
 }
 
-// cerrar modal
 function closeTableModal(){
     document.getElementById('table-modal').style.display = 'none';
 }
 
-// guardar receta en table
 async function saveToTable(tableId, tableName){
     const path = window.location.pathname.split('/');
     const pubId = path[path.length - 1];
 
-    await fetch('/tables/add', {
+    const response = await fetch('/tables/add', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -168,10 +144,13 @@ async function saveToTable(tableId, tableName){
         })
     });
 
-    alert(`Receta guardada en la table "${tableName}"`);
-    closeTableModal();
+    if(response.ok) {
+        alert(`¡Guardado en "${tableName}"!`);
+        closeTableModal();
+    } else {
+        alert("Esta receta ya está en esa Table.");
+    }
 }
-
 </script>
 
 </body>

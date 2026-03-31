@@ -2,7 +2,29 @@
 <header class="top-bar">
     <div class="logo-container">
         <a href="/" class="logo-link">
-            <img src="{{ url_for('static', filename='logo.png') }}" alt="Logo Trastevere" class="logo-full">
+            <img src="/storage/images/logo.png" alt="Logo Trastevere" class="logo-full" id="main-logo">
         </a>
     </div>
 </header>
+
+<script>
+async function updateBranding() {
+    try {
+        const response = await fetch('/user/profile');
+        if (response.ok) {
+            const user = await response.json();
+            
+            // Solo cambiamos el src si es premium, respetando el tamaño del CSS
+            if (user.is_premium) {
+                const logoImg = document.getElementById('main-logo');
+                if (logoImg) {
+                    logoImg.src = "/storage/images/logo_premium.png"; 
+                }
+            }
+        }
+    } catch (error) {
+        console.log("Modo invitado o error de red.");
+    }
+}
+document.addEventListener('DOMContentLoaded', updateBranding);
+</script>

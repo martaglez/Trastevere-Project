@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Buscar recetas</title>
+    <title>Buscar recetas - Trastevere</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="{{ url_for('static', filename='main.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='home.css') }}">
@@ -12,12 +12,13 @@
 
 {% include 'top_bar.html' %}
 
-<div class="search-container">
-
-    <input type="text" id="search-input" placeholder="Buscar por tags o ingredientes...">
-    <button id="search-btn">Buscar</button>
-
-</div>
+<section class="search-hero">
+    <div class="search-box">
+        <i class="fas fa-search search-icon"></i>
+        <input type="text" id="search-input" placeholder="Buscar por título, tags o ingredientes...">
+        <button id="search-btn" onclick="searchRecipes()">Buscar</button>
+    </div>
+</section>
 
 <div id="search-results" class="feed-container"></div>
 
@@ -25,41 +26,52 @@
 
 <script>
 async function searchRecipes() {
-    const query = document.getElementById('search-input').value.toLowerCase();
+    const query = document.getElementById('search-input').value.toLowerCase().trim();
+    if (!query) return;
 
-    const res = await fetch('/publications/all');
+    // Enlace directo con el nuevo endpoint de appy.py
+    const res = await fetch('/api/recipes/search'); 
     const publications = await res.json();
 
     const results = publications.filter(pub => {
-        const tagsMatch = pub.tags.some(t => t.toLowerCase().includes(query));
-        const ingredientsMatch = pub.ingredients.some(i => i.toLowerCase().includes(query));
-        return tagsMatch || ingredientsMatch;
+        const titleMatch = (pub.title || "").toLowerCase().includes(query);
+        
+        const tagsMatch = Array.isArray(pub.tags) && pub.tags.some(t => 
+            String(t).toLowerCase().includes(query)
+        );
+        
+        const ingredientsMatch = Array.isArray(pub.ingredients) && pub.ingredients.some(i => 
+            String(i).toLowerCase().includes(query)
+        );
+        
+        return titleMatch || tagsMatch || ingredientsMatch;
     });
 
     const container = document.getElementById('search-results');
-    container.innerHTML = "";
+    container.innerHTML = ""; 
+
+    if (results.length === 0) {
+        container.innerHTML = `<p style="grid-column: 1/-1; text-align:center; color: #888; margin-top: 50px;">No hay resultados para "${query}".</p>`;
+        return;
+    }
 
     results.forEach(pub => {
         const card = document.createElement("div");
         card.className = "recipe-card";
         card.innerHTML = `
-            <img src="${pub.images[0] || '/static/default_recipe.jpg'}" class="recipe-img">
+            <img src="${pub.image}" class="recipe-img" onerror="this.src='/storage/images/default_photo.jpg'">
             <div class="recipe-info">
-                <h3>${pub.title}</h3>
+                <h3 style="color:var(--primary-color)">${pub.title}</h3>
+                <p>Por ${pub.author}</p>
             </div>
         `;
-        card.onclick = () => {
-            window.location.href = "/publications/view/" + pub.id;
-        };
+        card.onclick = () => window.location.href = "/publications/view/" + pub.id;
         container.appendChild(card);
     });
 }
 
-document.getElementById('search-btn').addEventListener('click', searchRecipes);
-
-// opcional: búsqueda al presionar Enter
-document.getElementById('search-input').addEventListener('keypress', function(e) {
-    if(e.key === 'Enter') searchRecipes();
+document.getElementById('search-input').addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') searchRecipes();
 });
 </script>
 

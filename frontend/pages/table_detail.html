@@ -1,41 +1,28 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8">
-<title>Table</title>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-<link rel="stylesheet" href="{{ url_for('static', filename='main.css') }}">
-<link rel="stylesheet" href="{{ url_for('static', filename='home.css') }}">
-<style>
-    /* Botón quitar receta */
-    .remove-recipe-btn {
-        background: none;
-        border: none;
-        color: var(--primary-color);
-        font-size: 0.8rem;
-        cursor: pointer;
-        margin-left: 10px;
-    }
-    .remove-recipe-btn:hover {
-        color: #e5533d;
-    }
-</style>
+    <meta charset="UTF-8">
+    <title>Contenido de la Table - Trastevere</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='main.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='home.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='table_detail.css') }}">
 </head>
-
 <body>
 
 {% include 'top_bar.html' %}
 
-<h1 id="table-name"></h1>
+<div class="table-detail-header">
+    <h1 id="table-name"></h1>
+    <p id="recipe-count"></p>
+</div>
 
 <div class="feed-container" id="recipes"></div>
 
 {% include 'bottom_bar.html' %}
 
 <script>
-
 async function loadTable(){
-
     const path = window.location.pathname.split('/');
     const id = path[path.length-1];
 
@@ -43,38 +30,42 @@ async function loadTable(){
     const data = await res.json();
 
     document.getElementById("table-name").innerText = data.name;
-
     const container = document.getElementById("recipes");
     container.innerHTML = "";
 
-    data.publications.forEach(pub => {
+    if (!data.publications || data.publications.length === 0) {
+        container.innerHTML = "<p class='empty-msg'>Aún no hay recetas guardadas aquí.</p>";
+        return;
+    }
 
+    document.getElementById("recipe-count").innerText = data.publications.length + " recetas guardadas";
+
+    data.publications.forEach(pub => {
         const card = document.createElement("div");
         card.className = "recipe-card";
 
+        // Usamos la imagen real que viene del backend
+        const imgPath = pub.image || "/storage/images/default_photo.jpg";
+
         card.innerHTML = `
-            <img src="/static/pasta.jpg" class="recipe-img">
-            <div class="recipe-info" style="display:flex; align-items:center; justify-content:space-between;">
+            <img src="${imgPath}" class="recipe-img" onerror="this.src='/storage/images/default_photo.jpg'">
+            <div class="recipe-info-container">
                 <h3>${pub.title}</h3>
                 <button class="remove-recipe-btn" onclick="removeFromTable(${pub.id}); event.stopPropagation();">
-                    ✖
+                    <i class="fas fa-times-circle"></i>
                 </button>
             </div>
         `;
 
-        card.onclick = () => {
-            window.location.href = "/publications/view/" + pub.id;
-        };
-
+        card.onclick = () => { window.location.href = "/publications/view/" + pub.id; };
         container.appendChild(card);
     });
 }
 
-// 🔹 QUITAR RECETA
 async function removeFromTable(publicationId){
-
     const path = window.location.pathname.split('/');
     const tableId = path[path.length-1];
+    if (!confirm("¿Quitar esta receta de la table?")) return;
 
     await fetch('/tables/remove', {
         method: 'POST',
@@ -84,14 +75,10 @@ async function removeFromTable(publicationId){
             publication_id: publicationId
         })
     });
-
     loadTable();
 }
 
-// 🔹 INICIAL
-loadTable();
-
+window.onload = loadTable;
 </script>
-
 </body>
 </html>

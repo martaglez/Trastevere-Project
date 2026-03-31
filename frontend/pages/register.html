@@ -9,28 +9,81 @@
 <body>
     <div class="auth-container">
         <h1>Crear Cuenta</h1>
-        <input type="text" id="reg-name" placeholder="Nombre completo">
-        <input type="email" id="reg-email" placeholder="Email">
-        <input type="password" id="reg-pass" placeholder="Contraseña">
+        
+        <input type="text" id="username" placeholder="Nombre de usuario" required>
+        <input type="email" id="email" placeholder="Correo electrónico" required>
+        <input type="password" id="password" placeholder="Contraseña" required>
+        
+        <div style="text-align: left; margin: 15px 0; font-size: 0.9rem; color: #555;">
+            <div style="display: flex; align-items: center; gap: 8px;">
+                <input type="checkbox" id="want-premium" style="width: auto; margin: 0;" onchange="toggleDNI()">
+                <label for="want-premium">
+                    Quiero ser usuario Premium 
+                    <span style="color: var(--primary-color); font-weight: bold;">(Plan gratis ahora)</span>
+                </label>
+            </div>
+            
+            <div id="dni-container" style="display: none; margin-top: 10px;">
+                <input type="text" id="dni" placeholder="DNI (Obligatorio para Premium)" style="margin-bottom: 0;">
+                <small style="color: #888; font-size: 0.75rem;">Necesario para la futura facturación.</small>
+            </div>
+        </div>
+
         <button onclick="handleRegister()" class="btn-main">Registrarse</button>
         <p>¿Ya tienes cuenta? <a href="{{ url_for('auth.login') }}">Inicia sesión</a></p>
     </div>
 
     <script>
+        // Función para mostrar/ocultar el campo DNI
+        function toggleDNI() {
+            const isPremium = document.getElementById('want-premium').checked;
+            const dniContainer = document.getElementById('dni-container');
+            dniContainer.style.display = isPremium ? 'block' : 'none';
+        }
+
         async function handleRegister() {
-            const name = document.getElementById('reg-name').value;
-            const email = document.getElementById('reg-email').value;
-            const pass = document.getElementById('reg-pass').value;
+            const username = document.getElementById('username').value;
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const wantPremium = document.getElementById('want-premium').checked;
+            const dni = document.getElementById('dni').value;
 
-            const response = await fetch('/auth/register', {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({name, email, password: pass})
-            });
+            // 1. Verificación de campos básicos
+            if (!username || !email || !password) {
+                alert("Por favor, rellena los campos obligatorios (Usuario, Email y Password)");
+                return;
+            }
 
-            if (response.ok) {
-                alert("Cuenta creada con éxito");
-                window.location.href = "/auth/login";
+            // 2. Verificación de DNI si elige Premium
+            if (wantPremium && !dni) {
+                alert("Para ser usuario Premium es obligatorio introducir el DNI.");
+                return;
+            }
+
+            try {
+                const response = await fetch('/auth/register', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({
+                        username: username,
+                        email: email, 
+                        password: password, 
+                        wantPremium: wantPremium,
+                        dni: dni // Enviamos el DNI (estará vacío si no es premium)
+                    })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    alert("¡Cuenta creada con éxito! Bienvenido a Trastevere.");
+                    window.location.href = "{{ url_for('auth.login') }}"; // te manda al inicio
+                } else {
+                    alert("Error: " + (data.error || "No se pudo crear la cuenta"));
+                }
+            } catch (error) {
+                console.error("Error en el registro:", error);
+                alert("Hubo un error en la conexión con el servidor");
             }
         }
     </script>

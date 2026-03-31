@@ -1,143 +1,213 @@
 <!DOCTYPE html>
-
 <html lang="es">
 <head>
-<meta charset="UTF-8">
-<title>Crear receta</title>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-<link rel="stylesheet" href="{{ url_for('static', filename='main.css') }}">
-<link rel="stylesheet" href="{{ url_for('static', filename='create.css') }}">
-
+    <meta charset="UTF-8">
+    <title>Crear receta - Trastevere</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='main.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='profile.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='create.css') }}">
+    
+    <style>
+        .img-upload {
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        }
+        .img-upload img.preview-img-file {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: 1;
+        }
+        .plus-icon {
+            position: relative;
+            z-index: 2;
+            font-size: 1.5rem;
+            color: #ccc;
+        }
+        /* Ajuste para que el contenedor de creación respire mejor */
+        .create-recipe-card {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 30px;
+        }
+    </style>
 </head>
-
 <body>
 
 {% include 'top_bar.html' %}
 
-<div class="create-container">
+<div class="profile-container create-recipe-card">
+    
+    <div id="create-logged-view" style="display:none;">
+        <h1 class="tables-title" style="margin-bottom: 25px;">Nueva Receta</h1>
+        
+        <div class="image-grid">
+            <label class="img-upload large" id="preview_container_0">
+                <input type="file" id="file_0" accept="image/*" onchange="previewImage(0)" style="display:none;">
+                <span class="plus-icon"><i class="fas fa-plus"></i></span>
+            </label>
 
-<!-- FOTOS -->
+            <div class="right-images">
+                <label class="img-upload" id="preview_container_1">
+                    <input type="file" id="file_1" accept="image/*" onchange="previewImage(1)" style="display:none;">
+                    <span class="plus-icon"><i class="fas fa-plus"></i></span>
+                </label>
+                <label class="img-upload" id="preview_container_2">
+                    <input type="file" id="file_2" accept="image/*" onchange="previewImage(2)" style="display:none;">
+                    <span class="plus-icon"><i class="fas fa-plus"></i></span>
+                </label>
+            </div>
+        </div>
 
-<div class="image-grid">
+        <input class="title-input" id="title" placeholder="Título de la receta" required>
+        <textarea class="description-input" id="description" placeholder="Cuéntanos sobre tu plato..."></textarea>
 
-<label class="img-upload large">
-<input type="file" accept="image/*">
-<span>+</span>
-</label>
+        <h3>Ingredientes</h3>
+        <div id="ingredients"></div>
+        <button onclick="addIngredient()" class="btn-secondary" style="margin-bottom: 20px;">+ Añadir ingrediente</button>
 
-<div class="right-images">
+        <h3>Tags</h3>
+        <input class="tags-input" id="tags" placeholder="Ej: pasta, italiano, rápido" style="margin-bottom: 20px;">
 
-<label class="img-upload">
-<input type="file" accept="image/*">
-<span>+</span>
-</label>
+        <h3>Pasos de preparación</h3>
+        <div id="steps"></div>
+        <button onclick="addStep()" class="btn-secondary" style="margin-bottom: 30px;">+ Añadir paso</button>
 
-<label class="img-upload">
-<input type="file" accept="image/*">
-<span>+</span>
-</label>
+        <button class="publish-btn" onclick="publishRecipe()" style="width: 100%;">Publicar Receta</button>
+    </div>
 
-</div>
+    <div id="create-guest-view" style="display:none; text-align: center; padding: 40px 10px;">
+        <div class="profile-pic-section" style="margin-bottom: 30px; border: none;">
+            <i class="fas fa-utensils" style="font-size: 6rem; color: var(--primary-color); opacity: 0.3;"></i>
+        </div>
 
-</div>
-
-<!-- TITULO -->
-
-<input class="title-input" placeholder="Título de la receta">
-
-<!-- DESCRIPCION -->
-
-<textarea class="description-input" placeholder="Descripción de la receta"></textarea>
-
-<!-- INGREDIENTES -->
-
-<h3>Ingredientes</h3>
-
-<div id="ingredients"></div>
-
-<button onclick="addIngredient()">Añadir ingrediente</button>
-
-<!-- TAGS -->
-
-<h3>Tags</h3>
-
-<input class="tags-input" placeholder="Ej: pasta, italiano, queso">
-
-<!-- PASOS -->
-
-<h3>Pasos (opcional)</h3>
-
-<div id="steps"></div>
-
-<button onclick="addStep()">Añadir paso</button>
-
-<!-- PUBLICAR -->
-
-<button class="publish-btn" onclick="publishRecipe()">Publicar</button>
-
+        <h2 style="font-size: 2rem; color: #333; margin-bottom: 15px;">¡Comparte tu talento!</h2>
+        <p style="color: #666; margin-bottom: 40px; font-size: 1.1rem; max-width: 450px; margin-left: auto; margin-right: auto;">
+            Inicia sesión para subir tus propias recetas y que toda la comunidad de Trastevere pueda disfrutarlas.
+        </p>
+        
+        <div class="profile-actions" style="display: flex; flex-direction: column; gap: 15px; max-width: 320px; margin: 0 auto;">
+            <button onclick="window.location.href='/auth/login'" class="btn-main" style="width: 100%; padding: 12px;">
+                Iniciar Sesión
+            </button>
+            <button onclick="window.location.href='/auth/register'" style="background: white; color: var(--primary-color); border: 2px solid var(--primary-color); border-radius: 8px; padding: 12px; cursor: pointer; font-weight: bold; width: 100%;">
+                Crear cuenta gratis
+            </button>
+        </div>
+    </div>
 </div>
 
 {% include 'bottom_bar.html' %}
 
 <script>
+// VERIFICACIÓN DE SESIÓN AL CARGAR
+async function checkAccess() {
+    try {
+        const response = await fetch('/user/profile');
+        if (response.status === 401) {
+            document.getElementById('create-guest-view').style.display = 'block';
+            document.getElementById('create-logged-view').style.display = 'none';
+        } else {
+            document.getElementById('create-logged-view').style.display = 'block';
+            document.getElementById('create-guest-view').style.display = 'none';
+            // Inicializar con un campo vacío si está logueado
+            addIngredient();
+            addStep();
+        }
+    } catch (error) {
+        document.getElementById('create-guest-view').style.display = 'block';
+    }
+}
 
-function addIngredient(){
+function previewImage(index) {
+    const fileInput = document.getElementById(`file_${index}`);
+    const container = document.getElementById(`preview_container_${index}`);
+    const plusIcon = container.querySelector('.plus-icon');
+
+    if (fileInput.files && fileInput.files[0]) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const oldImg = container.querySelector('.preview-img-file');
+            if (oldImg) oldImg.remove();
+            plusIcon.style.opacity = '0';
+            const img = document.createElement('img');
+            img.src = e.target.result;
+            img.className = 'preview-img-file';
+            container.appendChild(img);
+        }
+        reader.readAsDataURL(fileInput.files[0]);
+    }
+}
+
+function addIngredient() {
     const div = document.createElement("div");
-    div.innerHTML = `<input class="ingredient-input" placeholder="Ingrediente">`;
+    div.className = "dynamic-input-container";
+    div.innerHTML = `<input class="ingredient-input" placeholder="Cantidad e ingrediente" style="width: 100%; margin-bottom: 10px; padding: 8px; border-radius: 5px; border: 1px solid #ddd;">`;
     document.getElementById("ingredients").appendChild(div);
 }
 
-function addStep(){
+function addStep() {
     const div = document.createElement("div");
-    div.innerHTML = `<input class="step-input" placeholder="Paso">`;
+    div.className = "dynamic-input-container";
+    div.innerHTML = `<input class="step-input" placeholder="Describe el paso" style="width: 100%; margin-bottom: 10px; padding: 8px; border-radius: 5px; border: 1px solid #ddd;">`;
     document.getElementById("steps").appendChild(div);
 }
 
-async function publishRecipe(){
-    // 1. Obtenemos el título y creamos el 'slug' (ej: "Pizza Casera" -> "pizza_casera")
-    const titleInput = document.querySelector(".title-input").value;
-    const slug = titleInput.trim().toLowerCase()
-        .normalize("NFD")
-        .replace(/[\u0300-\u036f]/g, "") // Quita tildes (convierte 'ó' en 'o')
-        .replace(/ñ/g, "n")            // Convierte 'ñ' en 'n'
-        .replace(/\s+/g, "_")           // Sustituye espacios por _
-        .replace(/[^a-z0-9_]/g, "");    // Quita todo lo que no sea letra, número o _
+async function publishRecipe() {
+    const title = document.getElementById("title").value;
+    const description = document.getElementById("description").value;
+    const tagsRaw = document.getElementById("tags").value;
+    const tagsArray = tagsRaw.split(',').map(t => t.trim()).filter(t => t !== "");
 
-    // 2. Lógica Inteligente de Imágenes:
-    // Miramos los tres inputs de archivo (accept="image/*")
-    const fileInputs = document.querySelectorAll('input[type="file"]');
+    if (!title || !description) {
+        alert("Por favor, rellena al menos el título y la descripción.");
+        return;
+    }
+
+    const formData = new FormData();
+    formData.append('title', title);
+    formData.append('description', description);
+    formData.append('tags', JSON.stringify(tagsArray));
+
+    const ingredients = [...document.querySelectorAll(".ingredient-input")].map(i => i.value).filter(v => v !== "");
+    const steps = [...document.querySelectorAll(".step-input")].map(s => s.value).filter(v => v !== "");
     
-    // Si el usuario ha seleccionado un archivo en el input 0, usamos su nombre de slug.
-    // Si no, usamos la default. (Simulando la subida real).
-    const img0 = fileInputs[0].files.length ? `/static/${slug}_1.jpg` : "/static/default_recipe.jpg";
-    
-    // Repetimos para el hueco 2 y 3.
-    const img1 = fileInputs[1].files.length ? `/static/${slug}_2.jpg` : "/static/default_recipe.jpg";
-    const img2 = fileInputs[2].files.length ? `/static/${slug}_3.jpg` : "/static/default_recipe.jpg";
+    formData.append('ingredients', JSON.stringify(ingredients));
+    formData.append('steps', JSON.stringify(steps));
 
-    const data = {
-        title: titleInput,
-        description: document.querySelector(".description-input").value,
-        user: document.querySelector(".user-input").value,
-        tags: document.querySelector(".tags-input").value.split(","),
-        ingredients: [...document.querySelectorAll(".ingredient-input")].map(i => i.value),
-        steps: [...document.querySelectorAll(".step-input")].map(s => s.value),
-        
-        // Guardamos las rutas que hemos decidido
-        images: [img0, img1, img2]
-    };
+    for (let i = 0; i < 3; i++) {
+        const fileInput = document.getElementById(`file_${i}`);
+        if (fileInput && fileInput.files.length > 0) {
+            formData.append(`file_${i}`, fileInput.files[0]);
+        }
+    }
 
-    await fetch('/publications/create', {
-    method:'POST',
-    headers:{'Content-Type':'application/json'},
-    body:JSON.stringify(data)
-    });
-
-    alert("Receta publicada");
-
-    window.location.href="/";
+    try {
+        const response = await fetch('/publications/create', {
+            method: 'POST',
+            body: formData
+        });
+        const result = await response.json();
+        if (response.ok) {
+            alert("¡Receta subida con éxito!");
+            window.location.href = "/";
+        } else {
+            alert("Error: " + (result.error || "No se pudo publicar"));
+        }
+    } catch (error) {
+        console.error("Error al publicar:", error);
+    }
 }
 
+window.onload = checkAccess;
 </script>
 
 </body>

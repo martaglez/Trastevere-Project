@@ -24,6 +24,7 @@ class User(Base):
     email = Column(String, unique=True, index=True, nullable=False)
     username = Column(String, unique=True, index=True, nullable=False)
     password_hash = Column(String, nullable=False)
+    is_premium = Column(Boolean, default=False)
     stars = Column(Float, nullable=False, server_default="0")
     signup_date = Column(DateTime(timezone=True), nullable=False, server_default=func.now())
 
@@ -50,7 +51,7 @@ class User(Base):
     dni = Column(String, unique=True, nullable=True)
     phone_number = Column(String, nullable=True)
     card_number = Column(Integer, nullable=True)
-    is_premium = Column(Boolean, server_default="false")
+    profile_pic = Column(String, nullable=True)
 
 
 class Publication(Base):

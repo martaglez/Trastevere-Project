@@ -1,0 +1,98 @@
+/* table_detail.css */
+
+/* Cabecera de la sección (Mis Recetas) */
+.table-detail-header {
+    padding: 40px 20px;
+    text-align: center;
+    background-color: var(--bg-color); /* Fondo beis */
+    border-bottom: 1px solid #e0d9cf;
+    margin-bottom: 30px;
+}
+
+.table-detail-header h1 {
+    margin: 0;
+    font-size: 2.5rem; /* Título más grande */
+    color: var(--primary-color); /* Naranja Trastevere */
+    font-weight: 800;
+}
+
+.table-detail-header p {
+    margin-top: 8px;
+    color: #888;
+    font-size: 1.1rem;
+}
+
+/* Ajuste del contenedor para que las tarjetas sean grandes */
+.feed-container {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr); /* Dos columnas */
+    gap: 30px;            /* Espacio elegante entre tarjetas */
+    width: 95%;
+    max-width: 1100px;    /* Expansión total */
+    margin: 0 auto 100px auto;
+}
+
+/* Tarjeta de Receta Ampliada */
+.recipe-card {
+    background: white;
+    border-radius: 15px;
+    overflow: hidden;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    display: flex;
+    flex-direction: column;
+}
+
+.recipe-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+}
+
+/* Imagen de la receta (Más alta) */
+.recipe-card .recipe-img {
+    width: 100%;
+    height: 280px;       /* <--- Altura generosa para que se vea bien la comida */
+    object-fit: cover;
+}
+
+/* Información de la receta */
+.recipe-info-container {
+    padding: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.recipe-info-container h3 {
+    margin: 0;
+    font-size: 1.4rem;    /* Título grande y legible */
+    font-weight: 700;
+    color: var(--primary-color); /* <--- TU NARANJA */
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Botón de eliminar (Equis) */
+.remove-recipe-btn {
+    background: none;
+    border: none;
+    color: #ccc;
+    font-size: 1.4rem;
+    cursor: pointer;
+    transition: color 0.2s, transform 0.2s;
+}
+
+.remove-recipe-btn:hover {
+    color: var(--primary-color);
+    transform: scale(1.2) rotate(90deg); /* Efecto chulo al pasar el ratón */
+}
+
+/* Mensaje si no hay nada */
+.empty-msg {
+    grid-column: 1 / -1;
+    text-align: center;
+    color: #bbb;
+    margin-top: 100px;
+    font-size: 1.2rem;
+}

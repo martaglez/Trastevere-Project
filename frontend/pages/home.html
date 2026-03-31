@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Feed</title>
+    <title>Trastevere - Feed</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="{{ url_for('static', filename='main.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='home.css') }}">
@@ -16,46 +16,49 @@
 
     <script>
         async function loadFeed() {
-            const response = await fetch('/home/feed');
-            const feed = await response.json();
-            const feedList = document.getElementById('feed-list');
-            feedList.innerHTML = '';
+            try {
+                const response = await fetch('/home/feed');
+                const feed = await response.json();
+                const feedList = document.getElementById('feed-list');
+                feedList.innerHTML = '';
 
-            feed.forEach(item => {
-                const card = document.createElement('div');
-                card.className = 'recipe-card';
-    
-                // Generamos el nombre del archivo basado en el título, igual que en 'create'
-                // "Pasta Carbonara" -> "pasta_carbonara"
-                const slug = item.title.trim().toLowerCase()
-                    .normalize("NFD")
-                    .replace(/[\u0300-\u036f]/g, "") // Esto elimina las tildes
-                    .replace(/\s+/g, "_")           // Espacios por guiones
-                    .replace(/[^a-z0-9_]/g, "");    // Quita símbolos raros
-    
-                // Forzamos a que busque el formato que acordamos: nombre_1.jpg
-                const imagePath = `/static/${slug}_1.jpg`;
+                if (feed.length === 0) {
+                    feedList.innerHTML = '<p style="grid-column: 1/-1; text-align: center; color: #888; margin-top: 50px;">No hay recetas aún. ¡Sé el primero en publicar!</p>';
+                    return;
+                }
 
-                card.innerHTML = `
-                    <img src="${imagePath}" 
-                    onerror="this.onerror=null;this.src='/static/default_recipe.jpg';" 
-                    alt="${item.title}" 
-                    class="recipe-img">
-                    <div class="recipe-info">
-                        <h3>${item.title}</h3>
-                    </div>
-                `;
-    
-                card.addEventListener('click', () => {
-                    window.location.href = '/publications/view/' + item.id;
+                feed.forEach(item => {
+                    const card = document.createElement('div');
+                    card.className = 'recipe-card';
+                    
+                    // IMPORTANTE: Usamos directamente item.image que nos manda el Back
+                    // Si por algún motivo falla, cargamos el placeholder de storage
+                    const imageSrc = item.image ? item.image : "/storage/images/placeholder.png";
+
+                    card.innerHTML = `
+                        <img src="${imageSrc}" 
+                             onerror="this.onerror=null;this.src='/storage/images/placeholder.png';" 
+                             alt="${item.title}" 
+                             class="recipe-img">
+                        <div class="recipe-info">
+                            <h3>${item.title}</h3>
+                            <p style="font-size: 0.8rem; color: #666; margin: 0;">Por ${item.author || 'Anónimo'}</p>
+                        </div>
+                    `;
+        
+                    card.addEventListener('click', () => {
+                        window.location.href = '/publications/view/' + item.id;
+                    });
+                    feedList.appendChild(card);
                 });
-                feedList.appendChild(card);
-            });
+            } catch (error) {
+                console.error("Error al cargar el feed:", error);
+            }
         }
         
-        loadFeed();
+        // Ejecutar al cargar la página
+        window.onload = loadFeed;
     </script>
         
 </body>
-
 </html>

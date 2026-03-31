@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <title>Perfil de Usuario - Trastevere</title>
+    <title>Perfil - Trastevere</title>
     <meta charset="UTF-8">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="{{ url_for('static', filename='main.css') }}">
@@ -11,143 +11,115 @@
     {% include 'top_bar.html' %}   
 
     <div class="profile-container">
-        <div class="profile-pic-section">
-            <img id="user-pic" src="/static/default_user.jpg" alt="Foto de perfil" class="profile-pic">
-        
-            <div id="edit-pic-container" style="display:none;">
-                <input type="file" id="upload-pic" accept="image/*" style="display:none">
-                
-                <button onclick="document.getElementById('upload-pic').click()">
-                    Cambiar foto
-                </button>
+        <div id="logged-in-view" style="display:none;">
+            <div class="profile-pic-section" style="text-align: center; position: relative;">
+                <img id="user-pic" src="/storage/images/default_user.jpg" alt="Foto de perfil" class="profile-pic" 
+                     style="cursor: pointer; width: 130px; height: 130px; object-fit: cover; border-radius: 50%; border: 3px solid var(--primary-color);">
+                <p style="font-size: 0.75rem; color: #888; margin-top: 5px;">Haz clic en tu foto de perfil para cambiarla</p>
+                <input type="file" id="pic-input" style="display:none;" accept="image/*">
+            </div>
+            
+            <h2 id="user-name" style="margin-top: 10px; text-align: center; color: var(--primary-color);"></h2>
+            
+            <div class="profile-info">
+                <p><strong>Email:</strong> <span id="user-email"></span></p>
+                <p><strong>Teléfono:</strong> <input id="user-phone" disabled placeholder="Sin configurar" class="profile-input"></p>
+                <p><strong>DNI:</strong> <input id="user-dni" disabled placeholder="Sin configurar" class="profile-input"></p>
+                <p><strong>Suscripción:</strong> <span id="user-sub" style="font-weight: bold; color: var(--primary-color);"></span></p>
+            </div>
+
+            <div class="profile-actions">
+                <button onclick="enableEdit()"><i class="fas fa-edit"></i> Editar Perfil</button>
+                <button onclick="openAbout()"><i class="fas fa-info-circle"></i> Info</button>
+                <button style="background-color: #666;" onclick="window.location.href='/auth/logout'"><i class="fas fa-sign-out-alt"></i> Salir</button>
+            </div>
+
+            <div style="text-align:center; margin-top:15px;">
+                <button id="save-btn" style="display:none;" onclick="saveProfile()" class="btn-main">Guardar cambios</button>
             </div>
         </div>
-        
-        <h2 id="user-name">Cargando nombre...</h2>
-        
-        <div class="profile-info">
-            <p><strong>Email:</strong> <span id="user-email">Cargando...</span></p>
-            <p><strong>Teléfono:</strong> <input id="user-phone" disabled></p>
-            <p><strong>DNI:</strong> <input id="user-dni" disabled></p>
-            <p><strong>Suscripción:</strong> <span id="user-sub" style="font-weight: bold; color: var(--primary-color);"></span></p>
-        </div>
 
-        <div class="profile-actions">
-            <button onclick="enableEdit()">Editar Perfil</button>
-            <button onclick="openAbout()">About</button>
-            <button style="background-color: #666;" onclick="window.location.href='/auth/logout'">Cerrar Sesión</button>
-        </div>
-        <div style="text-align:center; margin-top:15px;">
-            <button id="save-btn" style="display:none;" onclick="saveProfile()">Guardar cambios</button>
+        <div id="guest-view" style="display:none; text-align: center; padding: 40px 10px;">
+            <i class="fas fa-utensils" style="font-size: 4rem; color: var(--primary-color); opacity: 0.3;"></i>
+            <h2 style="font-size: 1.8rem; margin-bottom: 15px;">¡Únete a Trastevere!</h2>
+            <p style="color: #666; margin-bottom: 30px;">Crea tu red de recetas y guarda tus favoritos.</p>
+            <div class="profile-actions" style="display: flex; flex-direction: column; gap: 12px; max-width: 300px; margin: 0 auto;">
+                <button onclick="window.location.href='/auth/login'" class="btn-main">Iniciar Sesión</button>
+                <button onclick="window.location.href='/auth/register'" style="background: white; color: var(--primary-color); border: 2px solid var(--primary-color); border-radius: 8px; padding: 10px; cursor: pointer;">Crear cuenta gratis</button>
+            </div>
         </div>
     </div>
 
-    <div id="about-box" style="display:none; background:white; padding:20px; border-radius:10px; margin:20px auto; max-width:400px; text-align:center;">
-        <h3>Acerca de la aplicación</h3>
+    <div id="about-box" style="display:none; background:white; padding:20px; border-radius:10px; border: 1px solid #eee; margin:20px auto; max-width:400px; text-align:center; box-shadow: 0 10px 25px rgba(0,0,0,0.1);">
+        <h3>Trastevere App</h3>
         <p><strong>Versión:</strong> <span id="about-version"></span></p>
         <p><strong>Build:</strong> <span id="about-build"></span></p>
         <p><strong>Autores:</strong> <span id="about-authors"></span></p>
-    
-        <button onclick="closeAbout()">Cerrar</button>
+        <button onclick="closeAbout()" class="btn-small">Cerrar</button>
     </div>
 
     {% include 'bottom_bar.html' %}
 
     <script>
+        // CARGAR PERFIL
         async function loadProfile() {
             try {
-                // Llamamos al endpoint
                 const response = await fetch('/user/profile');
-                if (!response.ok) throw new Error("No se pudo obtener el perfil");
-                
+                if (response.status === 401) {
+                    document.getElementById('guest-view').style.display = 'block';
+                    return;
+                }
                 const user = await response.json();
                 
-                // Mapeamos los datos del JSON a los elementos del HTML
-                document.getElementById('user-name').innerText = user.name;
+                document.getElementById('logged-in-view').style.display = 'block';
+                document.getElementById('user-name').innerText = user.username;
                 document.getElementById('user-email').innerText = user.email;
-                document.getElementById('user-phone').value = user.phone;
-                document.getElementById('user-dni').value = user.dni;
-                document.getElementById('user-sub').innerText = user.subscription.toUpperCase();
+                document.getElementById('user-phone').value = user.phone_number || "";
+                document.getElementById('user-dni').value = user.dni || "";
                 
-                // Si se puso una foto, la usamos, si no, se queda la de por defecto
-                const profilePic = document.getElementById('user-pic');
-                if (user.profile_pic && user.profile_pic !== "foto.jpg") {
-                    document.getElementById('user-pic').src = "/static/" + user.profile_pic;
-                } else {
-                    profilePic.src = "/static/default_user.jpg";
-                }
-            } catch (error) {
-                console.error("Error al cargar datos del perfil:", error);
+                // Muestra BASIC o PREMIUM
+                document.getElementById('user-sub').innerText = user.plan;
+                
+                // Foto de perfil con fallback
+                document.getElementById('user-pic').src = user.profile_pic || "/storage/images/default_user.jpg";
+            } catch (error) { 
+                console.error("Error cargando perfil:", error); 
             }
         }
 
+        // HABILITAR EDICIÓN
         function enableEdit() {
             document.getElementById('user-phone').disabled = false;
             document.getElementById('user-dni').disabled = false;
-
+            document.getElementById('user-phone').focus();
             document.getElementById('save-btn').style.display = 'inline-block';
-            document.getElementById('edit-pic-container').style.display = 'block';
         }
 
+        // GUARDAR DATOS (DNI Y TELÉFONO)
         async function saveProfile() {
-            try {
-                const updatedData = {
-                    phone: document.getElementById('user-phone').value,
-                    dni: document.getElementById('user-dni').value
-                };
-
-                const response = await fetch('/user/update', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(updatedData)
-                });
-
-                const result = await response.json();
-
-                // Bloquear otra vez los inputs
-                document.getElementById('user-phone').disabled = true;
-                document.getElementById('user-dni').disabled = true;
-
-                document.getElementById('edit-pic-container').style.display = 'none';
-                document.getElementById('save-btn').style.display = 'none';
-
-                alert("Perfil actualizado correctamente");
-
-            } catch (error) {
-                console.error("Error al guardar:", error);
+            const data = {
+                phone_number: document.getElementById('user-phone').value,
+                dni: document.getElementById('user-dni').value
+            };
+            const response = await fetch('/user/update', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(data)
+            });
+            if (response.ok) {
+                alert("Perfil actualizado con éxito");
+                window.location.reload();
             }
         }
 
-        // Ejecutar al cargar la página
-        window.onload = loadProfile;
+        // LÓGICA DE CAMBIO DE FOTO
+        const picImg = document.getElementById('user-pic');
+        const picInput = document.getElementById('pic-input');
 
-        async function openAbout() {
-            try {
-                const response = await fetch('/user/about');
-                const data = await response.json();
+        picImg.onclick = () => picInput.click();
 
-                document.getElementById('about-version').innerText = data.version;
-                document.getElementById('about-build').innerText = data.build;
-                document.getElementById('about-authors').innerText = data.authors;
-
-                document.getElementById('about-box').style.display = 'block';
-            } catch (error) {
-                console.error("Error:", error);
-            }
-        }
-
-        function closeAbout() {
-            document.getElementById('about-box').style.display = 'none';
-        }
-
-        document.getElementById('upload-pic').addEventListener('change', uploadProfilePic);
-
-        async function uploadProfilePic() {
-            const fileInput = document.getElementById('upload-pic');
-            const file = fileInput.files[0];
-
+        picInput.onchange = async function() {
+            const file = this.files[0];
             if (!file) return;
 
             const formData = new FormData();
@@ -159,15 +131,62 @@
                     body: formData
                 });
 
-                const data = await response.json();
-
-                // actualizar imagen en pantalla
-                document.getElementById('user-pic').src = "/static/" + data.filename;
-
-            } catch (error) {
-                console.error("Error subiendo imagen:", error);
+                if (response.ok) {
+                    const data = await response.json();
+                    picImg.src = data.url;
+                    alert("Foto de perfil actualizada");
+                } else {
+                    alert("Error al subir la imagen");
+                }
+            } catch (err) {
+                console.error(err);
             }
+        };
+
+        // VENTANA ABOUT
+        async function openAbout() {
+            const response = await fetch('/user/about');
+            const data = await response.json();
+            document.getElementById('about-version').innerText = data.version;
+            document.getElementById('about-build').innerText = data.build;
+            document.getElementById('about-authors').innerText = data.authors;
+            document.getElementById('about-box').style.display = 'block';
         }
+        
+        function closeAbout() { 
+            document.getElementById('about-box').style.display = 'none'; 
+        }
+
+        window.onload = loadProfile;
     </script>
+
+    <style>
+        .profile-input {
+            border: none;
+            background: transparent;
+            font-size: 1rem;
+            color: #333;
+            width: 150px;
+            border-bottom: 1px solid transparent;
+        }
+        .profile-input:enabled {
+            border-bottom: 1px solid #ccc;
+            background: #f9f9f9;
+        }
+        .btn-main {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        .btn-small {
+            margin-top: 10px;
+            padding: 5px 15px;
+            cursor: pointer;
+        }
+    </style>
 </body>
 </html>
