@@ -35,27 +35,35 @@ def register():
         username = data.get('username')
         email = data.get('email')
         password = data.get('password')
+        dni = data.get('dni')
+        phone_number = data.get('phone_number')
         want_premium = data.get('wantPremium', False)
-        dni=data.get('dni')
+        card_number = data.get('card_number') # Nuevo campo
 
         db = SessionLocal()
-        # Comprobar si ya existe
-        if db.query(User).filter(User.email == email).first():
-            db.close()
-            return jsonify({"error": "El email ya está registrado"}), 400
+        try:
+            # Comprobar si ya existe el email
+            if db.query(User).filter(User.email == email).first():
+                return jsonify({"error": "El email ya está registrado"}), 400
 
-        # Crear nuevo usuario con contraseña encriptada
-        new_user = User(
-            username=username,
-            email=email,
-            password_hash=generate_password_hash(password),
-            is_premium=want_premium # ¡Guardamos si es premium!
-        )
-        db.add(new_user)
-        db.commit()
-        db.close()
-        
-        return jsonify({"message": "Usuario creado con éxito"}), 201
+            # Crear nuevo usuario con la lógica de tarjeta
+            new_user = User(
+                username=username,
+                email=email,
+                password_hash=generate_password_hash(password),
+                dni=dni,
+                phone_number=phone_number,
+                is_premium=want_premium,
+                card_number=card_number if want_premium else None # Solo guardamos tarjeta si es premium
+            )
+            db.add(new_user)
+            db.commit()
+            return jsonify({"message": "Usuario creado con éxito"}), 201
+        except Exception as e:
+            db.rollback()
+            return jsonify({"error": str(e)}), 500
+        finally:
+            db.close()
     
     return render_template('register.html')
 

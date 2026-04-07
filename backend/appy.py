@@ -21,8 +21,9 @@ from backend.routes.premium import premium_bp
 from backend.routes.auth import auth_bp
 
 # 4. IMPORTS DE MODELOS Y BASE DE DATOS
-from database.database import SessionLocal
+from database.database import SessionLocal, engine, Base
 from database.schema.models import User, Publication, Collection as Table
+from database.schema import models
 
 # --- CONFIGURACIÓN DE LA APP ---
 app = Flask(__name__, 
@@ -129,9 +130,14 @@ def profile():
 
 # --- INICIALIZACIÓN ---
 if __name__ == "__main__":
-    # Aseguramos la existencia del directorio de almacenamiento físico
+    # 1. Aseguramos la existencia del directorio de almacenamiento físico
     storage_dir = os.path.join(root_path, 'storage', 'images')
     os.makedirs(storage_dir, exist_ok=True)
+    
+    # 2. LA CLAVE: Creamos las tablas en la base de datos de Docker si no existen
+    # Usamos los modelos importados en el punto 4 de tu archivo
+    print("Sincronizando base de datos con Docker...")
+    Base.metadata.create_all(bind=engine)
     
     print(f"Servidor Trastevere activo en http://localhost:5000")
     app.run(debug=True, port=5000)

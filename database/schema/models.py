@@ -48,9 +48,9 @@ class User(Base):
         cascade="all, delete-orphan",
     )
     # Añadidas las nuevas características ~Hugo
-    dni = Column(String, unique=True, nullable=True)
+    dni = Column(String, nullable=True)
     phone_number = Column(String, nullable=True)
-    card_number = Column(Integer, nullable=True)
+    card_number = Column(String, nullable=True) # Solo para Premium
     profile_pic = Column(String, nullable=True)
 
 
