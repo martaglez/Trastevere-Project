@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Sesión Cerrada</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='main.css') }}">
+</head>
+<body style="text-align: center; padding-top: 100px;">
+    <h1>Has cerrado sesión</h1>
+    <p>Gracias por usar Trastevere. ¡Vuelve pronto!</p>
+    <br>
+    <a href="{{ url_for('auth.login') }}" style="color: var(--primary-color); text-decoration: none; font-weight: bold;">
+        Volver al Inicio de Sesión
+    </a>
+</body>
+</html>

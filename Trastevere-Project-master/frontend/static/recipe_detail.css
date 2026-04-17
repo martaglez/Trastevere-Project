@@ -1,0 +1,140 @@
+.recipe-detail{
+    max-width:900px;
+    margin:auto;
+    padding:20px;
+    }
+    
+    /* GRID DE IMÁGENES */
+    
+    .image-grid{
+    display:grid;
+    grid-template-columns:2fr 1fr;
+    gap:10px;
+    }
+    
+    .img-large{
+    width:100%;
+    height:300px;
+    object-fit:cover;
+    border-radius:10px;
+    }
+    
+    .img-right{
+    display:grid;
+    grid-template-rows:1fr 1fr;
+    gap:10px;
+    }
+    
+    .img-right img{
+    width:100%;
+    height:145px;
+    object-fit:cover;
+    border-radius:10px;
+    }
+    
+    /* CONTENIDO */
+    
+    .recipe-content{
+    margin-top:20px;
+    }
+    
+    .recipe-content h1{
+    color:var(--primary-color);
+    margin-bottom:5px;
+    }
+    
+    .user{
+    color:#666;
+    font-size:0.9rem;
+    margin-bottom:15px;
+    }
+    
+    .description{
+    margin-bottom:20px;
+    }
+    
+    .recipe-content ul{
+    padding-left:20px;
+    }
+    
+    .recipe-content li{
+    margin-bottom:5px;
+    }
+    
+    /* TAGS */
+    
+    .tags{
+    margin-top:10px;
+    }
+    
+    .tag{
+    display:inline-block;
+    background:#eee;
+    padding:5px 8px;
+    border-radius:6px;
+    font-size:0.8rem;
+    margin-right:5px;
+    }
+    
+
+    .save-btn{
+        background: var(--primary-color);
+        color:white;
+        border:none;
+        padding:10px 15px;
+        border-radius:8px;
+        cursor:pointer;
+        margin-bottom:15px;
+    }
+    
+    .save-btn:hover{
+        opacity:0.9;
+    }
+
+    /* modal */
+.modal {
+    position: fixed;
+    top:0; left:0;
+    width:100%; height:100%;
+    background: rgba(0,0,0,0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.modal-content {
+    background:white;
+    padding:20px;
+    border-radius:10px;
+    max-width:400px;
+    width:90%;
+    text-align:center;
+}
+
+.modal-content h3 {
+    margin-bottom:15px;
+}
+
+.modal-content button {
+    display:block;
+    width:80%;
+    margin:5px auto;
+    padding:8px;
+    border:none;
+    border-radius:6px;
+    background: var(--primary-color);
+    color:white;
+    cursor:pointer;
+}
+
+.modal-content button:hover {
+    opacity:0.9;
+}
+
+.close {
+    position:absolute;
+    top:10px; right:15px;
+    font-size:1.5rem;
+    cursor:pointer;
+}

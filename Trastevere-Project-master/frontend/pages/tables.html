@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Tables</title>
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='main.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='tables.css') }}">
+    <style>
+        /* Botón de eliminar table más discreto */
+        .delete-table-btn {
+            background: none;
+            border: none;
+            color: var(--primary-color);
+            font-size: 0.9rem;
+            cursor: pointer;
+            float: right;
+        }
+        .delete-table-btn:hover {
+            color: #e5533d;
+        }
+    </style>
+</head>
+
+<body>
+
+{% include 'top_bar.html' %}
+
+<h1 class="tables-title">Mis Tables</h1>
+
+<!-- CREAR TABLE -->
+<div style="text-align:center; margin-top:20px;">
+    <input id="new-table-name" placeholder="Nombre de la nueva table">
+    <button onclick="createTable()">Crear Table</button>
+</div>
+
+<div id="tables-container" class="tables-container"></div>
+
+{% include 'bottom_bar.html' %}
+
+<script>
+
+// 🔹 CARGAR TABLES
+async function loadTables(){
+
+    const res = await fetch('/tables/');
+    const tables = await res.json();
+
+    const container = document.getElementById("tables-container");
+    container.innerHTML = "";
+
+    tables.forEach(table => {
+
+        const card = document.createElement("div");
+        card.className = "table-card";
+
+        const img1 = "/static/pasta.jpg";
+        const img2 = "/static/pizza.jpg";
+        const img3 = "/static/brownie.jpg";
+
+        card.innerHTML = `
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <h2>${table.name}</h2>
+                <button class="delete-table-btn" onclick="deleteTable(${table.id}); event.stopPropagation();">
+                    ✖
+                </button>
+            </div>
+
+            <div class="table-preview">
+                <div class="table-left">
+                    <img src="${img3}">
+                </div>
+                <div class="table-right">
+                    <img src="${img1}">
+                    <img src="${img2}">
+                </div>
+            </div>
+        `;
+
+        // 👉 ir a la table
+        card.onclick = () => {
+            window.location.href = "/tables/view/" + table.id;
+        };
+
+        container.appendChild(card);
+    });
+}
+
+// 🔹 CREAR TABLE
+async function createTable(){
+
+    const name = document.getElementById("new-table-name").value;
+
+    if (!name){
+        alert("Pon un nombre");
+        return;
+    }
+
+    await fetch('/tables/create', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: name })
+    });
+
+    document.getElementById("new-table-name").value = "";
+
+    loadTables();
+}
+
+// 🔹 ELIMINAR TABLE
+async function deleteTable(id){
+
+    if (!confirm("¿Eliminar esta table?")) return;
+
+    await fetch('/tables/delete/' + id, {
+        method: 'DELETE'
+    });
+
+    loadTables();
+}
+
+// 🔹 INICIAL
+loadTables();
+
+</script>
+
+</body>
+</html>

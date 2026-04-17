@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Feed</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='main.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='home.css') }}">
+</head>
+<body>
+    {% include 'top_bar.html' %}
+
+    <div class="feed-container" id="feed-list"></div>
+
+    {% include 'bottom_bar.html' %}
+
+    <script>
+        async function loadFeed() {
+            const response = await fetch('/home/feed');
+            const feed = await response.json();
+            const feedList = document.getElementById('feed-list');
+            feedList.innerHTML = '';
+        
+            feed.forEach(item => {
+                const card = document.createElement('div');
+                card.className = 'recipe-card';
+                card.innerHTML = `
+                    <img src="${item.image || '/static/default_recipe.jpg'}" alt="${item.title}" class="recipe-img">
+                    <div class="recipe-info">
+                        <h3>${item.title}</h3>
+                    </div>
+                `;
+                card.addEventListener('click', () => {
+                    window.location.href = '/publications/view/' + item.id;
+                });
+                feedList.appendChild(card);
+            });
+        }
+        
+        loadFeed();
+    </script>
+        
+</body>
+
+</html>

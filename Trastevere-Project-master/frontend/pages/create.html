@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Crear receta</title>
+
+<link rel="stylesheet" href="{{ url_for('static', filename='main.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='create.css') }}">
+
+</head>
+
+<body>
+
+{% include 'top_bar.html' %}
+
+<div class="create-container">
+
+<!-- FOTOS -->
+
+<div class="image-grid">
+
+<label class="img-upload large">
+<input type="file" accept="image/*">
+<span>+</span>
+</label>
+
+<div class="right-images">
+
+<label class="img-upload">
+<input type="file" accept="image/*">
+<span>+</span>
+</label>
+
+<label class="img-upload">
+<input type="file" accept="image/*">
+<span>+</span>
+</label>
+
+</div>
+
+</div>
+
+<!-- TITULO -->
+
+<input class="title-input" placeholder="Título de la receta">
+
+<!-- DESCRIPCION -->
+
+<textarea class="description-input" placeholder="Descripción de la receta"></textarea>
+
+<!-- INGREDIENTES -->
+
+<h3>Ingredientes</h3>
+
+<div id="ingredients"></div>
+
+<button onclick="addIngredient()">Añadir ingrediente</button>
+
+<!-- TAGS -->
+
+<h3>Tags</h3>
+
+<input class="tags-input" placeholder="Ej: pasta, italiano, queso">
+
+<!-- PASOS -->
+
+<h3>Pasos (opcional)</h3>
+
+<div id="steps"></div>
+
+<button onclick="addStep()">Añadir paso</button>
+
+<!-- PUBLICAR -->
+
+<button class="publish-btn" onclick="publishRecipe()">Publicar</button>
+
+</div>
+
+{% include 'bottom_bar.html' %}
+
+<script>
+
+function addIngredient(){
+    const div = document.createElement("div");
+    div.innerHTML = `<input class="ingredient-input" placeholder="Ingrediente">`;
+    document.getElementById("ingredients").appendChild(div);
+}
+
+function addStep(){
+    const div = document.createElement("div");
+    div.innerHTML = `<input class="step-input" placeholder="Paso">`;
+    document.getElementById("steps").appendChild(div);
+}
+
+async function publishRecipe(){
+    const title = document.querySelector(".title-input").value;
+    const description = document.querySelector(".description-input").value;
+    const tags = document.querySelector(".tags-input").value
+                    .split(",")
+                    .map(t => t.trim())
+                    .filter(t => t);
+    const ingredients = [...document.querySelectorAll(".ingredient-input")]
+                        .map(i => i.value)
+                        .filter(i => i);
+    const steps = [...document.querySelectorAll(".step-input")]
+                        .map(s => s.value)
+                        .filter(s => s);
+
+    if(!title){
+        alert("Pon un título para la receta");
+        return;
+    }
+
+    const data = {
+        title,
+        description,
+        tags,
+        ingredients,
+        steps,
+        images: ["/static/pasta.jpg"] // reemplazar luego por fotos subidas
+    };
+
+    try {
+        const res = await fetch('/publications/create', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data)
+        });
+
+        const result = await res.json();
+
+        if(res.ok){
+            alert("Receta publicada correctamente");
+            window.location.href = "/"; 
+        } else {
+            alert("Error al publicar: " + (result.message || "Error desconocido"));
+        }
+    } catch(err){
+        console.error(err);
+        alert("Error al conectar con el servidor");
+    }
+}
+
+</script>
+
+</body>
+</html>

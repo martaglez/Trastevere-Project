@@ -1,0 +1,137 @@
+/* Variables para cambiar colores fácilmente en toda la web */
+:root {
+    --primary-color: #ff6347; /* Color tomate/naranja */
+    --bg-color: #f8f9fa;
+    --text-color: #333;
+    --bar-bg: #ffffff;
+}
+
+body {
+    font-family: 'Segoe UI', sans-serif;
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    margin: 0;
+    padding: 0;
+    padding-top: 70px; /* Deja espacio para la barra superior */
+    padding-bottom: 70px; 
+}
+
+/* Estilos para la Bottom Bar (Asegúrate de que tu bottom_bar.html use estas clases) */
+.bottom-nav {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 60px;
+    background-color: var(--bar-bg);
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+    z-index: 1000;
+}
+
+.nav-item {
+    text-decoration: none;
+    color: #888;
+    font-size: 0.8rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.nav-item.active {
+    color: var(--primary-color);
+}
+
+.nav-item i {
+    font-size: 1.2rem;
+    margin-bottom: 2px;
+}
+
+
+/* Barra superior fija */
+.top-bar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 60px;
+    background-color: var(--bar-bg);
+    display: flex;
+    align-items: center;
+    justify-content: center; /* Centra horizontalmente el contenido */
+    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    z-index: 1001; /* Superior a la barra inferior */
+}
+
+/* Contenedor del logo y nombre */
+.logo-container {
+    display: flex;
+    align-items: center;
+    gap: 10px; /* Espacio entre logo y nombre */
+}
+
+/* Logo */
+.logo-container .logo {
+    height: 40px; /* Ajusta según tamaño del logo */
+    width: 40px;
+    object-fit: contain;
+}
+
+/* Nombre de la app */
+.logo-container .app-name {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: var(--primary-color);
+}
+
+/* Contenedor del feed: dos por fila */
+.feed-container {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 15px;
+    width: 90%;
+    max-width: 800px;
+    margin: 20px auto;
+}
+
+/* Tarjeta de receta */
+.recipe-card {
+    background: white;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.recipe-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+/* Imagen de la receta */
+.recipe-img {
+    width: 100%;
+    height: 150px;
+    object-fit: cover;
+}
+
+/* Info debajo de la imagen */
+.recipe-info {
+    padding: 10px;
+}
+
+.recipe-info h3 {
+    margin: 0 0 5px 0;
+    color: var(--primary-color);
+    font-size: 1rem;
+}
+
+/* Tags */
+.recipe-info .tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+}

@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Table</title>
+
+<link rel="stylesheet" href="{{ url_for('static', filename='main.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='home.css') }}">
+<style>
+    /* Botón quitar receta */
+    .remove-recipe-btn {
+        background: none;
+        border: none;
+        color: var(--primary-color);
+        font-size: 0.8rem;
+        cursor: pointer;
+        margin-left: 10px;
+    }
+    .remove-recipe-btn:hover {
+        color: #e5533d;
+    }
+</style>
+</head>
+
+<body>
+
+{% include 'top_bar.html' %}
+
+<h1 id="table-name"></h1>
+
+<div class="feed-container" id="recipes"></div>
+
+{% include 'bottom_bar.html' %}
+
+<script>
+
+async function loadTable(){
+
+    const path = window.location.pathname.split('/');
+    const id = path[path.length-1];
+
+    const res = await fetch('/tables/' + id);
+    const data = await res.json();
+
+    document.getElementById("table-name").innerText = data.name;
+
+    const container = document.getElementById("recipes");
+    container.innerHTML = "";
+
+    data.publications.forEach(pub => {
+
+        const card = document.createElement("div");
+        card.className = "recipe-card";
+
+        card.innerHTML = `
+            <img src="/static/pasta.jpg" class="recipe-img">
+            <div class="recipe-info" style="display:flex; align-items:center; justify-content:space-between;">
+                <h3>${pub.title}</h3>
+                <button class="remove-recipe-btn" onclick="removeFromTable(${pub.id}); event.stopPropagation();">
+                    ✖
+                </button>
+            </div>
+        `;
+
+        card.onclick = () => {
+            window.location.href = "/publications/view/" + pub.id;
+        };
+
+        container.appendChild(card);
+    });
+}
+
+// 🔹 QUITAR RECETA
+async function removeFromTable(publicationId){
+
+    const path = window.location.pathname.split('/');
+    const tableId = path[path.length-1];
+
+    await fetch('/tables/remove', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            table_id: parseInt(tableId),
+            publication_id: publicationId
+        })
+    });
+
+    loadTable();
+}
+
+// 🔹 INICIAL
+loadTable();
+
+</script>
+
+</body>
+</html>

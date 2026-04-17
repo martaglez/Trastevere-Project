@@ -1,0 +1,53 @@
+/* frontend/static/style.css */
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f4f4f9;
+    margin: 0;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+h1 {
+    color: #333;
+    border-bottom: 2px solid #ff6347;
+    padding-bottom: 10px;
+}
+
+#feed-list {
+    list-style: none;
+    padding: 0;
+    width: 100%;
+    max-width: 500px;
+}
+
+#feed-list li {
+    background: white;
+    margin-bottom: 15px;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    transition: transform 0.2s;
+}
+
+#feed-list li:hover {
+    transform: scale(1.02);
+}
+
+#feed-list strong {
+    color: #ff6347;
+    font-size: 1.2em;
+}
+
+/* Estilo para los tags */
+.tag {
+    display: inline-block;
+    background: #e0e0e0;
+    border-radius: 4px;
+    padding: 2px 8px;
+    font-size: 0.8em;
+    margin-top: 10px;
+    margin-right: 5px;
+}
+

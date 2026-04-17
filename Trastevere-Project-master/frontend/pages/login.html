@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Login - Trastevere</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='main.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='auth.css') }}">
+</head>
+<body>
+    <div class="auth-container">
+        <h1>Iniciar Sesión</h1>
+        <input type="email" id="email" placeholder="Correo electrónico" required>
+        <input type="password" id="pass" placeholder="Contraseña" required>
+        <button onclick="handleLogin()" class="btn-main">Entrar</button>
+        <p>¿No tienes cuenta? <a href="{{ url_for('auth.register') }}">Regístrate</a></p>
+    </div>
+
+    <script>
+        async function handleLogin() {
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('pass').value;
+            
+            const response = await fetch('/auth/login', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({email, password})
+            });
+
+            const data = await response.json();
+            if (response.ok) {
+                window.location.href = "/";
+            } else {
+                alert("Error: " + data.error);
+            }
+        }
+    </script>
+</body>
+</html>
