@@ -1,0 +1,34 @@
+### NECESARIO PARA EJECUTAR EN RENDER ###
+services:
+  # ── Servicio web (Flask) ──────────────────────────────────────────
+  - type: web
+    name: trastevere-app
+    runtime: docker
+    dockerfilePath: ./Dockerfile
+    plan: free
+
+    # Variables de entorno que Render inyectará al contenedor
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: trastevere-db
+          property: connectionString
+
+      - key: SECRET_KEY
+        generateValue: true   # Render genera una clave segura automáticamente
+
+      - key: FLASK_ENV
+        value: production
+
+      - key: PYTHON_VERSION
+        value: "3.11"
+
+    # Render usa el puerto 10000 por defecto en el plan gratuito
+    # (ya lo hemos configurado en el Dockerfile)
+
+# ── Base de datos PostgreSQL gestionada por Render ─────────────────
+databases:
+  - name: trastevere-db
+    plan: free
+    databaseName: trastevere
+    user: trastevere_user
