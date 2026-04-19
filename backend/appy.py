@@ -30,7 +30,7 @@ app = Flask(__name__,
             template_folder='../frontend/pages', 
             static_folder='../frontend/static')
 
-app.secret_key = 'trastevere_clave_secreta_super_segura'
+app.secret_key = 'jycpob-syrfoj-qinhU3'
 
 # Registro de Blueprints
 app.register_blueprint(home_bp, url_prefix='/home')
