@@ -2,6 +2,7 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Detalle de receta - Trastevere</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="{{ url_for('static', filename='main.css') }}">
@@ -11,8 +12,24 @@
 
 {% include 'top_bar.html' %}
 
-<div class="recipe-detail" id="recipe-detail">
-    </div>
+<div class="recipe-detail" id="recipe-detail"></div>
+
+
+<!-- Lightbox / carrusel de imágenes -->
+<div id="lightbox" style="display:none;" onclick="closeLightbox(event)">
+    <div class="lightbox-overlay"></div>
+    <button class="lightbox-arrow left"  onclick="lightboxNav(-1);event.stopPropagation();">
+        <i class="fas fa-chevron-left"></i>
+    </button>
+    <img id="lightbox-img" src="" alt="">
+    <button class="lightbox-arrow right" onclick="lightboxNav(1);event.stopPropagation();">
+        <i class="fas fa-chevron-right"></i>
+    </button>
+    <button class="lightbox-close" onclick="closeLightbox()">
+        <i class="fas fa-times"></i>
+    </button>
+    <div id="lightbox-dots" class="lightbox-dots"></div>
+</div>
 
 {% include 'bottom_bar.html' %}
 
@@ -23,135 +40,257 @@ async function loadRecipe() {
 
     const response = await fetch('/publications/' + id);
     const data = await response.json();
-
     const container = document.getElementById('recipe-detail');
 
-    if(data.error){
-        container.innerHTML = '<p style="text-align:center; margin-top:50px;">Receta no encontrada</p>';
+    if (data.error) {
+        container.innerHTML = '<p style="text-align:center;margin-top:60px;color:#888;">Receta no encontrada</p>';
         return;
     }
 
-    // 1. Gestión de imágenes
     const photos = data.images || [];
     const img1 = photos[0] || '/storage/images/default_photo.jpg';
+    // Init lightbox with available images
+    setTimeout(() => initLightbox(photos.filter(p => p)), 100);
     const img2 = photos[1] || '/storage/images/default_photo.jpg';
     const img3 = photos[2] || '/storage/images/default_photo.jpg';
 
-    // 2. Renderizado (HE ELIMINADO EL BLOQUE DUPLICADO DE TAGS)
+    const tags = (data.tags && data.tags.length > 0)
+        ? [...new Set(data.tags)].map(t => `<span class="tag">#${t}</span>`).join('')
+        : '';
+
+    const ingredients = (data.ingredients || []).map(i => `<li>${i}</li>`).join('');
+    const steps = (data.steps || []).map(s => `<li>${s}</li>`).join('');
+
     container.innerHTML = `
-    <div class="image-grid">
-        <img src="${img1}" 
-             onerror="this.src='/storage/images/default_photo.jpg';" 
-             class="img-large">
-
-        <div class="img-right">
-            <img src="${img2}" onerror="this.src='/storage/images/default_photo.jpg';">
-            <img src="${img3}" onerror="this.src='/storage/images/default_photo.jpg';">
-        </div>
-    </div>
-
-    <div class="recipe-content">
-        <div class="save-container" style="margin-bottom:15px;">
-            <button class="save-btn" onclick="openTableModal()">
-                <i class="fas fa-bookmark"></i> Guardar en Table
-            </button>
-        </div>
-
-        <div id="table-modal" class="modal" style="display:none;">
-            <div class="modal-content">
-                <span class="close" onclick="closeTableModal()">&times;</span>
-                <h3>Selecciona una table</h3>
-                <div id="modal-tables-container"></div>
+        <!-- Imagen hero: solo la grande en móvil, grid en pantallas mayores -->
+        <div class="image-grid">
+            <img src="${img1}"
+                 onerror="this.src='/storage/images/default_photo.jpg';"
+                 class="img-large"
+                 alt="${data.title}">
+            <div class="img-right">
+                <img src="${img2}" onerror="this.src='/storage/images/default_photo.jpg';">
+                <img src="${img3}" onerror="this.src='/storage/images/default_photo.jpg';">
             </div>
         </div>
 
-        <h1 style="color: var(--primary-color);">${data.title}</h1>
-
-        <p class="user"><i class="fas fa-user-circle"></i> Por ${data.author || "Cocinero Anónimo"}</p>
-
-        <p class="description">${data.description || "Sin descripción disponible."}</p>
-
-        <div style="display: flex; gap: 40px; margin-top: 30px;">
-            <div style="flex: 1;">
-                <h3 style="color: var(--primary-color);"><i class="fas fa-list-ul"></i> Ingredientes</h3>
-                <ul>
-                    ${(data.ingredients || []).map(i => `<li>${i}</li>`).join("")}
-                </ul>
+        <div class="recipe-content">
+            <div class="save-container">
+                <button class="save-btn" onclick="openTableModal()">
+                    <i class="fas fa-bookmark"></i> Guardar en Table
+                </button>
             </div>
-            <div style="flex: 1;">
-                <h3 style="color: var(--primary-color);"><i class="fas fa-utensils"></i> Pasos</h3>
-                <ol>
-                    ${(data.steps || []).map(s => `<li>${s}</li>`).join("")}
-                </ol>
-            </div>
-        </div>
 
-        <div class="tags" style="margin-top: 20px;">
-            ${(data.tags && data.tags.length > 0) 
-                ? [...new Set(data.tags)].map(tag => `<span class="tag">#${tag}</span>`).join("") 
-                : ""}
+            <!-- Modal tables -->
+            <div id="table-modal" class="modal" style="display:none;">
+                <div class="modal-content" style="position:relative;">
+                    <button class="modal-close-btn" onclick="closeTableModal()" title="Cerrar">
+                        <i class="fas fa-times"></i>
+                    </button>
+                    <h3>Guardar en Table</h3>
+                    <p style="font-size:0.78rem;color:var(--text-muted);margin-bottom:12px;">
+                        Elige una table o cierra si te equivocaste
+                    </p>
+                    <div id="modal-tables-container"></div>
+                </div>
+            </div>
+
+            <h1>${data.title}</h1>
+
+            <div class="recipe-detail-meta">
+                <div class="recipe-detail-author" id="detail-author-btn">
+                    <i class="fas fa-user-circle"></i>
+                    <span>${data.author || 'Cocinero Anónimo'}</span>
+                </div>
+                <button class="detail-like-btn ${data.user_liked ? 'liked' : ''}"
+                        id="detail-like-btn">
+                    <i class="${data.user_liked ? 'fas' : 'far'} fa-heart"></i>
+                    <span id="detail-like-count">${data.like_count > 0 ? data.like_count : ''}</span>
+                </button>
+            </div>
+            <p class="description">${data.description || 'Sin descripción disponible.'}</p>
+
+            <!-- Columnas: apiladas en móvil, lado a lado en grande -->
+            <div class="recipe-columns">
+                <div>
+                    <div class="recipe-section-title">
+                        <i class="fas fa-list-ul"></i> Ingredientes
+                    </div>
+                    <ul>${ingredients}</ul>
+                </div>
+                <div>
+                    <div class="recipe-section-title">
+                        <i class="fas fa-utensils"></i> Pasos
+                    </div>
+                    <ol>${steps}</ol>
+                </div>
+            </div>
+
+            <div class="tags" style="margin-top:18px;">${tags}</div>
         </div>
-    </div>
     `;
+
+    // Wire author click
+    const authorBtn = document.getElementById('detail-author-btn');
+    if (authorBtn && data.author_id) {
+        authorBtn.addEventListener('click', () => {
+            window.location.href = '/user/' + data.author_id;
+        });
+    }
+    // Wire like button
+    const likeBtn = document.getElementById('detail-like-btn');
+    if (likeBtn) {
+        likeBtn.addEventListener('click', () => toggleDetailLike(data.id));
+    }
 }
 
 loadRecipe();
 
-// --- LÓGICA DE TABLES ---
-async function openTableModal(){
+async function openTableModal() {
     const res = await fetch('/user/profile');
     if (res.status === 401) {
-        alert("Inicia sesión para guardar recetas");
-        window.location.href = "/auth/login";
+        alert('Inicia sesión para guardar recetas');
+        window.location.href = '/auth/login';
         return;
     }
-
-    const tablesRes = await fetch('/tables/'); 
+    const tablesRes = await fetch('/tables/');
     const tablesList = await tablesRes.json();
-
     const modalContainer = document.getElementById('modal-tables-container');
-    modalContainer.innerHTML = "";
+    modalContainer.innerHTML = '';
 
-    if(!tablesList || tablesList.length === 0){
-        modalContainer.innerHTML = "<p>No tienes tables aún.</p><button onclick='window.location.href=\"/tables\"' class='btn-main'>Crear mi primera Table</button>";
+    if (!tablesList || tablesList.length === 0) {
+        modalContainer.innerHTML = `<p>No tienes tables aún.</p>
+            <button onclick="window.location.href='/tables'" class="btn-main" style="margin-top:10px;">
+                Crear mi primera Table
+            </button>`;
     } else {
         tablesList.forEach(t => {
-            const btn = document.createElement("button");
-            btn.className = "modal-table-btn";
+            const btn = document.createElement('button');
+            btn.className = 'modal-table-btn';
             btn.innerText = t.name;
             btn.onclick = () => saveToTable(t.id, t.name);
             modalContainer.appendChild(btn);
         });
     }
-
     document.getElementById('table-modal').style.display = 'flex';
 }
 
-function closeTableModal(){
+function closeTableModal() {
     document.getElementById('table-modal').style.display = 'none';
 }
 
-async function saveToTable(tableId, tableName){
+async function saveToTable(tableId, tableName) {
     const path = window.location.pathname.split('/');
     const pubId = path[path.length - 1];
-
     const response = await fetch('/tables/add', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-            table_id: tableId,
-            publication_id: parseInt(pubId)
-        })
+        body: JSON.stringify({ table_id: tableId, publication_id: parseInt(pubId) })
     });
-
-    if(response.ok) {
+    if (response.ok) {
         alert(`¡Guardado en "${tableName}"!`);
         closeTableModal();
     } else {
-        alert("Esta receta ya está en esa Table.");
+        alert('Esta receta ya está en esa Table.');
+    }
+}
+
+// ── Lightbox ─────────────────────────────────────────────────
+let _lbImages = [];
+let _lbIndex  = 0;
+
+function initLightbox(images) {
+    _lbImages = images.filter(Boolean);
+    // Make images clickable
+    document.querySelectorAll('.img-large, .img-right img').forEach((el, i) => {
+        el.style.cursor = 'zoom-in';
+        el.addEventListener('click', () => openLightbox(i));
+    });
+}
+
+function openLightbox(index) {
+    if (!_lbImages.length) return;
+    _lbIndex = index;
+    document.getElementById('lightbox').style.display = 'flex';
+    document.body.style.overflow = 'hidden';
+    updateLightbox();
+}
+
+function updateLightbox() {
+    const img  = document.getElementById('lightbox-img');
+    const dots = document.getElementById('lightbox-dots');
+    img.src    = _lbImages[_lbIndex];
+
+    // Dots
+    dots.innerHTML = _lbImages.map((_, i) =>
+        `<span class="lb-dot ${i === _lbIndex ? 'active' : ''}" onclick="lightboxGo(${i})"></span>`
+    ).join('');
+
+    // Show/hide arrows
+    document.querySelector('.lightbox-arrow.left').style.opacity  = _lbImages.length > 1 ? '1' : '0';
+    document.querySelector('.lightbox-arrow.right').style.opacity = _lbImages.length > 1 ? '1' : '0';
+}
+
+function lightboxNav(dir) {
+    _lbIndex = (_lbIndex + dir + _lbImages.length) % _lbImages.length;
+    updateLightbox();
+}
+
+function lightboxGo(i) { _lbIndex = i; updateLightbox(); }
+
+function closeLightbox(e) {
+    if (e && e.target !== document.getElementById('lightbox') &&
+        !e.target.classList.contains('lightbox-overlay')) return;
+    document.getElementById('lightbox').style.display = 'none';
+    document.body.style.overflow = '';
+}
+
+// Swipe support
+let _lbTouchX = null;
+document.addEventListener('DOMContentLoaded', () => {
+    const lb = document.getElementById('lightbox');
+    lb.addEventListener('touchstart', e => { _lbTouchX = e.touches[0].clientX; }, { passive: true });
+    lb.addEventListener('touchend',   e => {
+        if (_lbTouchX === null) return;
+        const dx = e.changedTouches[0].clientX - _lbTouchX;
+        if (Math.abs(dx) > 50) lightboxNav(dx < 0 ? 1 : -1);
+        _lbTouchX = null;
+    }, { passive: true });
+
+    // Keyboard
+    document.addEventListener('keydown', e => {
+        const lb = document.getElementById('lightbox');
+        if (lb.style.display === 'none') return;
+        if (e.key === 'ArrowRight') lightboxNav(1);
+        if (e.key === 'ArrowLeft')  lightboxNav(-1);
+        if (e.key === 'Escape')     { lb.style.display = 'none'; document.body.style.overflow = ''; }
+    });
+});
+
+
+async function toggleDetailLike(pubId) {
+    const btn = document.getElementById('detail-like-btn');
+    const cnt = document.getElementById('detail-like-count');
+    const wasLiked = btn.classList.contains('liked');
+    btn.classList.toggle('liked', !wasLiked);
+    btn.querySelector('i').className = wasLiked ? 'far fa-heart' : 'fas fa-heart';
+    try {
+        const res = await fetch(`/likes/${pubId}/toggle`, { method: 'POST' });
+        if (res.status === 401) {
+            btn.classList.toggle('liked', wasLiked);
+            btn.querySelector('i').className = wasLiked ? 'fas fa-heart' : 'far fa-heart';
+            if (confirm('Inicia sesión para dar like. ¿Ir al login?')) {
+                window.location.href = '/auth/login';
+            }
+            return;
+        }
+        const data = await res.json();
+        btn.classList.toggle('liked', data.liked);
+        btn.querySelector('i').className = data.liked ? 'fas fa-heart' : 'far fa-heart';
+        if (cnt) cnt.textContent = data.count > 0 ? data.count : '';
+    } catch(e) {
+        btn.classList.toggle('liked', wasLiked);
+        btn.querySelector('i').className = wasLiked ? 'fas fa-heart' : 'far fa-heart';
     }
 }
 </script>
-
-</body>
-</html>

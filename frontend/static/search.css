@@ -1,62 +1,62 @@
-/* Contenedor principal con más aire */
+/* search.css */
+ 
 .search-hero {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    padding: 40px 20px; 
-    background-color: transparent;
+  padding: 16px 16px 6px;
 }
-
-/* La caja de búsqueda: más ancha, redondeada y con sombra */
+ 
 .search-box {
-    display: flex;
-    align-items: center;
-    width: 95%;
-    max-width: 800px; /* Aquí está el cambio de tamaño */
-    background: white;
-    padding: 6px 12px;
-    border-radius: 50px; 
-    box-shadow: 0 4px 12px rgba(0,0,0,0.08); 
-    border: 1px solid #eee;
-    transition: box-shadow 0.3s ease;
+  display: flex;
+  align-items: center;
+  background: white;
+  border-radius: 30px;
+  padding: 8px 14px;
+  box-shadow: var(--shadow-sm);
+  border: 1.5px solid var(--border);
+  transition: border-color 0.2s, box-shadow 0.2s;
+  max-width: 800px;
+  margin: 0 auto;
 }
-
 .search-box:focus-within {
-    box-shadow: 0 4px 20px rgba(0,0,0,0.15);
-    border-color: var(--primary-color);
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(255,99,71,0.1);
 }
-
-/* Icono de lupa */
+ 
 .search-icon {
-    color: #999;
-    margin-left: 10px;
-    margin-right: 10px;
-    font-size: 1.1rem;
+  color: #ccc;
+  margin-right: 10px;
+  font-size: 0.95rem;
 }
-
-/* El input sin bordes feos */
+ 
 #search-input {
-    flex: 1;
-    border: none;
-    outline: none;
-    font-size: 1.1rem;
-    padding: 12px 5px;
-    background: transparent;
+  flex: 1;
+  border: none;
+  outline: none;
+  font-size: 0.92rem;
+  font-family: var(--font-body);
+  background: transparent;
+  color: var(--text);
+  padding: 4px 0;
 }
-
-/* El botón usando tu variable de color */
+#search-input::placeholder { color: #bbb; }
+ 
 #search-btn {
-    padding: 10px 25px;
-    border: none;
-    background: var(--primary-color);
-    color: white;
-    border-radius: 25px;
-    cursor: pointer;
-    font-weight: bold;
-    transition: transform 0.2s, opacity 0.2s;
+  padding: 8px 18px;
+  border: none;
+  background: var(--primary);
+  color: white;
+  border-radius: 22px;
+  cursor: pointer;
+  font-weight: 700;
+  font-size: 0.82rem;
+  font-family: var(--font-body);
+  transition: background 0.2s;
 }
-
-#search-btn:hover {
-    transform: scale(1.05);
-    opacity: 0.9;
+#search-btn:hover { background: var(--primary-dark); }
+ 
+.search-empty {
+  text-align: center;
+  color: var(--text-muted);
+  margin-top: 60px;
+  grid-column: 1 / -1;
+  font-size: 0.92rem;
 }

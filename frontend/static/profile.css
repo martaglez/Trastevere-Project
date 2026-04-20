@@ -1,88 +1,135 @@
-/* Contenedor principal del perfil */
+/* profile.css */
+ 
 .profile-container {
-    max-width: 600px; /* Ancho máximo para que no se vea gigante en pantallas grandes */
-    margin: 40px auto;
-    background: white;
-    padding: 30px;
-    border-radius: 12px;
-    box-shadow: 0 3px 8px rgba(0,0,0,0.1);
+  max-width: 560px;
+  margin: 28px auto;
+  background: white;
+  padding: 28px 24px;
+  border-radius: 20px;
+  box-shadow: var(--shadow-sm);
 }
-
+ 
 /* Foto de perfil */
-.profile-container img.profile-pic {
-    width: 120px;
-    height: 120px;
-    border-radius: 50%;
-    object-fit: cover;
-    display: block;
-    margin: 0 auto 20px auto;
-    border: 3px solid var(--primary-color); /* Borde circular con color principal */
-}
-
-/* Nombre del usuario */
-.profile-container h2 {
-    text-align: center;
-    color: var(--primary-color);
-    margin-bottom: 10px;
-}
-
-/* Información adicional del perfil */
-.profile-info {
-    text-align: center;
-    color: #555;
-    font-size: 0.95rem;
-    margin-bottom: 20px;
-}
-
-/* Botones de acción (editar perfil, seguir, etc.) */
-.profile-actions {
-    display: flex; /* Flexbox para alinear los botones horizontalmente */
-    justify-content: center;
-    gap: 15px;
-}
-
-.profile-actions button {
-    padding: 8px 16px;
-    border: none;
-    border-radius: 8px;
-    background-color: var(--primary-color);
-    color: white;
-    cursor: pointer;
-    transition: background-color 0.2s;
-}
-
-.profile-actions button:hover {
-    background-color: #e5533d; /* Cambio de color a un tono más oscuro al pasar el mouse */
-}
-
-/* Lista de recetas subidas por el usuario */
-.user-recipes {
-    margin-top: 30px;
-}
-
-.user-recipes h3 {
-    color: var(--primary-color);  /* Títulos de sección con color principal */
-    margin-bottom: 15px;
-}
-
-.user-recipes ul {
-    list-style: none;  /* Quita los puntos de la lista */
-    padding: 0;
-}
-
-.user-recipes li {
-    background: #f9f9f9;
-    padding: 15px;
-    margin-bottom: 10px;
-    border-radius: 8px;
-    box-shadow: 0 1px 4px rgba(0,0,0,0.05);
-}
-
-
 .profile-pic-section {
-    text-align: center;
+  text-align: center;
+  margin-bottom: 6px;
 }
-
-#edit-pic-container {
-    margin-top: 10px;
+ 
+.profile-pic {
+  width: 100px !important;
+  height: 100px !important;
+  border-radius: 50% !important;
+  object-fit: cover !important;
+  display: block !important;
+  margin: 0 auto 8px !important;
+  border: 3px solid var(--primary) !important;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+.profile-pic:hover { opacity: 0.85; }
+ 
+.profile-pic-hint {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+}
+ 
+/* Nombre */
+.profile-container h2 {
+  text-align: center;
+  font-family: var(--font-display);
+  color: var(--text);
+  font-size: 1.4rem;
+  margin: 10px 0 16px;
+}
+ 
+/* Info rows */
+.profile-info {
+  margin-bottom: 20px;
+}
+ 
+.profile-info p {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--border);
+  font-size: 0.88rem;
+  color: var(--text);
+}
+.profile-info p strong {
+  color: var(--text-muted);
+  font-weight: 600;
+  min-width: 90px;
+}
+ 
+.profile-input {
+  border: none;
+  background: transparent;
+  font-size: 0.88rem;
+  color: var(--text);
+  text-align: right;
+  font-family: var(--font-body);
+  flex: 1;
+  outline: none;
+}
+.profile-input:enabled {
+  background: var(--primary-light);
+  border-radius: 6px;
+  padding: 4px 8px;
+  border: 1px solid #ffd0c4;
+  text-align: left;
+}
+ 
+/* Acciones */
+.profile-actions {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+ 
+.profile-actions button {
+  padding: 9px 16px;
+  border: none;
+  border-radius: 10px;
+  background: var(--primary);
+  color: white;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 0.85rem;
+  font-family: var(--font-body);
+  transition: background 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.profile-actions button:hover { background: var(--primary-dark); }
+ 
+/* Badge plan */
+.plan-badge {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+.plan-badge.basic {
+  background: #f0f0f0;
+  color: #666;
+}
+.plan-badge.premium {
+  background: linear-gradient(135deg, #f7971e, #ffd200);
+  color: #7a4a00;
+}
+ 
+/* About box */
+#about-box {
+  background: white;
+  padding: 22px;
+  border-radius: 16px;
+  border: 1px solid var(--border);
+  margin: 16px auto;
+  max-width: 400px;
+  text-align: center;
+  box-shadow: var(--shadow-md);
 }

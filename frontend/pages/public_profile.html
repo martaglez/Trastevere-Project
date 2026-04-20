@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Perfil - Trastevere</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='main.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='public_profile.css') }}">
+</head>
+<body>
+    {% include 'top_bar.html' %}
+    <div id="profile-root"></div>
+    {% include 'bottom_bar.html' %}
+
+    <script>
+    let _profileData = null;
+
+    async function loadPublicProfile() {
+        const userId = window.location.pathname.split('/').filter(Boolean).pop();
+        const root   = document.getElementById('profile-root');
+        try {
+            const res = await fetch(`/profiles/${userId}`);
+            if (!res.ok) { root.innerHTML = '<p class="profile-error">Usuario no encontrado.</p>'; return; }
+            _profileData = await res.json();
+            renderProfile(_profileData);
+            // Cargar mi valoración existente (si la hay)
+            if (!_profileData.is_own_profile) {
+                fetch(`/profiles/${_profileData.id}/my-rating`)
+                    .then(r => r.json())
+                    .then(d => {
+                        if (d.my_rating) highlightMyRating(d.my_rating);
+                    }).catch(() => {});
+            }
+        } catch(e) {
+            root.innerHTML = '<p class="profile-error">Error al cargar el perfil.</p>';
+        }
+    }
+
+    function renderProfile(u) {
+        const root = document.getElementById('profile-root');
+
+        const premiumBadge = u.is_premium ? `<span class="premium-badge">✨ Premium</span>` : '';
+
+        // Follow button OR edit button if own profile
+        const followBtn = u.is_own_profile
+            ? `<a href="/profile" class="follow-btn own-profile-btn">
+                   <i class="fas fa-edit"></i> Editar perfil
+               </a>`
+            : `<button id="follow-btn" class="follow-btn ${u.is_following ? 'following' : ''}"
+                       onclick="toggleFollow(${u.id})">
+                   ${u.is_following
+                       ? '<i class="fas fa-user-check"></i> Siguiendo'
+                       : '<i class="fas fa-user-plus"></i> Seguir'}
+               </button>`;
+
+        // Star rating widget — only show if NOT own profile
+        const starWidget = u.is_own_profile ? '' : `
+            <div class="star-rating-widget" id="star-widget">
+                <span class="star-rating-label">Valorar:</span>
+                ${[1,2,3,4,5].map(n => `
+                    <button class="star-rate-btn" data-val="${n}"
+                            onmouseenter="hoverStars(${n})"
+                            onmouseleave="unhoverStars()"
+                            onclick="submitRating(${u.id}, ${n})">
+                        <i class="far fa-star"></i>
+                    </button>`).join('')}
+            </div>`;
+
+        // Recipe cards
+        const pubs = u.publications.length === 0
+            ? '<p class="feed-empty" style="grid-column:1/-1;margin-top:40px;">Aún no hay recetas publicadas.</p>'
+            : u.publications.map(p => `
+                <div class="recipe-card" onclick="window.location.href='/publications/view/${p.id}'">
+                    <img src="${p.image}" class="recipe-img"
+                         onerror="this.src='/storage/images/default_photo.jpg'">
+                    <div class="recipe-info">
+                        <h3>${p.title}</h3>
+                        <div class="recipe-author">
+                            <i class="fas fa-user-circle"></i>
+                            <span>${u.username}</span>
+                        </div>
+                    </div>
+                </div>`).join('');
+
+        root.innerHTML = `
+            <div class="pub-profile-header">
+                <div class="pub-profile-avatar-wrap">
+                    <img src="${u.profile_pic}" alt="${u.username}"
+                         class="pub-profile-avatar"
+                         onerror="this.src='/storage/images/default_user.jpg'">
+                    ${u.is_premium ? '<div class="avatar-premium-ring"></div>' : ''}
+                </div>
+                <div class="pub-profile-info">
+                    <div class="pub-profile-name-row">
+                        <h1>${u.username}</h1>
+                        ${premiumBadge}
+                    </div>
+                    <div class="pub-profile-stars" id="display-stars">
+                        ${renderStars(u.stars)}
+                        <span>${u.stars.toFixed(1)}</span>
+                    </div>
+                    ${starWidget}
+                    ${u.bio ? `<p class="pub-profile-bio">${u.bio}</p>` : ''}
+                    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;">
+                        ${followBtn}
+                    </div>
+                </div>
+            </div>
+
+            <div class="pub-profile-stats">
+                <div class="stat-item">
+                    <span class="stat-num">${u.pub_count}</span>
+                    <span class="stat-label">Recetas</span>
+                </div>
+                <div class="stat-divider"></div>
+                <div class="stat-item">
+                    <span class="stat-num" id="stat-followers">${u.follower_count}</span>
+                    <span class="stat-label">Seguidores</span>
+                </div>
+                <div class="stat-divider"></div>
+                <div class="stat-item">
+                    <span class="stat-num">${u.following_count}</span>
+                    <span class="stat-label">Siguiendo</span>
+                </div>
+            </div>
+
+            <div class="feed-container pub-profile-grid">${pubs}</div>
+        `;
+    }
+
+    // ── Stars display ───────────────────────────────────────────
+    function renderStars(val) {
+        const full  = Math.floor(val);
+        const half  = val - full >= 0.5;
+        const empty = 5 - full - (half ? 1 : 0);
+        return '<i class="fas fa-star"></i>'.repeat(full)
+             + (half ? '<i class="fas fa-star-half-alt"></i>' : '')
+             + '<i class="far fa-star"></i>'.repeat(empty);
+    }
+
+    // ── Star rating widget ──────────────────────────────────────
+    function hoverStars(val) {
+        document.querySelectorAll('.star-rate-btn').forEach(btn => {
+            const n = parseInt(btn.dataset.val);
+            btn.querySelector('i').className = n <= val ? 'fas fa-star' : 'far fa-star';
+            btn.classList.toggle('hovered', n <= val);
+        });
+    }
+
+    function unhoverStars() {
+        document.querySelectorAll('.star-rate-btn').forEach(btn => {
+            btn.querySelector('i').className = 'far fa-star';
+            btn.classList.remove('hovered');
+        });
+    }
+
+    function highlightMyRating(val) {
+        document.querySelectorAll('.star-rate-btn').forEach(btn => {
+            const n = parseInt(btn.dataset.val);
+            btn.querySelector('i').className = n <= val ? 'fas fa-star' : 'far fa-star';
+            btn.classList.toggle('selected', n <= val);
+        });
+        const label = document.querySelector('.star-rating-label');
+        if (label) label.textContent = 'Tu valoración:';
+    }
+
+    async function submitRating(userId, stars) {
+        try {
+            const res = await fetch(`/profiles/${userId}/rate`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ stars })
+            });
+            if (res.status === 401) {
+                alert('Inicia sesión para valorar.'); return;
+            }
+            const data = await res.json();
+            if (data.stars !== undefined) {
+                // Update the star display
+                const starsEl = document.getElementById('display-stars');
+                if (starsEl) {
+                    starsEl.innerHTML = renderStars(data.stars) + `<span>${data.stars.toFixed(1)}</span>`;
+                }
+                // Highlight selected stars
+                highlightMyRating(data.my_rating);
+                // Feedback message
+                const label = document.querySelector('.star-rating-label');
+                if (label) {
+                    const msg = data.action === 'updated' ? '✓ Actualizada' : '✓ Guardada';
+                    label.textContent = msg;
+                    label.style.color = 'var(--primary)';
+                    setTimeout(() => { label.textContent = 'Tu valoración:'; label.style.color = ''; }, 2500);
+                }
+            }
+        } catch(e) {
+            console.error('Error al valorar:', e);
+        }
+    }
+
+    // ── Follow/unfollow ─────────────────────────────────────────
+    async function toggleFollow(userId) {
+        const res = await fetch(`/profiles/${userId}/follow`, { method: 'POST' });
+        if (res.status === 401) {
+            alert('Inicia sesión para seguir a otros usuarios.');
+            window.location.href = '/auth/login';
+            return;
+        }
+        const data = await res.json();
+        if (!res.ok) { alert(data.error || 'Error al seguir.'); return; }
+
+        const following = data.action === 'followed';
+        const btn = document.getElementById('follow-btn');
+        btn.className = `follow-btn ${following ? 'following' : ''}`;
+        btn.innerHTML = following
+            ? '<i class="fas fa-user-check"></i> Siguiendo'
+            : '<i class="fas fa-user-plus"></i> Seguir';
+        document.getElementById('stat-followers').textContent = data.follower_count;
+    }
+
+    document.addEventListener('DOMContentLoaded', loadPublicProfile);
+    </script>
+</body>
+</html>

@@ -2,7 +2,8 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Trastevere - Feed</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trastevere - Inicio</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="{{ url_for('static', filename='main.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='home.css') }}">
@@ -10,55 +11,171 @@
 <body>
     {% include 'top_bar.html' %}
 
+    <div class="home-search-bar">
+        <i class="fas fa-search"></i>
+        <input type="text" placeholder="Busca recetas, ingredientes..."
+               onkeypress="if(event.key==='Enter') window.location.href='/search?q='+this.value">
+    </div>
+
+    <div class="category-chips">
+        <div class="chip active" onclick="filterFeed(this, null)">Todo</div>
+        <div class="chip" onclick="filterFeed(this, 'pasta')">🍝 Pasta</div>
+        <div class="chip" onclick="filterFeed(this, 'ensalada')">🥗 Ensaladas</div>
+        <div class="chip" onclick="filterFeed(this, 'postre')">🍰 Postres</div>
+        <div class="chip" onclick="filterFeed(this, 'mexicana')">🌮 Mexicana</div>
+        <div class="chip" onclick="filterFeed(this, 'asiatica')">🍜 Asiática</div>
+        <div class="chip" onclick="filterFeed(this, 'carne')">🥩 Carnes</div>
+    </div>
+
     <div class="feed-container" id="feed-list"></div>
 
     {% include 'bottom_bar.html' %}
 
     <script>
-        async function loadFeed() {
-            try {
-                const response = await fetch('/home/feed');
-                const feed = await response.json();
-                const feedList = document.getElementById('feed-list');
-                feedList.innerHTML = '';
+    let allRecipes = [];
 
-                if (feed.length === 0) {
-                    feedList.innerHTML = '<p style="grid-column: 1/-1; text-align: center; color: #888; margin-top: 50px;">No hay recetas aún. ¡Sé el primero en publicar!</p>';
-                    return;
-                }
+    let likeData = {};
 
-                feed.forEach(item => {
-                    const card = document.createElement('div');
-                    card.className = 'recipe-card';
-                    
-                    // IMPORTANTE: Usamos directamente item.image que nos manda el Back
-                    // Si por algún motivo falla, cargamos el placeholder de storage
-                    const imageSrc = item.image ? item.image : "/storage/images/placeholder.png";
-
-                    card.innerHTML = `
-                        <img src="${imageSrc}" 
-                             onerror="this.onerror=null;this.src='/storage/images/placeholder.png';" 
-                             alt="${item.title}" 
-                             class="recipe-img">
-                        <div class="recipe-info">
-                            <h3>${item.title}</h3>
-                            <p style="font-size: 0.8rem; color: #666; margin: 0;">Por ${item.author || 'Anónimo'}</p>
-                        </div>
-                    `;
-        
-                    card.addEventListener('click', () => {
-                        window.location.href = '/publications/view/' + item.id;
+    async function loadFeed() {
+        try {
+            const response = await fetch('/home/feed');
+            allRecipes = await response.json();
+            renderFeed(allRecipes);
+            // Cargar estados de like en batch
+            if (allRecipes.length > 0) {
+                try {
+                    const lr = await fetch('/likes/batch', {
+                        method: 'POST',
+                        headers: {'Content-Type': 'application/json'},
+                        body: JSON.stringify({ids: allRecipes.map(r => r.id)})
                     });
-                    feedList.appendChild(card);
-                });
-            } catch (error) {
-                console.error("Error al cargar el feed:", error);
+                    likeData = await lr.json();
+                    Object.keys(likeData).forEach(id => {
+                        const d   = likeData[id];
+                        const btn = document.getElementById('like-btn-' + id);
+                        const cnt = document.getElementById('like-count-' + id);
+                        if (btn) {
+                            btn.classList.toggle('liked', d.liked);
+                            btn.querySelector('i').className = d.liked ? 'fas fa-heart' : 'far fa-heart';
+                        }
+                        if (cnt) cnt.textContent = d.count > 0 ? d.count : '';
+                    });
+                } catch(e) { /* likes no críticos */ }
             }
+        } catch (error) {
+            console.error('Error al cargar el feed:', error);
         }
-        
-        // Ejecutar al cargar la página
-        window.onload = loadFeed;
+    }
+
+    async function toggleLike(pubId) {
+        const btn = document.getElementById('like-btn-' + pubId);
+        const cnt = document.getElementById('like-count-' + pubId);
+        if (!btn) return;
+        const wasLiked = btn.classList.contains('liked');
+        btn.classList.toggle('liked', !wasLiked);
+        btn.querySelector('i').className = wasLiked ? 'far fa-heart' : 'fas fa-heart';
+        try {
+            const res = await fetch('/likes/' + pubId + '/toggle', {method: 'POST'});
+            if (res.status === 401) {
+                btn.classList.toggle('liked', wasLiked);
+                btn.querySelector('i').className = wasLiked ? 'fas fa-heart' : 'far fa-heart';
+                if (confirm('Inicia sesión para dar like. ¿Ir al login?'))
+                    window.location.href = '/auth/login';
+                return;
+            }
+            const data = await res.json();
+            btn.classList.toggle('liked', data.liked);
+            btn.querySelector('i').className = data.liked ? 'fas fa-heart' : 'far fa-heart';
+            if (cnt) cnt.textContent = data.count > 0 ? data.count : '';
+        } catch(e) {
+            btn.classList.toggle('liked', wasLiked);
+            btn.querySelector('i').className = wasLiked ? 'fas fa-heart' : 'far fa-heart';
+        }
+    }
+
+    function renderFeed(recipes) {
+        const feedList = document.getElementById('feed-list');
+        feedList.innerHTML = '';
+        if (recipes.length === 0) {
+            feedList.innerHTML = '<p class="feed-empty">No hay recetas para esta categoría aún.</p>';
+            return;
+        }
+        recipes.forEach(item => {
+            const card = document.createElement('div');
+            card.className = 'recipe-card';
+            const imageSrc = item.image || '/storage/images/placeholder.png';
+
+            card.innerHTML = `
+                <img src="${imageSrc}"
+                     onerror="this.onerror=null;this.src='/storage/images/placeholder.png';"
+                     alt="${item.title}" class="recipe-img">
+                <div class="recipe-info">
+                    <h3>${item.title}</h3>
+                    <div class="card-footer">
+                        <div class="recipe-author" id="author-${item.id}">
+                            <i class="fas fa-user-circle"></i>
+                            <span>${item.author || 'Anónimo'}</span>
+                        </div>
+                        <button class="like-btn" id="like-btn-${item.id}">
+                            <i class="far fa-heart"></i>
+                            <span id="like-count-${item.id}"></span>
+                        </button>
+                    </div>
+                </div>`;
+
+            // Click tarjeta → receta
+            card.addEventListener('click', () => {
+                window.location.href = '/publications/view/' + item.id;
+            });
+
+            // Click autor → perfil
+            const authorEl = card.querySelector('.recipe-author');
+            if (authorEl) {
+                authorEl.style.cursor = 'pointer';
+                authorEl.addEventListener('click', e => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    window.location.href = '/user/' + item.author_id;
+                }, true);  // useCapture:true — fires before card click
+            }
+
+            // Click like → toggle (sin propagar)
+            card.querySelector('.like-btn').addEventListener('click', e => {
+                e.stopPropagation();
+                toggleLike(item.id);
+            });
+
+            feedList.appendChild(card);
+        });
+    }
+
+    function filterFeed(chipEl, keyword) {
+        document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+        chipEl.classList.add('active');
+        if (!keyword) { renderFeed(allRecipes); return; }
+        const kw = normalize(keyword);
+        const filtered = allRecipes.filter(item => {
+            const inTitle = normalize(item.title || '').includes(kw);
+            const inDesc  = normalize(item.description || '').includes(kw);
+            // Tags: handle both array and JSON string formats
+            let tags = item.tags;
+            if (typeof tags === 'string') { try { tags = JSON.parse(tags); } catch(e) { tags = [tags]; } }
+            const inTags = Array.isArray(tags) && tags.some(t => normalize(String(t)).includes(kw));
+            // Ingredients: same safety
+            let ingr = item.ingredients;
+            if (typeof ingr === 'string') { try { ingr = JSON.parse(ingr); } catch(e) { ingr = [ingr]; } }
+            const inIngr = Array.isArray(ingr) && ingr.some(i => normalize(String(i)).includes(kw));
+            return inTitle || inDesc || inTags || inIngr;
+        });
+        renderFeed(filtered);
+    }
+
+    function normalize(str) {
+        return str.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+    }
+
+    // DOMContentLoaded en lugar de window.onload para evitar conflictos con top_bar.html
+    document.addEventListener('DOMContentLoaded', loadFeed);
     </script>
-        
 </body>
 </html>

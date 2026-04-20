@@ -2,7 +2,8 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Buscar recetas - Trastevere</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Buscar - Trastevere</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="{{ url_for('static', filename='main.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='home.css') }}">
@@ -15,64 +16,131 @@
 <section class="search-hero">
     <div class="search-box">
         <i class="fas fa-search search-icon"></i>
-        <input type="text" id="search-input" placeholder="Buscar por título, tags o ingredientes...">
-        <button id="search-btn" onclick="searchRecipes()">Buscar</button>
+        <input type="text" id="search-input"
+               placeholder="Buscar recetas o @usuarios...">
+        <button id="search-btn" onclick="doSearch()">Buscar</button>
     </div>
 </section>
 
-<div id="search-results" class="feed-container"></div>
+<!-- Tabs -->
+<div class="search-tabs">
+    <button class="search-tab active" id="tab-recipes" onclick="switchTab('recipes')">
+        <i class="fas fa-utensils"></i> Recetas
+    </button>
+    <button class="search-tab" id="tab-users" onclick="switchTab('users')">
+        <i class="fas fa-users"></i> Usuarios
+    </button>
+</div>
+
+<div id="results-recipes" class="feed-container"></div>
+<div id="results-users" style="display:none; padding: 0 16px 80px;"></div>
 
 {% include 'bottom_bar.html' %}
 
 <script>
-async function searchRecipes() {
-    const query = document.getElementById('search-input').value.toLowerCase().trim();
+let currentTab = 'recipes';
+
+function switchTab(tab) {
+    currentTab = tab;
+    document.getElementById('tab-recipes').classList.toggle('active', tab === 'recipes');
+    document.getElementById('tab-users').classList.toggle('active', tab === 'users');
+    document.getElementById('results-recipes').style.display = tab === 'recipes' ? '' : 'none';
+    document.getElementById('results-users').style.display   = tab === 'users'   ? 'block' : 'none';
+}
+
+async function doSearch() {
+    const query = document.getElementById('search-input').value.trim();
     if (!query) return;
-
-    // Enlace directo con el nuevo endpoint de appy.py
-    const res = await fetch('/api/recipes/search'); 
-    const publications = await res.json();
-
-    const results = publications.filter(pub => {
-        const titleMatch = (pub.title || "").toLowerCase().includes(query);
-        
-        const tagsMatch = Array.isArray(pub.tags) && pub.tags.some(t => 
-            String(t).toLowerCase().includes(query)
-        );
-        
-        const ingredientsMatch = Array.isArray(pub.ingredients) && pub.ingredients.some(i => 
-            String(i).toLowerCase().includes(query)
-        );
-        
-        return titleMatch || tagsMatch || ingredientsMatch;
-    });
-
-    const container = document.getElementById('search-results');
-    container.innerHTML = ""; 
-
-    if (results.length === 0) {
-        container.innerHTML = `<p style="grid-column: 1/-1; text-align:center; color: #888; margin-top: 50px;">No hay resultados para "${query}".</p>`;
+    // @ prefix → forzar tab de usuarios
+    if (query.startsWith('@')) {
+        switchTab('users');
+        await searchUsers(query.slice(1));
         return;
     }
+    await Promise.all([searchRecipes(query), searchUsers(query)]);
+}
 
+async function searchRecipes(query) {
+    const res          = await fetch('/api/recipes/search');
+    const publications = await res.json();
+    const kw           = normalize(query);
+
+    const results = publications.filter(pub => {
+        const inTitle = normalize(pub.title || '').includes(kw);
+        const inTags  = Array.isArray(pub.tags) && pub.tags.some(t => normalize(String(t)).includes(kw));
+        const inIngr  = Array.isArray(pub.ingredients) && pub.ingredients.some(i => normalize(String(i)).includes(kw));
+        return inTitle || inTags || inIngr;
+    });
+
+    const container = document.getElementById('results-recipes');
+    container.innerHTML = '';
+
+    if (results.length === 0) {
+        container.innerHTML = `<p class="search-empty">No hay recetas para "${query}".</p>`;
+        return;
+    }
     results.forEach(pub => {
-        const card = document.createElement("div");
-        card.className = "recipe-card";
+        const card = document.createElement('div');
+        card.className = 'recipe-card';
         card.innerHTML = `
-            <img src="${pub.image}" class="recipe-img" onerror="this.src='/storage/images/default_photo.jpg'">
+            <img src="${pub.image}" class="recipe-img"
+                 onerror="this.src='/storage/images/default_photo.jpg'">
             <div class="recipe-info">
-                <h3 style="color:var(--primary-color)">${pub.title}</h3>
-                <p>Por ${pub.author}</p>
-            </div>
-        `;
-        card.onclick = () => window.location.href = "/publications/view/" + pub.id;
+                <h3>${pub.title}</h3>
+                <div class="recipe-author">
+                    <i class="fas fa-user-circle"></i> ${pub.author}
+                </div>
+            </div>`;
+        card.onclick = () => window.location.href = '/publications/view/' + pub.id;
         container.appendChild(card);
     });
 }
 
-document.getElementById('search-input').addEventListener('keypress', (e) => {
-    if (e.key === 'Enter') searchRecipes();
+async function searchUsers(query) {
+    if (!query || query.length < 2) return;
+    const res   = await fetch(`/profiles/search?q=${encodeURIComponent(query)}`);
+    const users = await res.json();
+
+    const container = document.getElementById('results-users');
+    container.innerHTML = '';
+
+    if (users.length === 0) {
+        container.innerHTML = `<p class="search-empty" style="text-align:center;padding-top:40px;">No hay usuarios para "${query}".</p>`;
+        return;
+    }
+    users.forEach(u => {
+        const card = document.createElement('div');
+        card.className = 'user-card';
+        card.onclick   = () => window.location.href = '/user/' + u.id;
+        const stars    = '★'.repeat(Math.round(u.stars)) + '☆'.repeat(5 - Math.round(u.stars));
+        card.innerHTML = `
+            <img src="${u.profile_pic}" class="user-card-avatar"
+                 onerror="this.src='/storage/images/default_user.jpg'">
+            <div class="user-card-info">
+                <div class="user-card-name">
+                    ${u.username}
+                    ${u.is_premium ? '<span class="premium-badge-sm">✨</span>' : ''}
+                </div>
+                <div class="user-card-stars">${stars} <span>${u.stars.toFixed(1)}</span></div>
+            </div>
+            <i class="fas fa-chevron-right" style="color:var(--text-muted);font-size:0.8rem;margin-left:auto;"></i>`;
+        container.appendChild(card);
+    });
+}
+
+function normalize(str) {
+    return str.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+}
+
+document.getElementById('search-input').addEventListener('keypress', e => {
+    if (e.key === 'Enter') doSearch();
 });
+
+const params = new URLSearchParams(window.location.search);
+if (params.get('q')) {
+    document.getElementById('search-input').value = params.get('q');
+    doSearch();
+}
 </script>
 
 </body>

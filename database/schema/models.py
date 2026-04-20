@@ -148,3 +148,17 @@ class SearchHistory(Base):
     created_at = Column(DateTime(timezone=True), nullable=False, server_default=func.now())
 
     user = relationship("User", back_populates="search_history_entries")
+
+class UserRating(Base):
+    """Una valoración de estrellas de un usuario a otro. Una por par (rater→rated)."""
+    __tablename__ = "user_ratings"
+    __table_args__ = (
+        UniqueConstraint("rater_id", "rated_id", name="uq_user_rating"),
+        CheckConstraint("rater_id <> rated_id", name="ck_rating_not_self"),
+    )
+
+    id        = Column(Integer, primary_key=True, index=True)
+    rater_id  = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True)
+    rated_id  = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True)
+    stars     = Column(Integer, nullable=False)   # 1-5
+    created_at = Column(DateTime(timezone=True), nullable=False, server_default=func.now())

@@ -2,29 +2,407 @@
 <header class="top-bar">
     <div class="logo-container">
         <a href="/" class="logo-link">
-            <img src="/storage/images/logo.png" alt="Logo Trastevere" class="logo-full" id="main-logo">
+            <img src="/storage/images/logo.png"
+                 alt="Trastevere"
+                 class="logo-full"
+                 id="main-logo"
+                 style="height:40px!important;max-height:40px!important;width:auto;object-fit:contain;"
+                 onerror="this.style.display='none'; document.querySelector('.app-name').style.display='block';">
+            <span class="app-name">Trastevere</span>
         </a>
+    </div>
+    <div style="display:flex;gap:6px;align-items:center;">
+        <button class="topbar-action" id="dice-btn" title="Receta aleatoria" onclick="goRandomRecipe()">
+            <i class="fas fa-dice"></i>
+        </button>
+        <button class="topbar-action topbar-premium-btn" id="premium-topbar-btn"
+                title="Premium" onclick="togglePremiumPanel()">
+            <i class="fas fa-crown"></i>
+        </button>
+        <button class="topbar-action" title="Ajustes" onclick="toggleSettings()">
+            <i class="fas fa-sliders-h"></i>
+        </button>
     </div>
 </header>
 
+<!-- ── Panel Premium ──────────────────────────────────────── -->
+<div id="premium-panel" style="display:none;">
+    <div class="settings-overlay" onclick="togglePremiumPanel()"></div>
+    <div class="settings-drawer">
+        <div class="settings-header">
+            <span>✨ Zona Premium</span>
+            <button onclick="togglePremiumPanel()"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="settings-section">
+            <p class="settings-section-title">Receta de la semana</p>
+            <div id="weekly-recipe-card" class="weekly-recipe-card">
+                <div class="weekly-recipe-loading"><i class="fas fa-spinner fa-spin"></i> Cargando...</div>
+            </div>
+        </div>
+        <div class="settings-section">
+            <p class="settings-section-title">Cupones exclusivos</p>
+            <div id="coupons-container"></div>
+        </div>
+        <div class="settings-section">
+            <p class="settings-section-title">Tema de color</p>
+            <div class="premium-themes-grid">
+                <button class="premium-theme-btn" data-theme="default" onclick="setThemeFromPremium('default',this)">
+                    🍅<span>Naranja</span>
+                    <i class="fas fa-check theme-check"></i>
+                </button>
+                <button class="premium-theme-btn" data-theme="green" onclick="setThemeFromPremium('green',this)">
+                    🌿<span>Verde</span>
+                    <i class="fas fa-check theme-check"></i>
+                </button>
+                <button class="premium-theme-btn" data-theme="dark" onclick="setThemeFromPremium('dark',this)">
+                    🌙<span>Oscuro</span>
+                    <i class="fas fa-check theme-check"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Panel de ajustes -->
+<div id="settings-panel" style="display:none;">
+    <div class="settings-overlay" onclick="toggleSettings()"></div>
+    <div class="settings-drawer">
+        <div class="settings-header">
+            <span>Ajustes</span>
+            <button onclick="toggleSettings()"><i class="fas fa-times"></i></button>
+        </div>
+
+        <div class="settings-section" id="settings-account-section">
+            <p class="settings-section-title">Cuenta</p>
+            <div class="settings-row" id="settings-user-row" style="display:none;">
+                <img id="settings-avatar" src="/storage/images/default_user.jpg" class="settings-avatar">
+                <div>
+                    <div id="settings-username" style="font-weight:700;font-size:0.9rem;"></div>
+                    <div id="settings-plan-badge"></div>
+                </div>
+            </div>
+            <a href="/my-profile" class="settings-item"><i class="fas fa-user"></i> Ver mi perfil</a>
+            <a href="/profile" class="settings-item"><i class="fas fa-edit"></i> Editar perfil</a>
+        </div>
+
+        <div class="settings-section">
+            <p class="settings-section-title">Suscripción</p>
+            <div id="settings-sub-basic" style="display:none;">
+                <div class="settings-item premium-upsell" onclick="upgradeToPremium()">
+                    <i class="fas fa-crown"></i>
+                    <div>
+                        <div style="font-weight:700;">Hazte Premium</div>
+                        <div style="font-size:0.75rem;opacity:0.85;">Temas, cupones y receta exclusiva</div>
+                    </div>
+                </div>
+            </div>
+            <div id="settings-sub-premium" style="display:none;">
+                <div class="settings-item" style="color:#f7971e;font-weight:700;pointer-events:none;">
+                    <i class="fas fa-crown"></i> Plan Premium activo
+                </div>
+                <div class="settings-item" onclick="changePayment()">
+                    <i class="fas fa-credit-card"></i> Cambiar método de pago
+                </div>
+                <div class="settings-item danger" onclick="cancelPremium()">
+                    <i class="fas fa-times-circle"></i> Cancelar suscripción
+                </div>
+            </div>
+        </div>
+
+        <div class="settings-section">
+            <p class="settings-section-title">Apariencia</p>
+            <div class="settings-item theme-row">
+                <span><i class="fas fa-palette"></i> Tema de color</span>
+                <div class="theme-pills">
+                    <button class="theme-pill active" data-theme="default" onclick="setTheme('default',this)" title="Naranja">🍅</button>
+                    <button class="theme-pill premium-only" data-theme="green" onclick="setTheme('green',this)" title="Verde (Premium)">🌿<span class="pill-lock">🔒</span></button>
+                    <button class="theme-pill premium-only" data-theme="dark" onclick="setTheme('dark',this)" title="Oscuro (Premium)">🌙<span class="pill-lock">🔒</span></button>
+                </div>
+            </div>
+            <div class="settings-item lang-row">
+                <span><i class="fas fa-language"></i> Idioma</span>
+                <select class="lang-select" onchange="setLanguage(this.value)">
+                    <option value="es" selected>🇪🇸 Español</option>
+                    <option value="en">🇬🇧 English</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="settings-section">
+            <a href="/auth/logout" class="settings-item danger">
+                <i class="fas fa-sign-out-alt"></i> Cerrar sesión
+            </a>
+        </div>
+    </div>
+</div>
+
 <script>
+// ── Branding premium ────────────────────────────────────────
+let _currentUser = null;
+
 async function updateBranding() {
     try {
         const response = await fetch('/user/profile');
         if (response.ok) {
-            const user = await response.json();
-            
-            // Solo cambiamos el src si es premium, respetando el tamaño del CSS
-            if (user.is_premium) {
+            _currentUser = await response.json();
+            if (_currentUser.is_premium) {
                 const logoImg = document.getElementById('main-logo');
                 if (logoImg) {
-                    logoImg.src = "/storage/images/logo_premium.png"; 
+                    logoImg.src = '/storage/images/logo_premium.png';
+                    logoImg.style.height = '40px';
+                    logoImg.style.maxHeight = '40px';
+                    logoImg.style.width = 'auto';
                 }
+                document.body.classList.add('is-premium');
+                _updatePremiumBtn(true);
+            }
+            // Rellenar datos del panel
+            const row = document.getElementById('settings-user-row');
+            if (row) {
+                row.style.display = 'flex';
+                document.getElementById('settings-username').textContent = _currentUser.username;
+                document.getElementById('settings-avatar').src =
+                    _currentUser.profile_pic || '/storage/images/default_user.jpg';
+                document.getElementById('settings-plan-badge').innerHTML = _currentUser.plan === 'PREMIUM'
+                    ? '<span class="plan-badge premium">✨ Premium</span>'
+                    : '<span class="plan-badge basic">Basic</span>';
+                document.getElementById('settings-sub-basic').style.display   = _currentUser.plan === 'PREMIUM' ? 'none' : 'block';
+                _updatePremiumBtn(_currentUser.plan === 'PREMIUM');
+                document.getElementById('settings-sub-premium').style.display = _currentUser.plan === 'PREMIUM' ? 'block' : 'none';
             }
         }
-    } catch (error) {
-        console.log("Modo invitado o error de red.");
+    } catch (e) { /* invitado */
+        _updatePremiumBtn(false);
     }
 }
-document.addEventListener('DOMContentLoaded', updateBranding);
+
+// ── Panel de ajustes ────────────────────────────────────────
+function toggleSettings() {
+    const panel = document.getElementById('settings-panel');
+    const isHidden = panel.style.display === 'none';
+    panel.style.display = isHidden ? 'block' : 'none';
+    if (isHidden) document.body.style.overflow = 'hidden';
+    else document.body.style.overflow = '';
+}
+
+// ── Temas de color ──────────────────────────────────────────
+const THEMES = {
+    default: {
+        '--primary':      '#ff6347',
+        '--primary-dark': '#e5533d',
+        '--primary-light':'#fff0ec',
+        '--bg':           '#fdf6ee',
+        '--bar-bg':       '#fff',
+        '--text':         '#222',
+        '--text-muted':   '#888',
+        '--border':       '#eeebe6',
+    },
+    green: {
+        '--primary':      '#4caf82',
+        '--primary-dark': '#388f66',
+        '--primary-light':'#eaf7f0',
+        '--bg':           '#f2f7f4',
+        '--bar-bg':       '#fff',
+        '--text':         '#1a2e24',
+        '--text-muted':   '#7a9e8c',
+        '--border':       '#d4e8dc',
+    },
+    dark: {
+        '--primary':      '#ff6347',
+        '--primary-dark': '#e5533d',
+        '--primary-light':'#3a1f18',
+        '--bg':           '#1a1a1a',
+        '--bar-bg':       '#242424',
+        '--text':         '#f0f0f0',
+        '--text-muted':   '#888',
+        '--border':       '#333',
+    }
+};
+
+function applyTheme(name) {
+    const theme = THEMES[name] || THEMES.default;
+    const root  = document.documentElement;
+    Object.entries(theme).forEach(([k, v]) => root.style.setProperty(k, v));
+}
+
+function setTheme(name, btn) {
+    if (!_currentUser && name !== 'default') {
+        alert('Inicia sesión para cambiar el tema.');
+        return;
+    }
+    if (_currentUser && _currentUser.plan !== 'PREMIUM' && name !== 'default') {
+        alert('Los temas Verde y Oscuro son exclusivos de Premium. ¡Hazte premium para desbloquearlos!');
+        return;
+    }
+    document.querySelectorAll('.theme-pill').forEach(p => p.classList.remove('active'));
+    btn.classList.add('active');
+    applyTheme(name);
+    // Clase en body para los overrides de modo oscuro
+    document.body.classList.toggle('theme-dark', name === 'dark');
+    localStorage.setItem('trastevere_theme', name);
+}
+
+// ── Suscripción ─────────────────────────────────────────────
+async function changePayment() {
+    const card = prompt('Introduce el nuevo número de tarjeta:');
+    if (!card || card.trim().length < 8) return;
+
+    const res = await fetch('/premium/update-payment', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ card_number: card.trim() })
+    });
+    const data = await res.json();
+    if (res.ok) {
+        alert('✅ ' + data.message);
+    } else {
+        alert('Error: ' + data.error);
+    }
+}
+
+async function upgradeToPremium() {
+    const card = prompt('Introduce tu número de tarjeta para activar Premium:');
+    if (!card || card.trim().length < 8) return;
+
+    const res = await fetch('/premium/upgrade', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ card_number: card.trim() })
+    });
+    const data = await res.json();
+    if (res.ok) {
+        alert('🎉 ' + data.message);
+        window.location.reload();
+    } else {
+        alert('Error: ' + data.error);
+    }
+}
+
+async function cancelPremium() {
+    if (!confirm('¿Seguro que quieres cancelar tu suscripción Premium? Perderás acceso a los temas exclusivos y los cupones.')) return;
+    const res = await fetch('/premium/cancel', { method: 'POST' });
+    const data = await res.json();
+    if (res.ok) {
+        // Volver al tema por defecto si estaba en uno premium
+        const saved = localStorage.getItem('trastevere_theme');
+        if (saved && saved !== 'default') {
+            localStorage.setItem('trastevere_theme', 'default');
+        }
+        alert('👋 ' + data.message);
+        window.location.reload();
+    } else {
+        alert('Error: ' + data.error);
+    }
+}
+
+// ── Idioma ──────────────────────────────────────────────────
+function setLanguage(lang) {
+    localStorage.setItem('trastevere_lang', lang);
+    // Por ahora guardamos la preferencia — la implementación completa
+    // de i18n se hará en una próxima versión del backend
+    const names = { es: 'Español', en: 'English' };
+    alert(`Idioma guardado: ${names[lang] || lang}.\nLa traducción completa estará disponible próximamente.`);
+}
+
+// ── Init ────────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', () => {
+    updateBranding();
+    // Restaurar tema guardado
+    const saved = localStorage.getItem('trastevere_theme');
+    if (saved) {
+        applyTheme(saved);
+        document.body.classList.toggle('theme-dark', saved === 'dark');
+        document.body.classList.toggle('theme-dark', saved === 'dark');
+        const btn = document.querySelector(`.theme-pill[data-theme="${saved}"]`);
+        if (btn) {
+            document.querySelectorAll('.theme-pill').forEach(p => p.classList.remove('active'));
+            btn.classList.add('active');
+        }
+    }
+});
+
+// ── Dado: receta aleatoria ───────────────────────────────────
+async function goRandomRecipe() {
+    const btn = document.getElementById('dice-btn');
+    if(btn){ btn.style.transform='rotate(360deg)'; btn.style.transition='transform 0.4s ease';
+    setTimeout(()=>{btn.style.transform='';btn.style.transition='';},400); }
+    try {
+        const res  = await fetch('/api/recipes/search');
+        const list = await res.json();
+        if(!list||list.length===0){alert('No hay recetas aún.');return;}
+        const pick = list[Math.floor(Math.random()*list.length)];
+        window.location.href='/publications/view/'+pick.id;
+    } catch(e){alert('Error al buscar receta aleatoria.');}
+}
+
+// ── Premium panel ────────────────────────────────────────────
+function togglePremiumPanel() {
+    const panel = document.getElementById('premium-panel');
+    const isHidden = panel.style.display==='none';
+    document.getElementById('settings-panel').style.display='none';
+    panel.style.display = isHidden?'block':'none';
+    document.body.style.overflow = isHidden?'hidden':'';
+    if(isHidden){
+        if(!_currentUser||_currentUser.plan!=='PREMIUM'){
+            panel.style.display='none'; document.body.style.overflow='';
+            document.getElementById('settings-panel').style.display='block';
+            document.body.style.overflow='hidden';
+            setTimeout(()=>{const el=document.querySelector('.premium-upsell');if(el)el.scrollIntoView({behavior:'smooth',block:'center'});},100);
+        } else { loadPremiumPanel(); }
+    }
+}
+
+async function loadPremiumPanel() {
+    try {
+        const res=await fetch('/premium/features'); const data=await res.json();
+        const recipeEl=document.getElementById('weekly-recipe-card');
+        if(data.weekly_recipe&&data.weekly_recipe.id){
+            const r=data.weekly_recipe;
+            recipeEl.innerHTML=`<div class="weekly-recipe-inner" onclick="window.location.href='/publications/view/${r.id}'">
+                <img src="${r.image||'/storage/images/default_photo.jpg'}" onerror="this.src='/storage/images/default_photo.jpg'" class="weekly-recipe-img">
+                <div class="weekly-recipe-info">
+                    <div class="weekly-recipe-label">Esta semana</div>
+                    <div class="weekly-recipe-title">${r.title}</div>
+                    <div class="weekly-recipe-sub">Por el equipo Trastevere 🍅</div>
+                </div></div>`;
+        }
+        const couponsEl=document.getElementById('coupons-container');
+        if(data.coupons&&data.coupons.length>0){
+            couponsEl.innerHTML=data.coupons.map(c=>`<div class="coupon-card">
+                <div class="coupon-left"><div class="coupon-name">${c.name}</div><div class="coupon-code">${c.code}</div></div>
+                <div class="coupon-barcode">${generateBarcode(c.code)}</div></div>`).join('');
+        }
+        const saved=localStorage.getItem('trastevere_theme')||'default';
+        document.querySelectorAll('.premium-theme-btn').forEach(b=>b.classList.toggle('active',b.dataset.theme===saved));
+    } catch(e){console.error('Error cargando panel premium:',e);}
+}
+
+function generateBarcode(code){
+    let bars='';
+    for(let i=0;i<code.length;i++){const w=(code.charCodeAt(i)%3)+1;bars+=`<div style="display:inline-block;width:${w}px;height:34px;background:#222;margin-right:1px;"></div>`;}
+    return `<div style="background:white;padding:4px 6px;border-radius:4px;line-height:0;">${bars}</div>`;
+}
+
+function setThemeFromPremium(name,btn){
+    document.querySelectorAll('.theme-pill').forEach(p=>p.classList.remove('active'));
+    const pill=document.querySelector(`.theme-pill[data-theme="${name}"]`);
+    if(pill)pill.classList.add('active');
+    applyTheme(name);
+    document.body.classList.toggle('theme-dark',name==='dark');
+    localStorage.setItem('trastevere_theme',name);
+    document.querySelectorAll('.premium-theme-btn').forEach(b=>b.classList.toggle('active',b.dataset.theme===name));
+}
+
+// ── Premium btn visibility ───────────────────────────────────
+function _updatePremiumBtn(isPremium){
+    const btn=document.getElementById('premium-topbar-btn'); if(!btn)return;
+    if(isPremium){
+        btn.classList.add('is-premium'); btn.title='Zona Premium';
+        btn.innerHTML='<i class="fas fa-crown"></i>';
+    } else {
+        btn.classList.remove('is-premium'); btn.title='Hazte Premium';
+        btn.innerHTML='<i class="fas fa-crown"></i><span class="crown-lock">🔒</span>';
+    }
+}
+
 </script>

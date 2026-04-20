@@ -1,58 +1,74 @@
-h1 {
-    text-align: center;
-    color: var(--primary-color);
-    margin-top: 20px;
+/* home.css */
+
+/* Barra de búsqueda inline en home */
+.home-search-bar {
+  display: flex;
+  align-items: center;
+  background: white;
+  margin: 14px 16px 0;
+  border-radius: 30px;
+  padding: 8px 16px;
+  box-shadow: var(--shadow-sm);
+  border: 1.5px solid var(--border);
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+.home-search-bar:focus-within {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(255,99,71,0.1);
+}
+.home-search-bar i {
+  color: #ccc;
+  margin-right: 10px;
+  font-size: 0.9rem;
+}
+.home-search-bar input {
+  flex: 1;
+  border: none;
+  outline: none;
+  font-size: 0.88rem;
+  font-family: var(--font-body);
+  background: transparent;
+  color: var(--text);
+}
+.home-search-bar input::placeholder { color: #bbb; }
+
+/* Chips de categoría */
+.category-chips {
+  display: flex;
+  gap: 8px;
+  padding: 12px 16px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.category-chips::-webkit-scrollbar { display: none; }
+
+.chip {
+  background: white;
+  border: 1.5px solid var(--border);
+  border-radius: 20px;
+  padding: 6px 14px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  white-space: nowrap;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: all 0.2s;
+  font-family: var(--font-body);
+}
+.chip:hover { border-color: var(--primary); color: var(--primary); }
+.chip.active {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: white;
+  box-shadow: 0 2px 8px rgba(255,99,71,0.3);
 }
 
-/* Lista del feed de recetas */
-#feed-list {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr); 
-    gap: 25px;            /* Más separación entre tarjetas */
-    width: 90%;
-    max-width: 1100px;    /* <--- Antes era 800px, ahora expandimos */
-    margin: 30px auto;
-    padding-bottom: 80px; /* Espacio para que la barra no tape la última fila */
-}
-
-/* Tarjeta de cada receta dentro del feed*/
-#feed-list li {
-    background: white;
-    margin-bottom: 15px;
-    padding: 20px;
-    border-radius: 10px;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-    transition: transform 0.2s;
-}
-
-/* Efecto de hover sobre cada tarjeta*/
-#feed-list li:hover {
-    transform: scale(1.02);  /* Aumenta ligeramente la tarjeta al pasar el mouse */
-}
-
-/* Título de receta */
-#feed-list strong {
-    color: var(--primary-color);
-    font-size: 1.2rem;
-}
-
-/* Tags de cada receta */
-.tag {
-    display: inline-block;
-    background: #e0e0e0;
-    border-radius: 6px;
-    padding: 4px 8px;
-    font-size: 0.75rem;
-    margin-top: 10px;
-    margin-right: 5px;
-}
-
-.recipe-info h3 {
-    margin: 0;
-    font-size: 1.4rem;    /* <--- Letra más grande y legible */
-    font-weight: 700;
-    color: var(--primary-color);
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+/* Mensaje de feed vacío */
+.feed-empty {
+  grid-column: 1 / -1;
+  text-align: center;
+  color: var(--text-muted);
+  margin-top: 60px;
+  font-size: 0.95rem;
 }

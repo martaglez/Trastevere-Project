@@ -2,105 +2,67 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Crear receta - Trastevere</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="{{ url_for('static', filename='main.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='profile.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='create.css') }}">
-    
-    <style>
-        .img-upload {
-            position: relative;
-            overflow: hidden;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-        }
-        .img-upload img.preview-img-file {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            position: absolute;
-            top: 0;
-            left: 0;
-            z-index: 1;
-        }
-        .plus-icon {
-            position: relative;
-            z-index: 2;
-            font-size: 1.5rem;
-            color: #ccc;
-        }
-        /* Ajuste para que el contenedor de creación respire mejor */
-        .create-recipe-card {
-            max-width: 800px;
-            margin: 20px auto;
-            padding: 30px;
-        }
-    </style>
 </head>
 <body>
 
 {% include 'top_bar.html' %}
 
 <div class="profile-container create-recipe-card">
-    
+
     <div id="create-logged-view" style="display:none;">
-        <h1 class="tables-title" style="margin-bottom: 25px;">Nueva Receta</h1>
-        
+        <h1>Nueva Receta</h1>
+
+        <!-- Grid de imágenes -->
         <div class="image-grid">
             <label class="img-upload large" id="preview_container_0">
-                <input type="file" id="file_0" accept="image/*" onchange="previewImage(0)" style="display:none;">
-                <span class="plus-icon"><i class="fas fa-plus"></i></span>
+                <input type="file" id="file_0" accept="image/*" onchange="previewImage(0)">
+                <span class="plus-icon"><i class="fas fa-camera"></i></span>
+                <span class="img-required-badge">*</span>
             </label>
-
             <div class="right-images">
                 <label class="img-upload" id="preview_container_1">
-                    <input type="file" id="file_1" accept="image/*" onchange="previewImage(1)" style="display:none;">
+                    <input type="file" id="file_1" accept="image/*" onchange="previewImage(1)">
                     <span class="plus-icon"><i class="fas fa-plus"></i></span>
                 </label>
                 <label class="img-upload" id="preview_container_2">
-                    <input type="file" id="file_2" accept="image/*" onchange="previewImage(2)" style="display:none;">
+                    <input type="file" id="file_2" accept="image/*" onchange="previewImage(2)">
                     <span class="plus-icon"><i class="fas fa-plus"></i></span>
                 </label>
             </div>
         </div>
+        <p class="field-hint">* Al menos una foto es obligatoria</p>
 
-        <input class="title-input" id="title" placeholder="Título de la receta" required>
-        <textarea class="description-input" id="description" placeholder="Cuéntanos sobre tu plato..."></textarea>
+        <input class="title-input" id="title" placeholder="Título de la receta *" required>
+        <textarea class="description-input" id="description" placeholder="Cuéntanos sobre tu plato... *"></textarea>
 
-        <h3>Ingredientes</h3>
+        <!-- Ingredientes estructurados -->
+        <span class="section-label">Ingredientes <span style="color:var(--primary)">*</span></span>
         <div id="ingredients"></div>
-        <button onclick="addIngredient()" class="btn-secondary" style="margin-bottom: 20px;">+ Añadir ingrediente</button>
+        <button onclick="addIngredient()" class="btn-add-item">+ Añadir ingrediente</button>
 
-        <h3>Tags</h3>
-        <input class="tags-input" id="tags" placeholder="Ej: pasta, italiano, rápido" style="margin-bottom: 20px;">
+        <span class="section-label">Tags</span>
+        <input class="tags-input" id="tags" placeholder="Ej: pasta, italiano, rápido">
 
-        <h3>Pasos de preparación</h3>
+        <span class="section-label">Pasos de preparación <span style="color:var(--primary)">*</span></span>
         <div id="steps"></div>
-        <button onclick="addStep()" class="btn-secondary" style="margin-bottom: 30px;">+ Añadir paso</button>
+        <button onclick="addStep()" class="btn-add-item">+ Añadir paso</button>
 
-        <button class="publish-btn" onclick="publishRecipe()" style="width: 100%;">Publicar Receta</button>
+        <button class="publish-btn" onclick="publishRecipe()">🍅 Publicar Receta</button>
     </div>
 
-    <div id="create-guest-view" style="display:none; text-align: center; padding: 40px 10px;">
-        <div class="profile-pic-section" style="margin-bottom: 30px; border: none;">
-            <i class="fas fa-utensils" style="font-size: 6rem; color: var(--primary-color); opacity: 0.3;"></i>
-        </div>
-
-        <h2 style="font-size: 2rem; color: #333; margin-bottom: 15px;">¡Comparte tu talento!</h2>
-        <p style="color: #666; margin-bottom: 40px; font-size: 1.1rem; max-width: 450px; margin-left: auto; margin-right: auto;">
-            Inicia sesión para subir tus propias recetas y que toda la comunidad de Trastevere pueda disfrutarlas.
-        </p>
-        
-        <div class="profile-actions" style="display: flex; flex-direction: column; gap: 15px; max-width: 320px; margin: 0 auto;">
-            <button onclick="window.location.href='/auth/login'" class="btn-main" style="width: 100%; padding: 12px;">
-                Iniciar Sesión
-            </button>
-            <button onclick="window.location.href='/auth/register'" style="background: white; color: var(--primary-color); border: 2px solid var(--primary-color); border-radius: 8px; padding: 12px; cursor: pointer; font-weight: bold; width: 100%;">
-                Crear cuenta gratis
-            </button>
+    <div id="create-guest-view" style="display:none; text-align:center; padding:40px 10px;">
+        <i class="fas fa-utensils" style="font-size:4rem;color:var(--primary);opacity:0.3;"></i>
+        <h2 style="font-size:1.6rem;margin:20px 0 10px;">¡Comparte tu talento!</h2>
+        <p style="color:var(--text-muted);margin-bottom:30px;">Inicia sesión para subir tus propias recetas.</p>
+        <div style="display:flex;flex-direction:column;gap:12px;max-width:300px;margin:0 auto;">
+            <button onclick="window.location.href='/auth/login'" class="btn-main">Iniciar Sesión</button>
+            <button onclick="window.location.href='/auth/register'" class="btn-secondary">Crear cuenta gratis</button>
         </div>
     </div>
 </div>
@@ -108,106 +70,135 @@
 {% include 'bottom_bar.html' %}
 
 <script>
-// VERIFICACIÓN DE SESIÓN AL CARGAR
+const UNITS = ['g','kg','ml','l','tsp','tbsp','taza','unidad','al gusto','pizca','láminas','dientes'];
+
 async function checkAccess() {
     try {
-        const response = await fetch('/user/profile');
-        if (response.status === 401) {
+        const r = await fetch('/user/profile');
+        if (r.status === 401) {
             document.getElementById('create-guest-view').style.display = 'block';
-            document.getElementById('create-logged-view').style.display = 'none';
         } else {
             document.getElementById('create-logged-view').style.display = 'block';
-            document.getElementById('create-guest-view').style.display = 'none';
-            // Inicializar con un campo vacío si está logueado
             addIngredient();
             addStep();
         }
-    } catch (error) {
-        document.getElementById('create-guest-view').style.display = 'block';
-    }
+    } catch { document.getElementById('create-guest-view').style.display = 'block'; }
 }
 
 function previewImage(index) {
     const fileInput = document.getElementById(`file_${index}`);
     const container = document.getElementById(`preview_container_${index}`);
-    const plusIcon = container.querySelector('.plus-icon');
-
+    const plusIcon  = container.querySelector('.plus-icon');
     if (fileInput.files && fileInput.files[0]) {
         const reader = new FileReader();
-        reader.onload = function(e) {
-            const oldImg = container.querySelector('.preview-img-file');
-            if (oldImg) oldImg.remove();
+        reader.onload = e => {
+            container.querySelector('.preview-img-file')?.remove();
             plusIcon.style.opacity = '0';
             const img = document.createElement('img');
             img.src = e.target.result;
             img.className = 'preview-img-file';
             container.appendChild(img);
-        }
+        };
         reader.readAsDataURL(fileInput.files[0]);
     }
 }
 
 function addIngredient() {
-    const div = document.createElement("div");
-    div.className = "dynamic-input-container";
-    div.innerHTML = `<input class="ingredient-input" placeholder="Cantidad e ingrediente" style="width: 100%; margin-bottom: 10px; padding: 8px; border-radius: 5px; border: 1px solid #ddd;">`;
-    document.getElementById("ingredients").appendChild(div);
+    const div = document.createElement('div');
+    div.className = 'ingredient-row';
+    const unitOptions = UNITS.map(u => `<option value="${u}">${u}</option>`).join('');
+    div.innerHTML = `
+        <input type="number" class="ingr-qty"   placeholder="Cant." min="0" step="any">
+        <select class="ingr-unit">${unitOptions}</select>
+        <input type="text"   class="ingr-name"  placeholder="Ingrediente">
+        <button class="ingr-remove" onclick="this.parentElement.remove()" title="Eliminar">
+            <i class="fas fa-times"></i>
+        </button>`;
+    document.getElementById('ingredients').appendChild(div);
 }
 
 function addStep() {
-    const div = document.createElement("div");
-    div.className = "dynamic-input-container";
-    div.innerHTML = `<input class="step-input" placeholder="Describe el paso" style="width: 100%; margin-bottom: 10px; padding: 8px; border-radius: 5px; border: 1px solid #ddd;">`;
-    document.getElementById("steps").appendChild(div);
+    const n   = document.getElementById('steps').children.length + 1;
+    const div = document.createElement('div');
+    div.className = 'step-row';
+    div.innerHTML = `
+        <span class="step-num">${n}</span>
+        <input type="text" class="step-input" placeholder="Describe el paso">
+        <button class="ingr-remove" onclick="removeStep(this)" title="Eliminar">
+            <i class="fas fa-times"></i>
+        </button>`;
+    document.getElementById('steps').appendChild(div);
+}
+
+function removeStep(btn) {
+    btn.parentElement.remove();
+    // Renumerar
+    document.querySelectorAll('.step-num').forEach((el, i) => el.textContent = i + 1);
 }
 
 async function publishRecipe() {
-    const title = document.getElementById("title").value;
-    const description = document.getElementById("description").value;
-    const tagsRaw = document.getElementById("tags").value;
-    const tagsArray = tagsRaw.split(',').map(t => t.trim()).filter(t => t !== "");
+    const title       = document.getElementById('title').value.trim();
+    const description = document.getElementById('description').value.trim();
 
-    if (!title || !description) {
-        alert("Por favor, rellena al menos el título y la descripción.");
+    // Recoger ingredientes estructurados
+    const ingredientRows = document.querySelectorAll('.ingredient-row');
+    const ingredients = [];
+    ingredientRows.forEach(row => {
+        const qty  = row.querySelector('.ingr-qty').value.trim();
+        const unit = row.querySelector('.ingr-unit').value;
+        const name = row.querySelector('.ingr-name').value.trim();
+        if (name) ingredients.push(qty ? `${qty} ${unit} ${name}` : name);
+    });
+
+    const steps = [...document.querySelectorAll('.step-input')]
+        .map(s => s.value.trim()).filter(Boolean);
+
+    // Validaciones
+    const hasPhoto = [0,1,2].some(i => {
+        const fi = document.getElementById(`file_${i}`);
+        return fi && fi.files.length > 0;
+    });
+
+    const errors = [];
+    if (!title)           errors.push('El título es obligatorio');
+    if (!description)     errors.push('La descripción es obligatoria');
+    if (!hasPhoto)        errors.push('Añade al menos una foto');
+    if (ingredients.length === 0) errors.push('Añade al menos un ingrediente');
+    if (steps.length === 0)       errors.push('Añade al menos un paso');
+
+    if (errors.length > 0) {
+        alert('Por favor corrige lo siguiente:\n\n• ' + errors.join('\n• '));
         return;
     }
 
-    const formData = new FormData();
-    formData.append('title', title);
-    formData.append('description', description);
-    formData.append('tags', JSON.stringify(tagsArray));
+    const tagsRaw  = document.getElementById('tags').value;
+    const tagsArray = tagsRaw.split(',').map(t => t.trim()).filter(Boolean);
 
-    const ingredients = [...document.querySelectorAll(".ingredient-input")].map(i => i.value).filter(v => v !== "");
-    const steps = [...document.querySelectorAll(".step-input")].map(s => s.value).filter(v => v !== "");
-    
+    const formData = new FormData();
+    formData.append('title',       title);
+    formData.append('description', description);
+    formData.append('tags',        JSON.stringify(tagsArray));
     formData.append('ingredients', JSON.stringify(ingredients));
-    formData.append('steps', JSON.stringify(steps));
+    formData.append('steps',       JSON.stringify(steps));
 
     for (let i = 0; i < 3; i++) {
-        const fileInput = document.getElementById(`file_${i}`);
-        if (fileInput && fileInput.files.length > 0) {
-            formData.append(`file_${i}`, fileInput.files[0]);
-        }
+        const fi = document.getElementById(`file_${i}`);
+        if (fi?.files.length > 0) formData.append(`file_${i}`, fi.files[0]);
     }
 
     try {
-        const response = await fetch('/publications/create', {
-            method: 'POST',
-            body: formData
-        });
-        const result = await response.json();
+        const response = await fetch('/publications/create', { method: 'POST', body: formData });
+        const result   = await response.json();
         if (response.ok) {
-            alert("¡Receta subida con éxito!");
-            window.location.href = "/";
+            alert('¡Receta publicada con éxito!');
+            window.location.href = '/';
         } else {
-            alert("Error: " + (result.error || "No se pudo publicar"));
+            alert('Error: ' + (result.error || 'No se pudo publicar'));
         }
-    } catch (error) {
-        console.error("Error al publicar:", error);
-    }
+    } catch { alert('Error al conectar con el servidor.'); }
 }
 
-window.onload = checkAccess;
+document.addEventListener('DOMContentLoaded', checkAccess);
 </script>
 
 </body>

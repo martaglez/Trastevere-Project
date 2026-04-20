@@ -1,192 +1,190 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <title>Perfil - Trastevere</title>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Perfil - Trastevere</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="{{ url_for('static', filename='main.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='profile.css') }}">
 </head>
 <body>
-    {% include 'top_bar.html' %}   
+    {% include 'top_bar.html' %}
 
     <div class="profile-container">
+
+        <!-- Vista logueado -->
         <div id="logged-in-view" style="display:none;">
-            <div class="profile-pic-section" style="text-align: center; position: relative;">
-                <img id="user-pic" src="/storage/images/default_user.jpg" alt="Foto de perfil" class="profile-pic" 
-                     style="cursor: pointer; width: 130px; height: 130px; object-fit: cover; border-radius: 50%; border: 3px solid var(--primary-color);">
-                <p style="font-size: 0.75rem; color: #888; margin-top: 5px;">Haz clic en tu foto de perfil para cambiarla</p>
+            <div class="profile-pic-section">
+                <img id="user-pic" src="/storage/images/default_user.jpg"
+                     alt="Foto de perfil" class="profile-pic">
+                <p class="profile-pic-hint">Toca tu foto para cambiarla</p>
                 <input type="file" id="pic-input" style="display:none;" accept="image/*">
             </div>
-            
-            <h2 id="user-name" style="margin-top: 10px; text-align: center; color: var(--primary-color);"></h2>
-            
+
+                        <h2 id="user-name" style="margin-top: 10px; text-align: center; color: var(--primary-color);"></h2>
+
+            <!-- Stats sociales -->
+            <div class="profile-social-stats" id="profile-stats" style="display:none;">
+                <div class="profile-stat" onclick="window.location.href='/user/'+_myUserId">
+                    <span class="profile-stat-num" id="stat-pubs">0</span>
+                    <span class="profile-stat-label">Recetas</span>
+                </div>
+                <div class="profile-stat-divider"></div>
+                <div class="profile-stat">
+                    <span class="profile-stat-num" id="stat-followers">0</span>
+                    <span class="profile-stat-label">Seguidores</span>
+                </div>
+                <div class="profile-stat-divider"></div>
+                <div class="profile-stat">
+                    <span class="profile-stat-num" id="stat-following">0</span>
+                    <span class="profile-stat-label">Siguiendo</span>
+                </div>
+                <div class="profile-stat-divider"></div>
+                <div class="profile-stat">
+                    <span class="profile-stat-num" id="stat-stars">0.0</span>
+                    <span class="profile-stat-label">⭐ Estrellas</span>
+                </div>
+            </div>
+
             <div class="profile-info">
-                <p><strong>Email:</strong> <span id="user-email"></span></p>
-                <p><strong>Teléfono:</strong> <input id="user-phone" disabled placeholder="Sin configurar" class="profile-input"></p>
-                <p><strong>DNI:</strong> <input id="user-dni" disabled placeholder="Sin configurar" class="profile-input"></p>
-                <p><strong>Suscripción:</strong> <span id="user-sub" style="font-weight: bold; color: var(--primary-color);"></span></p>
+                <p><strong>Email</strong> <span id="user-email"></span></p>
+                <p><strong>Teléfono</strong> <input id="user-phone" disabled placeholder="Sin configurar" class="profile-input"></p>
+                <p><strong>DNI</strong> <input id="user-dni" disabled placeholder="Sin configurar" class="profile-input"></p>
+                <p><strong>Plan</strong> <span id="user-sub"></span></p>
             </div>
 
             <div class="profile-actions">
-                <button onclick="enableEdit()"><i class="fas fa-edit"></i> Editar Perfil</button>
+                <button onclick="enableEdit()"><i class="fas fa-edit"></i> Editar</button>
+                <button onclick="if(_myUserId)window.location.href='/user/'+_myUserId"><i class="fas fa-eye"></i> Mi perfil</button>
                 <button onclick="openAbout()"><i class="fas fa-info-circle"></i> Info</button>
-                <button style="background-color: #666;" onclick="window.location.href='/auth/logout'"><i class="fas fa-sign-out-alt"></i> Salir</button>
+                <button style="background:#888;" onclick="window.location.href='/auth/logout'">
+                    <i class="fas fa-sign-out-alt"></i> Salir
+                </button>
             </div>
 
-            <div style="text-align:center; margin-top:15px;">
-                <button id="save-btn" style="display:none;" onclick="saveProfile()" class="btn-main">Guardar cambios</button>
+            <div style="text-align:center;margin-top:14px;">
+                <button id="save-btn" style="display:none;" onclick="saveProfile()" class="btn-main">
+                    Guardar cambios
+                </button>
             </div>
         </div>
 
-        <div id="guest-view" style="display:none; text-align: center; padding: 40px 10px;">
-            <i class="fas fa-utensils" style="font-size: 4rem; color: var(--primary-color); opacity: 0.3;"></i>
-            <h2 style="font-size: 1.8rem; margin-bottom: 15px;">¡Únete a Trastevere!</h2>
-            <p style="color: #666; margin-bottom: 30px;">Crea tu red de recetas y guarda tus favoritos.</p>
-            <div class="profile-actions" style="display: flex; flex-direction: column; gap: 12px; max-width: 300px; margin: 0 auto;">
+        <!-- Vista invitado -->
+        <div id="guest-view" style="display:none;text-align:center;padding:40px 10px;">
+            <i class="fas fa-utensils" style="font-size:3.5rem;color:var(--primary);opacity:0.3;"></i>
+            <h2 style="font-size:1.5rem;margin:20px 0 10px;">¡Únete a Trastevere!</h2>
+            <p style="color:var(--text-muted);margin-bottom:28px;">Crea tu red de recetas y guarda tus favoritos.</p>
+            <div style="display:flex;flex-direction:column;gap:10px;max-width:280px;margin:0 auto;">
                 <button onclick="window.location.href='/auth/login'" class="btn-main">Iniciar Sesión</button>
-                <button onclick="window.location.href='/auth/register'" style="background: white; color: var(--primary-color); border: 2px solid var(--primary-color); border-radius: 8px; padding: 10px; cursor: pointer;">Crear cuenta gratis</button>
+                <button onclick="window.location.href='/auth/register'" class="btn-secondary">Crear cuenta gratis</button>
             </div>
         </div>
     </div>
 
-    <div id="about-box" style="display:none; background:white; padding:20px; border-radius:10px; border: 1px solid #eee; margin:20px auto; max-width:400px; text-align:center; box-shadow: 0 10px 25px rgba(0,0,0,0.1);">
+    <!-- About box -->
+    <div id="about-box" style="display:none;">
         <h3>Trastevere App</h3>
         <p><strong>Versión:</strong> <span id="about-version"></span></p>
         <p><strong>Build:</strong> <span id="about-build"></span></p>
         <p><strong>Autores:</strong> <span id="about-authors"></span></p>
-        <button onclick="closeAbout()" class="btn-small">Cerrar</button>
+        <button onclick="closeAbout()" class="btn-main" style="margin-top:12px;">Cerrar</button>
     </div>
 
     {% include 'bottom_bar.html' %}
 
     <script>
-        // CARGAR PERFIL
-        async function loadProfile() {
-            try {
-                const response = await fetch('/user/profile');
-                if (response.status === 401) {
-                    document.getElementById('guest-view').style.display = 'block';
-                    return;
-                }
-                const user = await response.json();
-                
-                document.getElementById('logged-in-view').style.display = 'block';
-                document.getElementById('user-name').innerText = user.username;
-                document.getElementById('user-email').innerText = user.email;
-                document.getElementById('user-phone').value = user.phone_number || "";
-                document.getElementById('user-dni').value = user.dni || "";
-                
-                // Muestra BASIC o PREMIUM
-                document.getElementById('user-sub').innerText = user.plan;
-                
-                // Foto de perfil con fallback
-                document.getElementById('user-pic').src = user.profile_pic || "/storage/images/default_user.jpg";
-            } catch (error) { 
-                console.error("Error cargando perfil:", error); 
+    let _myUserId = null;
+
+    async function loadProfile() {
+        try {
+            const response = await fetch('/user/profile');
+            if (response.status === 401) {
+                document.getElementById('guest-view').style.display = 'block';
+                return;
             }
+            const user = await response.json();
+            document.getElementById('logged-in-view').style.display = 'block';
+            document.getElementById('user-name').innerText  = user.username;
+
+            // Stats sociales
+            _myUserId = user.id;
+            fetch('/profiles/' + user.id).then(r=>r.json()).then(p=>{
+                document.getElementById('stat-pubs').textContent      = p.pub_count      || 0;
+                document.getElementById('stat-followers').textContent  = p.follower_count || 0;
+                document.getElementById('stat-following').textContent  = p.following_count|| 0;
+                document.getElementById('stat-stars').textContent      = (p.stars||0).toFixed(1);
+                document.getElementById('profile-stats').style.display = 'flex';
+            }).catch(()=>{});
+            document.getElementById('user-email').innerText = user.email;
+            document.getElementById('user-phone').value = user.phone_number || '';
+            document.getElementById('user-dni').value   = user.dni || '';
+
+            // Badge plan
+            const planEl = document.getElementById('user-sub');
+            planEl.innerHTML = user.plan === 'PREMIUM'
+                ? `<span class="plan-badge premium">✨ Premium</span>`
+                : `<span class="plan-badge basic">Basic</span>`;
+
+            document.getElementById('user-pic').src = user.profile_pic || '/storage/images/default_user.jpg';
+        } catch (e) {
+            console.error('Error cargando perfil:', e);
         }
+    }
 
-        // HABILITAR EDICIÓN
-        function enableEdit() {
-            document.getElementById('user-phone').disabled = false;
-            document.getElementById('user-dni').disabled = false;
-            document.getElementById('user-phone').focus();
-            document.getElementById('save-btn').style.display = 'inline-block';
-        }
+    function enableEdit() {
+        document.getElementById('user-phone').disabled = false;
+        document.getElementById('user-dni').disabled   = false;
+        document.getElementById('user-phone').focus();
+        document.getElementById('save-btn').style.display = 'inline-block';
+    }
 
-        // GUARDAR DATOS (DNI Y TELÉFONO)
-        async function saveProfile() {
-            const data = {
-                phone_number: document.getElementById('user-phone').value,
-                dni: document.getElementById('user-dni').value
-            };
-            const response = await fetch('/user/update', {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify(data)
-            });
-            if (response.ok) {
-                alert("Perfil actualizado con éxito");
-                window.location.reload();
-            }
-        }
-
-        // LÓGICA DE CAMBIO DE FOTO
-        const picImg = document.getElementById('user-pic');
-        const picInput = document.getElementById('pic-input');
-
-        picImg.onclick = () => picInput.click();
-
-        picInput.onchange = async function() {
-            const file = this.files[0];
-            if (!file) return;
-
-            const formData = new FormData();
-            formData.append('profile_pic', file);
-
-            try {
-                const response = await fetch('/user/upload_pic', {
-                    method: 'POST',
-                    body: formData
-                });
-
-                if (response.ok) {
-                    const data = await response.json();
-                    picImg.src = data.url;
-                    alert("Foto de perfil actualizada");
-                } else {
-                    alert("Error al subir la imagen");
-                }
-            } catch (err) {
-                console.error(err);
-            }
+    async function saveProfile() {
+        const data = {
+            phone_number: document.getElementById('user-phone').value,
+            dni: document.getElementById('user-dni').value
         };
+        const response = await fetch('/user/update', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data)
+        });
+        if (response.ok) {
+            alert('Perfil actualizado');
+            window.location.reload();
+        }
+    }
 
-        // VENTANA ABOUT
-        async function openAbout() {
-            const response = await fetch('/user/about');
+    // Cambio de foto
+    document.getElementById('user-pic').onclick = () => document.getElementById('pic-input').click();
+    document.getElementById('pic-input').onchange = async function() {
+        const file = this.files[0];
+        if (!file) return;
+        const formData = new FormData();
+        formData.append('profile_pic', file);
+        const response = await fetch('/user/upload_pic', { method: 'POST', body: formData });
+        if (response.ok) {
             const data = await response.json();
-            document.getElementById('about-version').innerText = data.version;
-            document.getElementById('about-build').innerText = data.build;
-            document.getElementById('about-authors').innerText = data.authors;
-            document.getElementById('about-box').style.display = 'block';
+            document.getElementById('user-pic').src = data.url;
+        } else {
+            alert('Error al subir la imagen');
         }
-        
-        function closeAbout() { 
-            document.getElementById('about-box').style.display = 'none'; 
-        }
+    };
 
-        window.onload = loadProfile;
+    async function openAbout() {
+        const response = await fetch('/user/about');
+        const data = await response.json();
+        document.getElementById('about-version').innerText = data.version;
+        document.getElementById('about-build').innerText   = data.build;
+        document.getElementById('about-authors').innerText = data.authors;
+        document.getElementById('about-box').style.display = 'block';
+    }
+
+    function closeAbout() {
+        document.getElementById('about-box').style.display = 'none';
+    }
+
+    window.onload = loadProfile;
     </script>
-
-    <style>
-        .profile-input {
-            border: none;
-            background: transparent;
-            font-size: 1rem;
-            color: #333;
-            width: 150px;
-            border-bottom: 1px solid transparent;
-        }
-        .profile-input:enabled {
-            border-bottom: 1px solid #ccc;
-            background: #f9f9f9;
-        }
-        .btn-main {
-            background-color: var(--primary-color);
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: bold;
-        }
-        .btn-small {
-            margin-top: 10px;
-            padding: 5px 15px;
-            cursor: pointer;
-        }
-    </style>
 </body>
 </html>

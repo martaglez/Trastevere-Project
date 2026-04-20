@@ -1,37 +1,38 @@
+<!-- templates/bottom_bar.html -->
 <nav class="bottom-nav">
-    <a href="/" class="nav-item" title="Inicio">
+    <a href="/"         class="nav-item" title="Inicio">
         <i class="fa-solid fa-house"></i>
+        <span>Inicio</span>
     </a>
-    <a href="/search" class="nav-item" title="Buscar">
+    <a href="/search"   class="nav-item" title="Buscar">
         <i class="fa-solid fa-magnifying-glass"></i>
+        <span>Buscar</span>
     </a>
-    <a href="/create" class="nav-item" title="Crear">
-        <i class="fa-solid fa-plus-square"></i>
+    <a href="/create"   class="nav-item nav-create" title="Crear receta">
+        <i class="fa-solid fa-plus"></i>
     </a>
-    <a href="/tables" class="nav-item" title="Tablas">
-        <i class="fa-solid fa-table"></i>
+    <a href="/tables"   class="nav-item" title="Tables">
+        <i class="fa-solid fa-bookmark"></i>
+        <span>Tables</span>
     </a>
-    <a href="/profile" class="nav-item" title="Mi Perfil">
+    <a href="/my-profile" class="nav-item" title="Mi Perfil" id="nav-profile-btn">
         <i class="fa-solid fa-user"></i>
+        <span>Perfil</span>
     </a>
 </nav>
 
 <script>
-    // Detectamos en qué página estamos
-    const currentPath = window.location.pathname;
-    
-    // Buscamos todos los botones de la barra
-    const navItems = document.querySelectorAll('.nav-item');
-
-    navItems.forEach(item => {
-        const linkPath = item.getAttribute('href');
-
-        // Si la ruta coincide, le ponemos la clase active
-        // Usamos una comparación sencilla para empezar
-        if (currentPath === linkPath) {
+(function() {
+    const path = window.location.pathname;
+    document.querySelectorAll('.bottom-nav .nav-item').forEach(item => {
+        const href = item.getAttribute('href');
+        // Mark active for both /my-profile and /user/* paths
+        const isProfile = href === '/my-profile' && (path === '/my-profile' || path.startsWith('/user/'));
+        if (isProfile || (href && href !== '/' && !isProfile && path.startsWith(href))) {
             item.classList.add('active');
-        } else {
-            item.classList.remove('active');
+        } else if (href === '/' && path === '/') {
+            item.classList.add('active');
         }
     });
+})();
 </script>

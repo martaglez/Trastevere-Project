@@ -100,15 +100,30 @@ def publication_detail(pub_id):
             return jsonify({"error": "No encontrada"}), 404
         
         meta = pub.image_meta if isinstance(pub.image_meta, dict) else {}
+        if isinstance(pub.image_meta, str):
+            import json as _json
+            try: meta = _json.loads(pub.image_meta)
+            except: meta = {}
+
+        from database.schema.models import Like
+        from flask import session as _sess
+        like_count = db.query(Like).filter(Like.publication_id == pub_id).count()
+        uid = _sess.get('user_id')
+        user_liked = bool(uid and db.query(Like).filter(
+            Like.user_id == uid, Like.publication_id == pub_id).first())
+
         return jsonify({
-            "id": pub.id,
-            "title": pub.title,
+            "id":          pub.id,
+            "title":       pub.title,
             "description": pub.body,
-            "author": pub.author.username if pub.author else "Anónimo",
-            "images": meta.get("urls", []),
+            "author":      pub.author.username if pub.author else "Anónimo",
+            "author_id":   pub.user_id,
+            "images":      meta.get("urls", []),
             "ingredients": meta.get("ingredients", []),
-            "steps": meta.get("steps", []),
-            "tags": meta.get("tags", [])
+            "steps":       meta.get("steps", []),
+            "tags":        meta.get("tags", []),
+            "like_count":  like_count,
+            "user_liked":  user_liked
         })
     finally:
         db.close()
