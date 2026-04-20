@@ -144,6 +144,12 @@ def public_profile_page(user_id):
     return render_template("public_profile.html")
 
 # --- INICIALIZACIÓN ---
+##########################################
+# Crear tablas al arrancar
+with app.app_context():
+    Base.metadata.create_all(bind=engine)
+##########################################
+
 if __name__ == "__main__":
     storage_dir = os.path.join(root_path, 'storage', 'images')
     os.makedirs(storage_dir, exist_ok=True)
