@@ -110,7 +110,7 @@ def update_profile():
 @user_bp.route('/about', methods=['GET'])
 def about():
     return jsonify({
-        "version": "1.0.4",
-        "build": "2026-03-30",
-        "authors": "Hugo & Trastevere Team"
+        "version": "2.0.1",
+        "build": "2026-04-20",
+        "authors": "Trastevere Team 🍅"
     })
