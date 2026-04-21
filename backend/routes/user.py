@@ -1,12 +1,20 @@
 import os
-import uuid
+import cloudinary
+import cloudinary.uploader
 from flask import Blueprint, request, jsonify, session
 from database.database import SessionLocal
 from database.schema.models import User
 
 user_bp = Blueprint('user', __name__)
 
-STORAGE_FOLDER = os.path.abspath(os.path.join(os.path.dirname(__file__), '../../storage/images'))
+# Configurar Cloudinary
+cloudinary.config(
+    cloud_name = os.environ.get("CLOUDINARY_CLOUD_NAME"),
+    api_key    = os.environ.get("CLOUDINARY_API_KEY"),
+    api_secret = os.environ.get("CLOUDINARY_API_SECRET"),
+    secure     = True
+)
+
 
 @user_bp.route('/profile', methods=['GET'])
 def profile():
@@ -20,28 +28,26 @@ def profile():
         if not user:
             return jsonify({"error": "Usuario no encontrado"}), 404
 
-        # Lógica de Plan y Foto Default
-        plan_name = "PREMIUM" if user.is_premium else "BASIC"
-        
-        # Si no tiene foto, usamos la default de storage
-        profile_pic = user.profile_pic if hasattr(user, 'profile_pic') and user.profile_pic else "/storage/images/default_user.jpg"
-        
-        # Aseguramos que la ruta empiece por / si es una imagen subida
+        plan_name   = "PREMIUM" if user.is_premium else "BASIC"
+        profile_pic = user.profile_pic or "/storage/images/default_user.jpg"
+
+        # Si es una ruta local antigua (no URL de Cloudinary), la dejamos tal cual
         if profile_pic and not profile_pic.startswith('/') and not profile_pic.startswith('http'):
             profile_pic = f"/storage/images/{profile_pic}"
 
         return jsonify({
-            "id": user.id,
-            "username": user.username,
-            "email": user.email,
-            "is_premium": user.is_premium,
-            "plan": plan_name,
+            "id":           user.id,
+            "username":     user.username,
+            "email":        user.email,
+            "is_premium":   user.is_premium,
+            "plan":         plan_name,
             "phone_number": user.phone_number or "",
-            "dni": user.dni or "",
-            "profile_pic": profile_pic
+            "dni":          user.dni or "",
+            "profile_pic":  profile_pic
         })
     finally:
         db.close()
+
 
 @user_bp.route('/upload_pic', methods=['POST'])
 def upload_pic():
@@ -56,28 +62,31 @@ def upload_pic():
     db = SessionLocal()
     try:
         user = db.query(User).filter(User.id == user_id).first()
-        if not user: return jsonify({"error": "Usuario no encontrado"}), 404
+        if not user:
+            return jsonify({"error": "Usuario no encontrado"}), 404
 
-        # 1. Guardar archivo físico
-        ext = os.path.splitext(file.filename)[1]
-        filename = f"user_{user_id}_{uuid.uuid4().hex}{ext}"
-        save_path = os.path.join(STORAGE_FOLDER, filename)
-        file.save(save_path)
-        
-        # 2. LA CLAVE: Guardar la ruta en la base de datos
-        # Guardamos la URL pública que entiende el navegador
-        db_path = f"/storage/images/{filename}"
-        user.profile_pic = db_path 
-        
-        db.commit() # Confirmamos cambios en la DB
-        
-        return jsonify({"status": "success", "url": db_path})
+        # Subir a Cloudinary en la carpeta de avatares
+        result  = cloudinary.uploader.upload(
+            file,
+            folder          = "trastevere/avatars",
+            resource_type   = "image",
+            public_id       = f"user_{user_id}",   # sobreescribe la anterior automáticamente
+            overwrite       = True,
+            transformation  = [{"width": 400, "height": 400, "crop": "fill", "gravity": "face"}]
+        )
+        url = result["secure_url"]
+
+        user.profile_pic = url
+        db.commit()
+
+        return jsonify({"status": "success", "url": url})
     except Exception as e:
         db.rollback()
         print(f"Error subiendo foto: {e}")
         return jsonify({"error": str(e)}), 500
     finally:
         db.close()
+
 
 @user_bp.route('/update', methods=['POST'])
 def update_profile():
@@ -86,7 +95,7 @@ def update_profile():
         return jsonify({"error": "No autorizado"}), 401
 
     data = request.json
-    db = SessionLocal()
+    db   = SessionLocal()
     try:
         user = db.query(User).filter(User.id == user_id).first()
         if not user:
@@ -98,19 +107,19 @@ def update_profile():
             user.dni = data['dni']
 
         db.commit()
-        db.refresh(user) # Confirmación de escritura
+        db.refresh(user)
         return jsonify({"message": "Perfil actualizado con éxito"})
     except Exception as e:
         db.rollback()
-        print(f"Error en /update: {e}")
         return jsonify({"error": str(e)}), 500
     finally:
         db.close()
 
+
 @user_bp.route('/about', methods=['GET'])
 def about():
     return jsonify({
-        "version": "2.0.1",
-        "build": "2026-04-20",
+        "version": "2.0.2",
+        "build":   "2026-04-21",
         "authors": "Trastevere Team 🍅"
     })
