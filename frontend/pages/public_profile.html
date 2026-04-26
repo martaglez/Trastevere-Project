@@ -8,10 +8,114 @@
     <link rel="apple-touch-icon" href="/storage/images/touch-icon.png">
     <link rel="stylesheet" href="{{ url_for('static', filename='main.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='public_profile.css') }}">
+    <style>
+        /* Modal overlay centrado */
+        #follow-modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+        #follow-modal {
+            background: var(--bg, #fff);
+            width: 90%;
+            max-width: 400px;
+            border-radius: 16px;
+            padding: 20px;
+            max-height: 60vh;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+        }
+        #follow-modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 14px;
+        }
+        #follow-modal-title {
+            margin: 0;
+            font-size: 1.1rem;
+            color: var(--primary-color, #c0392b);
+        }
+        #follow-modal-close {
+            background: none;
+            border: none;
+            font-size: 1.4rem;
+            cursor: pointer;
+            color: var(--text-muted, #888);
+            line-height: 1;
+        }
+        #follow-modal-list {
+            overflow-y: auto;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+        .follow-modal-user {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 8px 10px;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: background .15s;
+        }
+        .follow-modal-user:hover {
+            background: var(--surface, #f5f5f5);
+        }
+        .follow-modal-user img {
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            object-fit: cover;
+            flex-shrink: 0;
+        }
+        .follow-modal-user .name {
+            font-weight: 600;
+            flex: 1;
+        }
+        .follow-modal-user .premium-tag {
+            font-size: .7rem;
+            background: gold;
+            color: #333;
+            padding: 2px 7px;
+            border-radius: 20px;
+        }
+        /* Stats clicables */
+        .stat-item.clickable {
+            cursor: pointer;
+        }
+        .stat-item.clickable:hover .stat-num {
+            color: var(--primary-color, #c0392b);
+        }
+        .follow-modal-empty {
+            text-align: center;
+            color: var(--text-muted, #888);
+            padding: 20px 0;
+        }
+    </style>
 </head>
 <body>
     {% include 'top_bar.html' %}
     <div id="profile-root"></div>
+
+    <!-- Modal seguidores / siguiendo -->
+    <div id="follow-modal-overlay">
+        <div id="follow-modal">
+            <div id="follow-modal-header">
+                <h3 id="follow-modal-title"></h3>
+                <button id="follow-modal-close" onclick="closeFollowModal()">✕</button>
+            </div>
+            <div id="follow-modal-list">
+                <p class="follow-modal-empty">Cargando...</p>
+            </div>
+        </div>
+    </div>
     {% include 'bottom_bar.html' %}
 
     <script>
@@ -115,12 +219,12 @@
                     <span class="stat-label">Recetas</span>
                 </div>
                 <div class="stat-divider"></div>
-                <div class="stat-item">
+                <div class="stat-item clickable" onclick="openFollowModal('followers', ${u.id})">
                     <span class="stat-num" id="stat-followers">${u.follower_count}</span>
                     <span class="stat-label">Seguidores</span>
                 </div>
                 <div class="stat-divider"></div>
-                <div class="stat-item">
+                <div class="stat-item clickable" onclick="openFollowModal('following', ${u.id})">
                     <span class="stat-num">${u.following_count}</span>
                     <span class="stat-label">Siguiendo</span>
                 </div>
@@ -129,6 +233,56 @@
             <div class="feed-container pub-profile-grid">${pubs}</div>
         `;
     }
+
+
+
+    // ── Modal seguidores / siguiendo ────────────────────────────
+    async function openFollowModal(type, userId) {
+        const overlay = document.getElementById('follow-modal-overlay');
+        const title   = document.getElementById('follow-modal-title');
+        const list    = document.getElementById('follow-modal-list');
+
+        title.textContent = type === 'followers' ? 'Seguidores' : 'Siguiendo';
+        list.innerHTML = '<p class="follow-modal-empty">Cargando...</p>';
+        overlay.style.display = 'flex';
+
+        try {
+            const res  = await fetch(`/profiles/${userId}/${type}`);
+            const data = await res.json();
+
+            if (!data.length) {
+                list.innerHTML = `<p class="follow-modal-empty">
+                    ${type === 'followers' ? 'Aún no hay seguidores.' : 'No sigue a nadie todavía.'}
+                </p>`;
+                return;
+            }
+
+            list.innerHTML = '';
+            data.forEach(user => {
+                const item = document.createElement('div');
+                item.className = 'follow-modal-user';
+                item.onclick = () => { window.location.href = '/user/' + user.id; };
+                item.innerHTML = `
+                    <img src="${user.profile_pic || '/storage/images/default_user.jpg'}"
+                         onerror="this.src='/storage/images/default_user.jpg'">
+                    <span class="name">${user.username}</span>
+                    ${user.is_premium ? '<span class="premium-tag">✨ Premium</span>' : ''}
+                `;
+                list.appendChild(item);
+            });
+        } catch(e) {
+            list.innerHTML = '<p class="follow-modal-empty" style="color:red;">Error al cargar la lista.</p>';
+        }
+    }
+
+    function closeFollowModal() {
+        document.getElementById('follow-modal-overlay').style.display = 'none';
+    }
+
+    // Cerrar al hacer click fuera del modal
+    document.getElementById('follow-modal-overlay').addEventListener('click', function(e) {
+        if (e.target === this) closeFollowModal();
+    });
 
     // ── Stars display ───────────────────────────────────────────
     function renderStars(val) {

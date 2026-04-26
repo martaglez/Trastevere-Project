@@ -121,5 +121,5 @@ def about():
     return jsonify({
         "version": "2.0.2",
         "build":   "2026-04-21",
-        "authors": "Trastevere Team 🍅"
+        "authors": "CEU San Pablo & Trastevere Team"
     })
