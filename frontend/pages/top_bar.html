@@ -139,7 +139,6 @@
 <script>
 // ── Branding premium ────────────────────────────────────────
 let _currentUser = null;
-
 async function updateBranding() {
     try {
         const response = await fetch('/user/profile');
@@ -155,6 +154,9 @@ async function updateBranding() {
                 }
                 document.body.classList.add('is-premium');
                 _updatePremiumBtn(true);
+            } else {
+                // Usuario logueado pero NO premium: resetear tema si era premium
+                _resetPremiumThemeIfNeeded();
             }
             // Rellenar datos del panel
             const row = document.getElementById('settings-user-row');
@@ -170,9 +172,22 @@ async function updateBranding() {
                 _updatePremiumBtn(_currentUser.plan === 'PREMIUM');
                 document.getElementById('settings-sub-premium').style.display = _currentUser.plan === 'PREMIUM' ? 'block' : 'none';
             }
+        } else {
+            // 401 u otro error: usuario sin sesión
+            _updatePremiumBtn(false);
+            _resetPremiumThemeIfNeeded();
         }
-    } catch (e) { /* invitado */
+    } catch (e) {
+        // Error de red
         _updatePremiumBtn(false);
+        _resetPremiumThemeIfNeeded();
+    }
+}
+
+function _resetPremiumThemeIfNeeded() {
+    const saved = localStorage.getItem('trastevere_theme');
+    if (saved && saved !== 'default') {
+        localStorage.setItem('trastevere_theme', 'default');
     }
 }
 
@@ -305,19 +320,17 @@ function setLanguage(lang) {
 }
 
 // ── Init ────────────────────────────────────────────────────
-document.addEventListener('DOMContentLoaded', () => {
-    updateBranding();
-    // Restaurar tema guardado
-    const saved = localStorage.getItem('trastevere_theme');
-    if (saved) {
-        applyTheme(saved);
-        document.body.classList.toggle('theme-dark', saved === 'dark');
-        document.body.classList.toggle('theme-dark', saved === 'dark');
-        const btn = document.querySelector(`.theme-pill[data-theme="${saved}"]`);
-        if (btn) {
-            document.querySelectorAll('.theme-pill').forEach(p => p.classList.remove('active'));
-            btn.classList.add('active');
-        }
+document.addEventListener('DOMContentLoaded', async () => {
+    // updateBranding ya gestiona el tema según si el usuario es premium o no
+    await updateBranding();
+
+    const saved = localStorage.getItem('trastevere_theme') || 'default';
+    applyTheme(saved);
+    document.body.classList.toggle('theme-dark', saved === 'dark');
+    const btn = document.querySelector(`.theme-pill[data-theme="${saved}"]`);
+    if (btn) {
+        document.querySelectorAll('.theme-pill').forEach(p => p.classList.remove('active'));
+        btn.classList.add('active');
     }
 });
 

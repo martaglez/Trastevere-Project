@@ -181,6 +181,47 @@ def rate_user(user_id):
         db.close()
 
 
+# ── Lista de seguidores ─────────────────────────────────────────────────────────
+@user_profile_bp.route('/<int:user_id>/followers', methods=['GET'])
+def get_followers(user_id):
+    db = SessionLocal()
+    try:
+        follows = db.query(Follow).filter(Follow.following_id == user_id).all()
+        result = []
+        for f in follows:
+            u = db.query(User).filter(User.id == f.follower_id).first()
+            if u:
+                result.append({
+                    'id':          u.id,
+                    'username':    u.username,
+                    'profile_pic': _pic(u),
+                    'is_premium':  u.is_premium,
+                })
+        return jsonify(result)
+    finally:
+        db.close()
+
+
+# ── Lista de siguiendo ──────────────────────────────────────────────────────────
+@user_profile_bp.route('/<int:user_id>/following', methods=['GET'])
+def get_following(user_id):
+    db = SessionLocal()
+    try:
+        follows = db.query(Follow).filter(Follow.follower_id == user_id).all()
+        result = []
+        for f in follows:
+            u = db.query(User).filter(User.id == f.following_id).first()
+            if u:
+                result.append({
+                    'id':          u.id,
+                    'username':    u.username,
+                    'profile_pic': _pic(u),
+                    'is_premium':  u.is_premium,
+                })
+        return jsonify(result)
+    finally:
+        db.close()
+
 # ── Obtener mi valoración de un usuario ────────────────────────────────────────
 @user_profile_bp.route('/<int:user_id>/my-rating', methods=['GET'])
 def get_my_rating(user_id):
