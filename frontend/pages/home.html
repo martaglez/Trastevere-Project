@@ -8,24 +8,25 @@
     <link rel="apple-touch-icon" href="/storage/images/touch-icon.png">
     <link rel="stylesheet" href="{{ url_for('static', filename='main.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='home.css') }}">
+    <script src="{{ url_for('static', filename='i18n.js') }}"></script>
 </head>
 <body>
     {% include 'top_bar.html' %}
 
     <div class="home-search-bar">
         <i class="fas fa-search"></i>
-        <input type="text" placeholder="Busca recetas, ingredientes..."
+        <input type="text" placeholder="Busca recetas, ingredientes..." data-i18n-placeholder="home.searchPlaceholder"
                onkeypress="if(event.key==='Enter') window.location.href='/search?q='+this.value">
     </div>
 
     <div class="category-chips">
-        <div class="chip active" onclick="filterFeed(this, null)">Todo</div>
-        <div class="chip" onclick="filterFeed(this, 'pasta')">🍝 Pasta</div>
-        <div class="chip" onclick="filterFeed(this, 'ensalada')">🥗 Ensaladas</div>
-        <div class="chip" onclick="filterFeed(this, 'postre')">🍰 Postres</div>
-        <div class="chip" onclick="filterFeed(this, 'mexicana')">🌮 Mexicana</div>
-        <div class="chip" onclick="filterFeed(this, 'asiatica')">🍜 Asiática</div>
-        <div class="chip" onclick="filterFeed(this, 'carne')">🥩 Carnes</div>
+        <div class="chip active" onclick="filterFeed(this, null)" data-i18n="home.chipAll">Todo</div>
+        <div class="chip" onclick="filterFeed(this, 'pasta')" data-i18n="home.chipPasta">🍝 Pasta</div>
+        <div class="chip" onclick="filterFeed(this, 'ensalada')" data-i18n="home.chipSalads">🥗 Ensaladas</div>
+        <div class="chip" onclick="filterFeed(this, 'postre')" data-i18n="home.chipDesserts">🍰 Postres</div>
+        <div class="chip" onclick="filterFeed(this, 'mexicana')" data-i18n="home.chipMexican">🌮 Mexicana</div>
+        <div class="chip" onclick="filterFeed(this, 'asiatica')" data-i18n="home.chipAsian">🍜 Asiática</div>
+        <div class="chip" onclick="filterFeed(this, 'carne')" data-i18n="home.chipMeat">🥩 Carnes</div>
     </div>
 
     <div class="feed-container" id="feed-list"></div>
@@ -80,7 +81,7 @@
             if (res.status === 401) {
                 btn.classList.toggle('liked', wasLiked);
                 btn.querySelector('i').className = wasLiked ? 'fas fa-heart' : 'far fa-heart';
-                if (confirm('Inicia sesión para dar like. ¿Ir al login?'))
+                if (confirm(t('home.loginLike')))
                     window.location.href = '/auth/login';
                 return;
             }
@@ -98,7 +99,7 @@
         const feedList = document.getElementById('feed-list');
         feedList.innerHTML = '';
         if (recipes.length === 0) {
-            feedList.innerHTML = '<p class="feed-empty">No hay recetas para esta categoría aún.</p>';
+            feedList.innerHTML = '<p class="feed-empty">' + t('home.noRecipes') + '</p>';
             return;
         }
         recipes.forEach(item => {
@@ -115,7 +116,7 @@
                     <div class="card-footer">
                         <div class="recipe-author" id="author-${item.id}">
                             <i class="fas fa-user-circle"></i>
-                            <span>${item.author || 'Anónimo'}</span>
+                            <span>${item.author || t('home.anonymous')}</span>
                         </div>
                         <button class="like-btn" id="like-btn-${item.id}">
                             <i class="far fa-heart"></i>

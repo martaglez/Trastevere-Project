@@ -3,49 +3,50 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Registro - Trastevere</title>
+    <title data-i18n="register.title">Registro - Trastevere</title>
     <link rel="apple-touch-icon" href="/storage/images/touch-icon.png">
     <link rel="stylesheet" href="{{ url_for('static', filename='main.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='auth.css') }}">
+    <script src="{{ url_for('static', filename='i18n.js') }}"></script>
 </head>
 <body>
     <div class="auth-container">
         <div class="auth-logo"><span>Trastevere</span></div>
-        <h1>Crear Cuenta</h1>
+        <h1 data-i18n="register.heading">Crear Cuenta</h1>
 
-        <label>Usuario <span style="color:var(--primary)">*</span></label>
-        <input type="text" id="username" placeholder="Tu nombre de usuario">
+        <label><span data-i18n="register.username">Usuario</span> <span style="color:var(--primary)">*</span></label>
+        <input type="text" id="username" placeholder="Tu nombre de usuario" data-i18n-placeholder="register.usernamePh">
 
-        <label>Email <span style="color:var(--primary)">*</span></label>
-        <input type="email" id="email" placeholder="correo@ejemplo.com">
+        <label><span data-i18n="register.email">Email</span> <span style="color:var(--primary)">*</span></label>
+        <input type="email" id="email" placeholder="correo@ejemplo.com" data-i18n-placeholder="register.emailPh">
 
-        <label>Contraseña <span style="color:var(--primary)">*</span></label>
-        <input type="password" id="password" placeholder="Contraseña segura">
+        <label><span data-i18n="register.password">Contraseña</span> <span style="color:var(--primary)">*</span></label>
+        <input type="password" id="password" placeholder="Contraseña segura" data-i18n-placeholder="register.passwordPh">
 
         <hr class="auth-divider">
 
         <div class="premium-toggle">
             <input type="checkbox" id="want-premium" onchange="toggleFields()">
-            <label for="want-premium">✨ Activar Plan Premium</label>
+            <label for="want-premium" data-i18n="register.premium">✨ Activar Plan Premium</label>
         </div>
 
         <div id="personal-data">
-            <label>DNI <span id="star-dni" style="color:var(--primary)">*</span></label>
-            <input type="text" id="dni" placeholder="12345678Z">
+            <label><span data-i18n="register.dni">DNI</span> <span id="star-dni" style="color:var(--primary)">*</span></label>
+            <input type="text" id="dni" placeholder="12345678Z" data-i18n-placeholder="register.dniPh">
 
-            <label>Teléfono <span id="star-phone" style="color:var(--primary)">*</span></label>
-            <input type="text" id="phone" placeholder="600000000">
+            <label><span data-i18n="register.phone">Teléfono</span> <span id="star-phone" style="color:var(--primary)">*</span></label>
+            <input type="text" id="phone" placeholder="600000000" data-i18n-placeholder="register.phonePh">
         </div>
 
         <div id="premium-fields" style="display:none;">
-            <label>Número de Tarjeta <span style="color:var(--primary)">*</span></label>
+            <label><span data-i18n="register.card">Número de Tarjeta</span> <span style="color:var(--primary)">*</span></label>
             <input type="text" id="card_number" placeholder="1234 5678 1234 5678" maxlength="16">
             <small style="color:var(--text-muted);font-size:0.75rem;display:block;margin-top:-6px;margin-bottom:10px;">
                 DNI y Teléfono opcionales para el Plan Premium.
             </small>
         </div>
 
-        <button onclick="handleRegister()" class="btn-main" style="margin-top:10px;">Registrarse</button>
+        <button onclick="handleRegister()" class="btn-main" style="margin-top:10px;" data-i18n="register.btn">Registrarse</button>
         <p>¿Ya tienes cuenta? <a href="{{ url_for('auth.login') }}">Inicia sesión</a></p>
     </div>
 

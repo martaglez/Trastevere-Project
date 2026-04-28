@@ -8,6 +8,7 @@
     <link rel="apple-touch-icon" href="/storage/images/touch-icon.png">
     <link rel="stylesheet" href="{{ url_for('static', filename='main.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='profile.css') }}">
+    <script src="{{ url_for('static', filename='i18n.js') }}"></script>
 </head>
 <body>
     {% include 'top_bar.html' %}
@@ -19,7 +20,7 @@
             <div class="profile-pic-section">
                 <img id="user-pic" src="/storage/images/default_user.jpg"
                      alt="Foto de perfil" class="profile-pic">
-                <p class="profile-pic-hint">Toca tu foto para cambiarla</p>
+                <p class="profile-pic-hint" data-i18n="profile.picHint">Toca tu foto para cambiarla</p>
                 <input type="file" id="pic-input" style="display:none;" accept="image/*">
             </div>
 
@@ -29,43 +30,43 @@
             <div class="profile-social-stats" id="profile-stats" style="display:none;">
                 <div class="profile-stat" onclick="window.location.href='/user/'+_myUserId">
                     <span class="profile-stat-num" id="stat-pubs">0</span>
-                    <span class="profile-stat-label">Recetas</span>
+                    <span class="profile-stat-label" data-i18n="profile.recipes">Recetas</span>
                 </div>
                 <div class="profile-stat-divider"></div>
                 <div class="profile-stat">
                     <span class="profile-stat-num" id="stat-followers">0</span>
-                    <span class="profile-stat-label">Seguidores</span>
+                    <span class="profile-stat-label" data-i18n="profile.followers">Seguidores</span>
                 </div>
                 <div class="profile-stat-divider"></div>
                 <div class="profile-stat">
                     <span class="profile-stat-num" id="stat-following">0</span>
-                    <span class="profile-stat-label">Siguiendo</span>
+                    <span class="profile-stat-label" data-i18n="profile.following">Siguiendo</span>
                 </div>
                 <div class="profile-stat-divider"></div>
                 <div class="profile-stat">
                     <span class="profile-stat-num" id="stat-stars">0.0</span>
-                    <span class="profile-stat-label">⭐ Estrellas</span>
+                    <span class="profile-stat-label" data-i18n="profile.stars">⭐ Estrellas</span>
                 </div>
             </div>
 
             <div class="profile-info">
-                <p><strong>Email</strong> <span id="user-email"></span></p>
-                <p><strong>Teléfono</strong> <input id="user-phone" disabled placeholder="Sin configurar" class="profile-input"></p>
-                <p><strong>DNI</strong> <input id="user-dni" disabled placeholder="Sin configurar" class="profile-input"></p>
-                <p><strong>Plan</strong> <span id="user-sub"></span></p>
+                <p><strong data-i18n="profile.email">Email</strong> <span id="user-email"></span></p>
+                <p><strong data-i18n="profile.phone">Teléfono</strong> <input id="user-phone" disabled data-i18n-placeholder="profile.phonePh" placeholder="Sin configurar" class="profile-input"></p>
+                <p><strong data-i18n="profile.dni">DNI</strong> <input id="user-dni" disabled data-i18n-placeholder="profile.phonePh" placeholder="Sin configurar" class="profile-input"></p>
+                <p><strong data-i18n="profile.plan">Plan</strong> <span id="user-sub"></span></p>
             </div>
 
             <div class="profile-actions">
-                <button onclick="enableEdit()"><i class="fas fa-edit"></i> Editar</button>
-                <button onclick="if(_myUserId)window.location.href='/user/'+_myUserId"><i class="fas fa-eye"></i> Mi perfil</button>
-                <button onclick="openAbout()"><i class="fas fa-info-circle"></i> Info</button>
+                <button onclick="enableEdit()"><i class="fas fa-edit"></i> <span data-i18n="profile.edit">Editar</span></button>
+                <button onclick="if(_myUserId)window.location.href='/user/'+_myUserId"><i class="fas fa-eye"></i> <span data-i18n="profile.myProfile">Mi perfil</span></button>
+                <button onclick="openAbout()"><i class="fas fa-info-circle"></i> <span data-i18n="profile.info">Info</span></button>
                 <button style="background:#888;" onclick="window.location.href='/auth/logout'">
-                    <i class="fas fa-sign-out-alt"></i> Salir
+                    <i class="fas fa-sign-out-alt"></i> <span data-i18n="profile.logout">Salir</span>
                 </button>
             </div>
 
             <div style="text-align:center;margin-top:14px;">
-                <button id="save-btn" style="display:none;" onclick="saveProfile()" class="btn-main">
+                <button id="save-btn" style="display:none;" onclick="saveProfile()" class="btn-main" data-i18n="profile.saveChanges">
                     Guardar cambios
                 </button>
             </div>
@@ -74,22 +75,22 @@
         <!-- Vista invitado -->
         <div id="guest-view" style="display:none;text-align:center;padding:40px 10px;">
             <i class="fas fa-utensils" style="font-size:3.5rem;color:var(--primary);opacity:0.3;"></i>
-            <h2 style="font-size:1.5rem;margin:20px 0 10px;">¡Únete a Trastevere!</h2>
-            <p style="color:var(--text-muted);margin-bottom:28px;">Crea tu red de recetas y guarda tus favoritos.</p>
+            <h2 style="font-size:1.5rem;margin:20px 0 10px;"><span data-i18n="profile.joinTitle">¡Únete a Trastevere!</span></h2>
+            <p style="color:var(--text-muted);margin-bottom:28px;" data-i18n="profile.joinSub">Crea tu red de recetas y guarda tus favoritos.</p>
             <div style="display:flex;flex-direction:column;gap:10px;max-width:280px;margin:0 auto;">
-                <button onclick="window.location.href='/auth/login'" class="btn-main">Iniciar Sesión</button>
-                <button onclick="window.location.href='/auth/register'" class="btn-secondary">Crear cuenta gratis</button>
+                <button onclick="window.location.href='/auth/login'" class="btn-main" data-i18n="profile.login">Iniciar Sesión</button>
+                <button onclick="window.location.href='/auth/register'" class="btn-secondary" data-i18n="profile.createAccount">Crear cuenta gratis</button>
             </div>
         </div>
     </div>
 
     <!-- About box -->
     <div id="about-box" style="display:none;">
-        <h3>Trastevere App</h3>
-        <p><strong>Versión:</strong> <span id="about-version"></span></p>
-        <p><strong>Build:</strong> <span id="about-build"></span></p>
-        <p><strong>Autores:</strong> <span id="about-authors"></span></p>
-        <button onclick="closeAbout()" class="btn-main" style="margin-top:12px;">Cerrar</button>
+        <h3 data-i18n="profile.aboutTitle">Trastevere App</h3>
+        <p><strong data-i18n="profile.version">Versión:</strong> <span id="about-version"></span></p>
+        <p><strong data-i18n="profile.build">Build:</strong> <span id="about-build"></span></p>
+        <p><strong data-i18n="profile.authors">Autores:</strong> <span id="about-authors"></span></p>
+        <button onclick="closeAbout()" class="btn-main" style="margin-top:12px;" data-i18n="profile.close">Cerrar</button>
     </div>
 
     {% include 'bottom_bar.html' %}
@@ -151,7 +152,7 @@
             body: JSON.stringify(data)
         });
         if (response.ok) {
-            alert('Perfil actualizado');
+            alert(t('profile.updated'));
             window.location.reload();
         }
     }
@@ -168,7 +169,7 @@
             const data = await response.json();
             document.getElementById('user-pic').src = data.url;
         } else {
-            alert('Error al subir la imagen');
+            alert(t('profile.uploadError'));
         }
     };
 

@@ -3,27 +3,28 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Iniciar Sesión - Trastevere</title>
+    <title data-i18n="login.title">Iniciar Sesión - Trastevere</title>
     <link rel="apple-touch-icon" href="/storage/images/touch-icon.png">
     <link rel="stylesheet" href="{{ url_for('static', filename='main.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='auth.css') }}">
+    <script src="{{ url_for('static', filename='i18n.js') }}"></script>
 </head>
 <body>
     <div class="auth-container">
         <div class="auth-logo">
             <span>Trastevere</span>
         </div>
-        <h1>Bienvenido</h1>
+        <h1 data-i18n="login.welcome">Bienvenido</h1>
 
-        <label for="email">Email</label>
-        <input type="email" id="email" placeholder="correo@ejemplo.com" required>
+        <label for="email" data-i18n="login.email">Email</label>
+        <input type="email" id="email" placeholder="correo@ejemplo.com" data-i18n-placeholder="login.emailPh" required>
 
-        <label for="pass">Contraseña</label>
-        <input type="password" id="pass" placeholder="Tu contraseña" required>
+        <label for="pass" data-i18n="login.password">Contraseña</label>
+        <input type="password" id="pass" placeholder="Tu contraseña" data-i18n-placeholder="login.passwordPh" required>
 
-        <button onclick="handleLogin()" class="btn-main">Entrar</button>
+        <button onclick="handleLogin()" class="btn-main" data-i18n="login.btn">Entrar</button>
 
-        <p>¿No tienes cuenta? <a href="{{ url_for('auth.register') }}">Regístrate gratis</a></p>
+        <p><span data-i18n="login.noAccount">¿No tienes cuenta?</span> <a href="{{ url_for('auth.register') }}" data-i18n="login.register">Regístrate gratis</a></p>
     </div>
 
     <script>

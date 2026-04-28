@@ -9,6 +9,7 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='main.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='home.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='search.css') }}">
+    <script src="{{ url_for('static', filename='i18n.js') }}"></script>
 </head>
 <body>
 
@@ -18,18 +19,18 @@
     <div class="search-box">
         <i class="fas fa-search search-icon"></i>
         <input type="text" id="search-input"
-               placeholder="Buscar recetas o @usuarios...">
-        <button id="search-btn" onclick="doSearch()">Buscar</button>
+               placeholder="Buscar recetas o @usuarios..." data-i18n-placeholder="search.placeholder">
+        <button id="search-btn" onclick="doSearch()" data-i18n="search.btn">Buscar</button>
     </div>
 </section>
 
 <!-- Tabs -->
 <div class="search-tabs">
     <button class="search-tab active" id="tab-recipes" onclick="switchTab('recipes')">
-        <i class="fas fa-utensils"></i> Recetas
+        <i class="fas fa-utensils"></i> <span data-i18n="search.tabRecipes">Recetas</span>
     </button>
     <button class="search-tab" id="tab-users" onclick="switchTab('users')">
-        <i class="fas fa-users"></i> Usuarios
+        <i class="fas fa-users"></i> <span data-i18n="search.tabUsers">Usuarios</span>
     </button>
 </div>
 
@@ -77,7 +78,7 @@ async function searchRecipes(query) {
     container.innerHTML = '';
 
     if (results.length === 0) {
-        container.innerHTML = `<p class="search-empty">No hay recetas para "${query}".</p>`;
+        container.innerHTML = `<p class="search-empty">${t("search.noRecipes")} "${query}".</p>`;
         return;
     }
     results.forEach(pub => {

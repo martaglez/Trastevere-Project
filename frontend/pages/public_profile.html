@@ -8,6 +8,7 @@
     <link rel="apple-touch-icon" href="/storage/images/touch-icon.png">
     <link rel="stylesheet" href="{{ url_for('static', filename='main.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='public_profile.css') }}">
+    <script src="{{ url_for('static', filename='i18n.js') }}"></script>
     <style>
         /* Modal overlay centrado */
         #follow-modal-overlay {
@@ -150,31 +151,25 @@
         // Follow button OR edit button if own profile
         const followBtn = u.is_own_profile
             ? `<a href="/profile" class="follow-btn own-profile-btn">
-                   <i class="fas fa-edit"></i> Editar perfil
-               </a>`
+                    <i class="fas fa-edit"></i> ${t('profile.edit')} 
+               </a>` // Cambiado: "Editar perfil" por t('profile.edit')
             : `<button id="follow-btn" class="follow-btn ${u.is_following ? 'following' : ''}"
-                       onclick="toggleFollow(${u.id})">
-                   ${u.is_following
-                       ? '<i class="fas fa-user-check"></i> Siguiendo'
-                       : '<i class="fas fa-user-plus"></i> Seguir'}
-               </button>`;
+                        onclick="toggleFollow(${u.id})">
+                    ${u.is_following
+                        ? '<i class="fas fa-user-check"></i> ' + t('public.unfollow')
+                        : '<i class="fas fa-user-plus"></i> ' + t('public.follow')}
+        </button>`;
 
         // Star rating widget — only show if NOT own profile
+        // 2. El widget de estrellas
         const starWidget = u.is_own_profile ? '' : `
             <div class="star-rating-widget" id="star-widget">
-                <span class="star-rating-label">Valorar:</span>
-                ${[1,2,3,4,5].map(n => `
-                    <button class="star-rate-btn" data-val="${n}"
-                            onmouseenter="hoverStars(${n})"
-                            onmouseleave="unhoverStars()"
-                            onclick="submitRating(${u.id}, ${n})">
-                        <i class="far fa-star"></i>
-                    </button>`).join('')}
-            </div>`;
+                <span class="star-rating-label">${t('profile.stars')}:</span> 
+                ...`; // Cambiado: "Valorar" por t('profile.stars') o crea una nueva key
 
         // Recipe cards
         const pubs = u.publications.length === 0
-            ? '<p class="feed-empty" style="grid-column:1/-1;margin-top:40px;">Aún no hay recetas publicadas.</p>'
+            ? '<p class="feed-empty" style="grid-column:1/-1;margin-top:40px;">' + t('public.noRecipes') + '</p>'
             : u.publications.map(p => `
                 <div class="recipe-card" onclick="window.location.href='/publications/view/${p.id}'">
                     <img src="${p.image}" class="recipe-img"
@@ -192,8 +187,8 @@
             <div class="pub-profile-header">
                 <div class="pub-profile-avatar-wrap">
                     <img src="${u.profile_pic}" alt="${u.username}"
-                         class="pub-profile-avatar"
-                         onerror="this.src='/storage/images/default_user.jpg'">
+                        class="pub-profile-avatar"
+                        onerror="this.src='/storage/images/default_user.jpg'">
                     ${u.is_premium ? '<div class="avatar-premium-ring"></div>' : ''}
                 </div>
                 <div class="pub-profile-info">
@@ -216,17 +211,17 @@
             <div class="pub-profile-stats">
                 <div class="stat-item">
                     <span class="stat-num">${u.pub_count}</span>
-                    <span class="stat-label">Recetas</span>
+                    <span class="stat-label">${t('public.recipes')}</span>
                 </div>
                 <div class="stat-divider"></div>
                 <div class="stat-item clickable" onclick="openFollowModal('followers', ${u.id})">
                     <span class="stat-num" id="stat-followers">${u.follower_count}</span>
-                    <span class="stat-label">Seguidores</span>
+                    <span class="stat-label">${t('public.followers')}</span>
                 </div>
                 <div class="stat-divider"></div>
                 <div class="stat-item clickable" onclick="openFollowModal('following', ${u.id})">
                     <span class="stat-num">${u.following_count}</span>
-                    <span class="stat-label">Siguiendo</span>
+                    <span class="stat-label">${t('public.following')}</span>
                 </div>
             </div>
 
@@ -235,15 +230,17 @@
     }
 
 
-
     // ── Modal seguidores / siguiendo ────────────────────────────
     async function openFollowModal(type, userId) {
         const overlay = document.getElementById('follow-modal-overlay');
         const title   = document.getElementById('follow-modal-title');
         const list    = document.getElementById('follow-modal-list');
 
-        title.textContent = type === 'followers' ? 'Seguidores' : 'Siguiendo';
-        list.innerHTML = '<p class="follow-modal-empty">Cargando...</p>';
+        // Título dinámico
+        title.textContent = type === 'followers' ? t('public.followers') : t('public.following');
+        
+        // Texto de carga traducido
+        list.innerHTML = `<p class="follow-modal-empty">${t('premium.loading')}</p>`;
         overlay.style.display = 'flex';
 
         try {
@@ -251,9 +248,12 @@
             const data = await res.json();
 
             if (!data.length) {
-                list.innerHTML = `<p class="follow-modal-empty">
-                    ${type === 'followers' ? 'Aún no hay seguidores.' : 'No sigue a nadie todavía.'}
-                </p>`;
+                // Mensaje de lista vacía según el tipo
+                const emptyMsg = type === 'followers' 
+                    ? t('public.noFollowers') 
+                    : t('public.noFollowing');
+                
+                list.innerHTML = `<p class="follow-modal-empty">${emptyMsg}</p>`;
                 return;
             }
 
@@ -264,17 +264,17 @@
                 item.onclick = () => { window.location.href = '/user/' + user.id; };
                 item.innerHTML = `
                     <img src="${user.profile_pic || '/storage/images/default_user.jpg'}"
-                         onerror="this.src='/storage/images/default_user.jpg'">
+                        onerror="this.src='/storage/images/default_user.jpg'">
                     <span class="name">${user.username}</span>
-                    ${user.is_premium ? '<span class="premium-tag">✨ Premium</span>' : ''}
+                    ${user.is_premium ? `<span class="premium-tag">${t('settings.premiumActive')}</span>` : ''}
                 `;
                 list.appendChild(item);
             });
         } catch(e) {
-            list.innerHTML = '<p class="follow-modal-empty" style="color:red;">Error al cargar la lista.</p>';
+            list.innerHTML = `<p class="follow-modal-empty" style="color:red;">Error</p>`;
         }
     }
-
+    
     function closeFollowModal() {
         document.getElementById('follow-modal-overlay').style.display = 'none';
     }
@@ -368,8 +368,8 @@
         const btn = document.getElementById('follow-btn');
         btn.className = `follow-btn ${following ? 'following' : ''}`;
         btn.innerHTML = following
-            ? '<i class="fas fa-user-check"></i> Siguiendo'
-            : '<i class="fas fa-user-plus"></i> Seguir';
+            ? '<i class="fas fa-user-check"></i> ' + t('public.unfollow')
+            : '<i class="fas fa-user-plus"></i> ' + t('public.follow');
         document.getElementById('stat-followers').textContent = data.follower_count;
     }
 

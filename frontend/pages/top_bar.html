@@ -19,7 +19,7 @@
                 title="Premium" onclick="togglePremiumPanel()">
             <i class="fas fa-crown"></i>
         </button>
-        <button class="topbar-action" title="Ajustes" onclick="toggleSettings()">
+        <button class="topbar-action" data-i18n-title="settings.title" title="Ajustes" onclick="toggleSettings()">
             <i class="fas fa-sliders-h"></i>
         </button>
     </div>
@@ -30,32 +30,32 @@
     <div class="settings-overlay" onclick="togglePremiumPanel()"></div>
     <div class="settings-drawer">
         <div class="settings-header">
-            <span>✨ Zona Premium</span>
+            <span data-i18n="premium.zone">✨ Zona Premium</span>
             <button onclick="togglePremiumPanel()"><i class="fas fa-times"></i></button>
         </div>
         <div class="settings-section">
-            <p class="settings-section-title">Receta de la semana</p>
+            <p class="settings-section-title" data-i18n="premium.weeklyRecipe">Receta de la semana</p>
             <div id="weekly-recipe-card" class="weekly-recipe-card">
-                <div class="weekly-recipe-loading"><i class="fas fa-spinner fa-spin"></i> Cargando...</div>
+                <div class="weekly-recipe-loading"><i class="fas fa-spinner fa-spin"></i> <span data-i18n="premium.loading">Cargando...</span></div>
             </div>
         </div>
         <div class="settings-section">
-            <p class="settings-section-title">Cupones exclusivos</p>
+            <p class="settings-section-title" data-i18n="premium.coupons">Cupones exclusivos</p>
             <div id="coupons-container"></div>
         </div>
         <div class="settings-section">
             <p class="settings-section-title">Tema de color</p>
             <div class="premium-themes-grid">
                 <button class="premium-theme-btn" data-theme="default" onclick="setThemeFromPremium('default',this)">
-                    🍅<span>Naranja</span>
+                    🍅<span data-i18n="settings.themeOrange">Naranja</span>
                     <i class="fas fa-check theme-check"></i>
                 </button>
                 <button class="premium-theme-btn" data-theme="green" onclick="setThemeFromPremium('green',this)">
-                    🌿<span>Verde</span>
+                    🌿<span data-i18n="settings.themeGreen">Verde</span>
                     <i class="fas fa-check theme-check"></i>
                 </button>
                 <button class="premium-theme-btn" data-theme="dark" onclick="setThemeFromPremium('dark',this)">
-                    🌙<span>Oscuro</span>
+                    🌙<span data-i18n="settings.themeDark">Oscuro</span>
                     <i class="fas fa-check theme-check"></i>
                 </button>
             </div>
@@ -68,12 +68,12 @@
     <div class="settings-overlay" onclick="toggleSettings()"></div>
     <div class="settings-drawer">
         <div class="settings-header">
-            <span>Ajustes</span>
+            <span data-i18n="settings.title">Ajustes</span>
             <button onclick="toggleSettings()"><i class="fas fa-times"></i></button>
         </div>
 
         <div class="settings-section" id="settings-account-section">
-            <p class="settings-section-title">Cuenta</p>
+            <p class="settings-section-title" data-i18n="settings.account">Cuenta</p>
             <div class="settings-row" id="settings-user-row" style="display:none;">
                 <img id="settings-avatar" src="/storage/images/default_user.jpg" class="settings-avatar">
                 <div>
@@ -81,46 +81,46 @@
                     <div id="settings-plan-badge"></div>
                 </div>
             </div>
-            <a href="/my-profile" class="settings-item"><i class="fas fa-user"></i> Ver mi perfil</a>
-            <a href="/profile" class="settings-item"><i class="fas fa-edit"></i> Editar perfil</a>
+            <a href="/my-profile" class="settings-item"><i class="fas fa-user"></i> <span data-i18n="settings.viewProfile">Ver mi perfil</span></a>
+            <a href="/profile" class="settings-item"><i class="fas fa-edit"></i> <span data-i18n="settings.editProfile">Editar perfil</span></a>
         </div>
 
         <div class="settings-section">
-            <p class="settings-section-title">Suscripción</p>
+            <p class="settings-section-title" data-i18n="settings.subscription">Suscripción</p>
             <div id="settings-sub-basic" style="display:none;">
                 <div class="settings-item premium-upsell" onclick="upgradeToPremium()">
                     <i class="fas fa-crown"></i>
                     <div>
-                        <div style="font-weight:700;">Hazte Premium</div>
-                        <div style="font-size:0.75rem;opacity:0.85;">Temas, cupones y receta exclusiva</div>
+                        <div style="font-weight:700;" data-i18n="settings.goPremium">Hazte Premium</div>
+                        <div style="font-size:0.75rem;opacity:0.85;" data-i18n="settings.goPremiumSub">Temas, cupones y receta exclusiva</div>
                     </div>
                 </div>
             </div>
             <div id="settings-sub-premium" style="display:none;">
                 <div class="settings-item" style="color:#f7971e;font-weight:700;pointer-events:none;">
-                    <i class="fas fa-crown"></i> Plan Premium activo
+                    <i class="fas fa-crown"></i> <span data-i18n="settings.premiumActive">Plan Premium activo</span>
                 </div>
                 <div class="settings-item" onclick="changePayment()">
-                    <i class="fas fa-credit-card"></i> Cambiar método de pago
+                    <i class="fas fa-credit-card"></i> <span data-i18n="settings.changePayment">Cambiar método de pago</span>
                 </div>
                 <div class="settings-item danger" onclick="cancelPremium()">
-                    <i class="fas fa-times-circle"></i> Cancelar suscripción
+                    <i class="fas fa-times-circle"></i> <span data-i18n="settings.cancelSub">Cancelar suscripción</span>
                 </div>
             </div>
         </div>
 
         <div class="settings-section">
-            <p class="settings-section-title">Apariencia</p>
+            <p class="settings-section-title" data-i18n="settings.appearance">Apariencia</p>
             <div class="settings-item theme-row">
-                <span><i class="fas fa-palette"></i> Tema de color</span>
+                <span><i class="fas fa-palette"></i> <span data-i18n="settings.colorTheme">Tema de color</span></span>
                 <div class="theme-pills">
-                    <button class="theme-pill active" data-theme="default" onclick="setTheme('default',this)" title="Naranja">🍅</button>
-                    <button class="theme-pill premium-only" data-theme="green" onclick="setTheme('green',this)" title="Verde (Premium)">🌿<span class="pill-lock">🔒</span></button>
-                    <button class="theme-pill premium-only" data-theme="dark" onclick="setTheme('dark',this)" title="Oscuro (Premium)">🌙<span class="pill-lock">🔒</span></button>
+                    <button class="theme-pill active" data-theme="default" onclick="setTheme('default',this)" data-i18n-title="settings.themeOrange" title="Naranja">🍅</button>
+                    <button class="theme-pill premium-only" data-theme="green" onclick="setTheme('green',this)" data-i18n-title="settings.themeGreen" title="Verde (Premium)">🌿<span class="pill-lock">🔒</span></button>
+                    <button class="theme-pill premium-only" data-theme="dark" onclick="setTheme('dark',this)" data-i18n-title="settings.themeDark" title="Oscuro (Premium)">🌙<span class="pill-lock">🔒</span></button>
                 </div>
             </div>
             <div class="settings-item lang-row">
-                <span><i class="fas fa-language"></i> Idioma</span>
+                <span><i class="fas fa-language"></i> <span data-i18n="settings.language">Idioma</span></span>
                 <select class="lang-select" onchange="setLanguage(this.value)">
                     <option value="es" selected>🇪🇸 Español</option>
                     <option value="en">🇬🇧 English</option>
@@ -130,12 +130,13 @@
 
         <div class="settings-section">
             <a href="/auth/logout" class="settings-item danger">
-                <i class="fas fa-sign-out-alt"></i> Cerrar sesión
+                <i class="fas fa-sign-out-alt"></i> <span data-i18n="settings.logout">Cerrar sesión</span>
             </a>
         </div>
     </div>
 </div>
 
+<script src="{{ url_for('static', filename='i18n.js') }}"></script>
 <script>
 // ── Branding premium ────────────────────────────────────────
 let _currentUser = null;
@@ -242,11 +243,11 @@ function applyTheme(name) {
 
 function setTheme(name, btn) {
     if (!_currentUser && name !== 'default') {
-        alert('Inicia sesión para cambiar el tema.');
+        alert(t('alert.loginTheme'));
         return;
     }
     if (_currentUser && _currentUser.plan !== 'PREMIUM' && name !== 'default') {
-        alert('Los temas Verde y Oscuro son exclusivos de Premium. ¡Hazte premium para desbloquearlos!');
+        alert(t('alert.premiumTheme'));
         return;
     }
     document.querySelectorAll('.theme-pill').forEach(p => p.classList.remove('active'));
@@ -259,7 +260,7 @@ function setTheme(name, btn) {
 
 // ── Suscripción ─────────────────────────────────────────────
 async function changePayment() {
-    const card = prompt('Introduce el nuevo número de tarjeta:');
+    const card = prompt(t('alert.newCardNumber'));
     if (!card || card.trim().length < 8) return;
 
     const res = await fetch('/premium/update-payment', {
@@ -276,7 +277,7 @@ async function changePayment() {
 }
 
 async function upgradeToPremium() {
-    const card = prompt('Introduce tu número de tarjeta para activar Premium:');
+    const card = prompt(t('alert.cardForPremium'));
     if (!card || card.trim().length < 8) return;
 
     const res = await fetch('/premium/upgrade', {
@@ -294,7 +295,7 @@ async function upgradeToPremium() {
 }
 
 async function cancelPremium() {
-    if (!confirm('¿Seguro que quieres cancelar tu suscripción Premium? Perderás acceso a los temas exclusivos y los cupones.')) return;
+    if (!confirm(t('alert.cancelConfirm'))) return;
     const res = await fetch('/premium/cancel', { method: 'POST' });
     const data = await res.json();
     if (res.ok) {
@@ -313,16 +314,14 @@ async function cancelPremium() {
 // ── Idioma ──────────────────────────────────────────────────
 function setLanguage(lang) {
     localStorage.setItem('trastevere_lang', lang);
-    // Por ahora guardamos la preferencia — la implementación completa
-    // de i18n se hará en una próxima versión del backend
-    const names = { es: 'Español', en: 'English' };
-    alert(`Idioma guardado: ${names[lang] || lang}.\nLa traducción completa estará disponible próximamente.`);
+    applyLanguage();
 }
 
 // ── Init ────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', async () => {
     // updateBranding ya gestiona el tema según si el usuario es premium o no
     await updateBranding();
+    applyLanguage();
 
     const saved = localStorage.getItem('trastevere_theme') || 'default';
     applyTheme(saved);
@@ -342,10 +341,10 @@ async function goRandomRecipe() {
     try {
         const res  = await fetch('/api/recipes/search');
         const list = await res.json();
-        if(!list||list.length===0){alert('No hay recetas aún.');return;}
+        if(!list||list.length===0){alert(t('alert.noRecipes'));return;}
         const pick = list[Math.floor(Math.random()*list.length)];
         window.location.href='/publications/view/'+pick.id;
-    } catch(e){alert('Error al buscar receta aleatoria.');}
+    } catch(e){alert(t('alert.randomError'));}
 }
 
 // ── Premium panel ────────────────────────────────────────────
@@ -410,10 +409,10 @@ function setThemeFromPremium(name,btn){
 function _updatePremiumBtn(isPremium){
     const btn=document.getElementById('premium-topbar-btn'); if(!btn)return;
     if(isPremium){
-        btn.classList.add('is-premium'); btn.title='Zona Premium';
+        btn.classList.add('is-premium'); btn.title=t('premium.zone');
         btn.innerHTML='<i class="fas fa-crown"></i>';
     } else {
-        btn.classList.remove('is-premium'); btn.title='Hazte Premium';
+        btn.classList.remove('is-premium'); btn.title=t('settings.goPremium');
         btn.innerHTML='<i class="fas fa-crown"></i><span class="crown-lock">🔒</span>';
     }
 }
