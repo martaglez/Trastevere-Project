@@ -58,7 +58,9 @@ def register():
             )
             db.add(new_user)
             db.commit()
-            return jsonify({"message": "Usuario creado con éxito"}), 201
+            db.refresh(new_user)
+            session['user_id'] = new_user.id
+            return jsonify({"message": "Usuario creado con éxito", "id": new_user.id}), 201
         except Exception as e:
             db.rollback()
             return jsonify({"error": str(e)}), 500

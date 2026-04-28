@@ -9,19 +9,25 @@
 /* ── Cabecera ──────────────────────────────────────────────── */
 .pub-profile-header {
   display: flex;
-  gap: 18px;
+  gap: 16px;
   padding: 20px 16px 0;
   align-items: flex-start;
+  flex-wrap: wrap;  /* wrap on very small screens */
 }
 
 .pub-profile-avatar-wrap { position: relative; flex-shrink: 0; }
 
 .pub-profile-avatar {
-  width: 86px; height: 86px;
+  width: 76px; height: 76px;
   border-radius: 50%;
   object-fit: cover;
   border: 3px solid var(--border);
   display: block;
+}
+
+@media (min-width: 600px) {
+  .pub-profile-avatar { width: 90px; height: 90px; }
+  .stat-num { font-size: 1.15rem; }
 }
 
 /* Anillo premium animado */
@@ -44,15 +50,16 @@
 .pub-profile-name-row {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
   flex-wrap: wrap;
   margin-bottom: 4px;
 }
 .pub-profile-name-row h1 {
   font-family: var(--font-display);
-  font-size: 1.25rem;
+  font-size: 1.15rem;
   color: var(--text);
   margin: 0;
+  word-break: break-word;
 }
 
 .premium-badge {
@@ -121,9 +128,11 @@
   display: flex;
   justify-content: space-around;
   align-items: center;
-  padding: 16px;
+  padding: 12px 8px;
   border-bottom: 1px solid var(--border);
   margin-top: 14px;
+  flex-wrap: nowrap;
+  overflow-x: auto;
 }
 
 .stat-item {
@@ -137,7 +146,7 @@
 }
 
 .stat-num {
-  font-size: 1.15rem;
+  font-size: 1rem;
   font-weight: 800;
   color: var(--text);
   font-family: var(--font-display);

@@ -6,7 +6,7 @@
                  alt="Trastevere"
                  class="logo-full"
                  id="main-logo"
-                 style="height:40px!important;max-height:40px!important;width:auto;object-fit:contain;"
+                 style="height:90px!important;max-height:90px!important;max-width:220px;width:auto;object-fit:contain;"
                  onerror="this.style.display='none'; document.querySelector('.app-name').style.display='block';">
             <span class="app-name">Trastevere</span>
         </a>
@@ -149,8 +149,9 @@ async function updateBranding() {
                 const logoImg = document.getElementById('main-logo');
                 if (logoImg) {
                     logoImg.src = '/storage/images/logo_premium.png';
-                    logoImg.style.height = '40px';
-                    logoImg.style.maxHeight = '40px';
+                    logoImg.style.height = '100px';
+                    logoImg.style.maxHeight = '100px';
+                    logoImg.style.maxWidth = '3¡220px';
                     logoImg.style.width = 'auto';
                 }
                 document.body.classList.add('is-premium');

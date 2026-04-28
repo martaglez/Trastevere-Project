@@ -11,7 +11,13 @@
 </head>
 <body>
     <div class="auth-container">
-        <div class="auth-logo"><span>Trastevere</span></div>
+        <div class="auth-logo" style="display:flex;justify-content:space-between;align-items:center;">
+            <span>Trastevere</span>
+            <select onchange="setLang(this.value)" style="border:1px solid var(--border);border-radius:8px;padding:4px 8px;font-size:0.8rem;background:white;cursor:pointer;color:var(--text);">
+                <option value="es">🇪🇸 ES</option>
+                <option value="en">🇬🇧 EN</option>
+            </select>
+        </div>
         <h1 data-i18n="register.heading">Crear Cuenta</h1>
 
         <label><span data-i18n="register.username">Usuario</span> <span style="color:var(--primary)">*</span></label>
@@ -39,11 +45,12 @@
         </div>
 
         <div id="premium-fields" style="display:none;">
-            <label><span data-i18n="register.card">Número de Tarjeta</span> <span style="color:var(--primary)">*</span></label>
-            <input type="text" id="card_number" placeholder="1234 5678 1234 5678" maxlength="16">
-            <small style="color:var(--text-muted);font-size:0.75rem;display:block;margin-top:-6px;margin-bottom:10px;">
-                DNI y Teléfono opcionales para el Plan Premium.
-            </small>
+            <div style="background:var(--primary-light);border-radius:12px;padding:12px 14px;margin-bottom:10px;">
+                <div style="font-weight:700;color:var(--primary);margin-bottom:4px;">✨ Plan Premium</div>
+                <div style="font-size:0.82rem;color:var(--text-muted)" data-i18n="register.premiumInfo">
+                    Tras registrarte serás redirigido a la pasarela de pago segura (1,99€/mes).
+                </div>
+            </div>
         </div>
 
         <button onclick="handleRegister()" class="btn-main" style="margin-top:10px;" data-i18n="register.btn">Registrarse</button>
@@ -58,23 +65,31 @@
         document.getElementById('star-phone').style.display = isPremium ? 'none' : 'inline';
     }
 
+    function setLang(lang) {
+        localStorage.setItem('trastevere_lang', lang);
+        applyLanguage();
+        document.querySelector('select').value = lang;
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        applyLanguage();
+        const saved = localStorage.getItem('trastevere_lang') || 'es';
+        document.querySelector('select').value = saved;
+    });
+
     async function handleRegister() {
-        const username   = document.getElementById('username').value;
-        const email      = document.getElementById('email').value;
-        const password   = document.getElementById('password').value;
-        const dni        = document.getElementById('dni').value;
-        const phone      = document.getElementById('phone').value;
-        const wantPremium= document.getElementById('want-premium').checked;
-        const cardNumber = document.getElementById('card_number').value;
+        const username    = document.getElementById('username').value.trim();
+        const email       = document.getElementById('email').value.trim();
+        const password    = document.getElementById('password').value;
+        const dni         = document.getElementById('dni').value.trim();
+        const phone       = document.getElementById('phone').value.trim();
+        const wantPremium = document.getElementById('want-premium').checked;
 
         if (!username || !email || !password) {
-            alert('Rellena los campos obligatorios.'); return;
+            alert(t('alert.fillRequired') || 'Rellena los campos obligatorios.'); return;
         }
         if (!wantPremium && (!dni || !phone)) {
-            alert('DNI y Teléfono son obligatorios para el plan gratuito.'); return;
-        }
-        if (wantPremium && !cardNumber) {
-            alert('Introduce tu tarjeta para activar el plan Premium.'); return;
+            alert(t('alert.dniPhoneRequired') || 'DNI y Teléfono son obligatorios para el plan gratuito.'); return;
         }
 
         try {
@@ -86,18 +101,23 @@
                     dni: dni || null,
                     phone_number: phone || null,
                     wantPremium,
-                    card_number: wantPremium ? cardNumber : null
+                    card_number: null   // Ya no guardamos tarjeta aquí
                 })
             });
             const data = await response.json();
             if (response.ok) {
-                alert('¡Bienvenido a Trastevere!');
-                window.location.href = "{{ url_for('auth.login') }}";
+                if (wantPremium) {
+                    // Redirigir al TPV para activar premium
+                    window.location.href = '/premium/pay';
+                } else {
+                    alert(t('alert.welcome') || '¡Bienvenido a Trastevere!');
+                    window.location.href = "{{ url_for('auth.login') }}";
+                }
             } else {
                 alert('Error: ' + data.error);
             }
         } catch {
-            alert('Error de conexión con el servidor.');
+            alert(t('alert.connectionError') || 'Error de conexión con el servidor.');
         }
     }
     </script>

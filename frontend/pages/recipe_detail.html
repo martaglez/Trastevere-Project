@@ -143,6 +143,45 @@ async function loadRecipe() {
 
 loadRecipe();
 
+async function deleteRecipe() {
+    if (!confirm('¿Seguro que quieres borrar esta receta?')) return;
+    const pubId = window.location.pathname.split('/').pop();
+    const res = await fetch('/publications/delete/' + pubId, {method:'POST'});
+    if (res.ok) { alert('Receta borrada.'); window.location.href='/'; }
+    else { const d=await res.json(); alert('Error: '+(d.error||'No se pudo borrar')); }
+}
+
+function openEditModal() {
+    fetch('/publications/'+window.location.pathname.split('/').pop())
+    .then(r=>r.json()).then(d=>{
+        document.getElementById('edit-title').value       = d.title||'';
+        document.getElementById('edit-description').value = d.description||'';
+        document.getElementById('edit-ingredients').value = (d.ingredients||[]).join('\n');
+        document.getElementById('edit-steps').value       = (d.steps||[]).join('\n');
+        document.getElementById('edit-tags').value        = (d.tags||[]).join(', ');
+        document.getElementById('edit-modal').style.display='flex';
+        document.body.style.overflow='hidden';
+    });
+}
+function closeEditModal() {
+    document.getElementById('edit-modal').style.display='none';
+    document.body.style.overflow='';
+}
+async function saveEdit() {
+    const pubId=window.location.pathname.split('/').pop();
+    const title=document.getElementById('edit-title').value.trim();
+    if(!title){alert('El título es obligatorio');return;}
+    const fd=new FormData();
+    fd.append('title',title);
+    fd.append('description',document.getElementById('edit-description').value.trim());
+    fd.append('ingredients',JSON.stringify(document.getElementById('edit-ingredients').value.split('\n').map(s=>s.trim()).filter(Boolean)));
+    fd.append('steps',JSON.stringify(document.getElementById('edit-steps').value.split('\n').map(s=>s.trim()).filter(Boolean)));
+    fd.append('tags',JSON.stringify(document.getElementById('edit-tags').value.split(',').map(s=>s.trim()).filter(Boolean)));
+    const res=await fetch('/publications/edit/'+pubId,{method:'POST',body:fd});
+    if(res.ok){alert('¡Receta actualizada!');closeEditModal();window.location.reload();}
+    else{const d=await res.json();alert('Error:'+(d.error||'No se pudo guardar'));}
+}
+
 async function openTableModal() {
     const res = await fetch('/user/profile');
     if (res.status === 401) {

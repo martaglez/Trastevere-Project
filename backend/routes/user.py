@@ -119,7 +119,7 @@ def update_profile():
 @user_bp.route('/about', methods=['GET'])
 def about():
     return jsonify({
-        "version": "2.0.2",
-        "build":   "2026-04-21",
+        "version": "2.2.0",
+        "build":   "2026-04-28",
         "authors": "CEU San Pablo & Trastevere Team"
     })

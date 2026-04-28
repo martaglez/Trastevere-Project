@@ -11,8 +11,12 @@
 </head>
 <body>
     <div class="auth-container">
-        <div class="auth-logo">
+        <div class="auth-logo" style="display:flex;justify-content:space-between;align-items:center;">
             <span>Trastevere</span>
+            <select onchange="setLang(this.value)" style="border:1px solid var(--border);border-radius:8px;padding:4px 8px;font-size:0.8rem;background:white;cursor:pointer;color:var(--text);">
+                <option value="es">🇪🇸 ES</option>
+                <option value="en">🇬🇧 EN</option>
+            </select>
         </div>
         <h1 data-i18n="login.welcome">Bienvenido</h1>
 
@@ -28,6 +32,19 @@
     </div>
 
     <script>
+    function setLang(lang) {
+        localStorage.setItem('trastevere_lang', lang);
+        applyLanguage();
+        // Update selector
+        document.querySelector('select').value = lang;
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        applyLanguage();
+        const saved = localStorage.getItem('trastevere_lang') || 'es';
+        document.querySelector('select').value = saved;
+    });
+
     async function handleLogin() {
         const email = document.getElementById('email').value;
         const password = document.getElementById('pass').value;

@@ -164,8 +164,15 @@
         // 2. El widget de estrellas
         const starWidget = u.is_own_profile ? '' : `
             <div class="star-rating-widget" id="star-widget">
-                <span class="star-rating-label">${t('profile.stars')}:</span> 
-                ...`; // Cambiado: "Valorar" por t('profile.stars') o crea una nueva key
+                <span class="star-rating-label">${t('profile.rate')}:</span>
+                ${[1,2,3,4,5].map(n => `
+                    <button class="star-rate-btn" data-val="${n}"
+                            onmouseenter="hoverStars(${n})"
+                            onmouseleave="unhoverStars()"
+                            onclick="submitRating(${u.id}, ${n})">
+                        <i class="far fa-star"></i>
+                    </button>`).join('')}
+            </div>`;
 
         // Recipe cards
         const pubs = u.publications.length === 0

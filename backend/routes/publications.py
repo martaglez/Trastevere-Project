@@ -136,3 +136,80 @@ def publication_detail(pub_id):
 @publications_bp.route('/view/<int:pub_id>')
 def publication_view(pub_id):
     return render_template("recipe_detail.html")
+
+# ── Borrar publicación ──────────────────────────────────────────────────────────
+@publications_bp.route('/delete/<int:pub_id>', methods=['POST'])
+def delete_publication(pub_id):
+    user_id = session.get('user_id')
+    if not user_id:
+        return jsonify({"error": "No autorizado"}), 401
+    db = SessionLocal()
+    try:
+        pub = db.query(Publication).filter(Publication.id == pub_id).first()
+        if not pub:
+            return jsonify({"error": "No encontrada"}), 404
+        if pub.user_id != user_id:
+            return jsonify({"error": "No es tu receta"}), 403
+        db.delete(pub)
+        db.commit()
+        return jsonify({"status": "ok"})
+    except Exception as e:
+        db.rollback()
+        return jsonify({"error": str(e)}), 500
+    finally:
+        db.close()
+
+
+# ── Editar publicación ──────────────────────────────────────────────────────────
+@publications_bp.route('/edit/<int:pub_id>', methods=['POST'])
+def edit_publication(pub_id):
+    user_id = session.get('user_id')
+    if not user_id:
+        return jsonify({"error": "No autorizado"}), 401
+    db = SessionLocal()
+    try:
+        pub = db.query(Publication).filter(Publication.id == pub_id).first()
+        if not pub:
+            return jsonify({"error": "No encontrada"}), 404
+        if pub.user_id != user_id:
+            return jsonify({"error": "No es tu receta"}), 403
+
+        import json as _json
+        title       = request.form.get('title', pub.title)
+        description = request.form.get('description', pub.body)
+        try:
+            ingredients = _json.loads(request.form.get('ingredients', '[]'))
+            steps       = _json.loads(request.form.get('steps', '[]'))
+            tags        = _json.loads(request.form.get('tags', '[]'))
+        except:
+            return jsonify({"error": "Formato incorrecto"}), 400
+
+        meta = pub.image_meta if isinstance(pub.image_meta, dict) else {}
+        if isinstance(pub.image_meta, str):
+            try: meta = _json.loads(pub.image_meta)
+            except: meta = {}
+
+        existing_urls = meta.get('urls', [])
+        new_urls = list(existing_urls)
+        for i in range(3):
+            file = request.files.get(f'file_{i}')
+            if file and file.filename != '':
+                result = upload_to_cloudinary(file)
+                if i < len(new_urls):
+                    new_urls[i] = result
+                else:
+                    new_urls.append(result)
+
+        pub.title = title
+        pub.body  = description
+        pub.image_meta = {
+            "urls": new_urls, "ingredients": list(ingredients),
+            "steps": list(steps), "tags": list(tags)
+        }
+        db.commit()
+        return jsonify({"status": "ok", "id": pub.id})
+    except Exception as e:
+        db.rollback()
+        return jsonify({"error": str(e)}), 500
+    finally:
+        db.close()
