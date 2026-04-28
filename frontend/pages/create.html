@@ -3,11 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Crear receta - Trastevere</title>
+    <title data-i18n="create.title">Crear receta - Trastevere</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="{{ url_for('static', filename='main.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='profile.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='create.css') }}">
+    <script src="{{ url_for('static', filename='i18n.js') }}"></script>
     <link rel="apple-touch-icon" href="/storage/images/touch-icon.png">
 </head>
 <body>
@@ -17,7 +18,7 @@
 <div class="profile-container create-recipe-card">
 
     <div id="create-logged-view" style="display:none;">
-        <h1>Nueva Receta</h1>
+        <h1 data-i18n="create.heading">Nueva Receta</h1>
 
         <!-- Grid de imágenes -->
         <div class="image-grid">
@@ -37,24 +38,24 @@
                 </label>
             </div>
         </div>
-        <p class="field-hint">* Al menos una foto es obligatoria</p>
+        <p class="field-hint" data-i18n="create.photoHint">* Al menos una foto es obligatoria</p>
 
-        <input class="title-input" id="title" placeholder="Título de la receta *" required>
-        <textarea class="description-input" id="description" placeholder="Cuéntanos sobre tu plato... *"></textarea>
+        <input class="title-input" id="title" placeholder="Título de la receta *" data-i18n-placeholder="create.titlePh" required>
+        <textarea class="description-input" id="description" placeholder="Cuéntanos sobre tu plato... *" data-i18n-placeholder="create.descPh"></textarea>
 
         <!-- Ingredientes estructurados -->
-        <span class="section-label">Ingredientes <span style="color:var(--primary)">*</span></span>
+        <span class="section-label"><span data-i18n="create.ingredients">Ingredientes</span> <span style="color:var(--primary)">*</span></span>
         <div id="ingredients"></div>
-        <button onclick="addIngredient()" class="btn-add-item">+ Añadir ingrediente</button>
+        <button onclick="addIngredient()" class="btn-add-item" data-i18n="create.addIngr">+ Añadir ingrediente</button>
 
-        <span class="section-label">Tags</span>
-        <input class="tags-input" id="tags" placeholder="Ej: pasta, italiano, rápido">
+        <span class="section-label"><span data-i18n="create.tags">Tags</span></span>
+        <input class="tags-input" id="tags" placeholder="Ej: pasta, italiano, rápido" data-i18n-placeholder="create.tagsPh">
 
-        <span class="section-label">Pasos de preparación <span style="color:var(--primary)">*</span></span>
+        <span class="section-label"><span data-i18n="create.steps">Pasos de preparación</span> <span style="color:var(--primary)">*</span></span>
         <div id="steps"></div>
-        <button onclick="addStep()" class="btn-add-item">+ Añadir paso</button>
+        <button onclick="addStep()" class="btn-add-item" data-i18n="create.addStep">+ Añadir paso</button>
 
-        <button class="publish-btn" onclick="publishRecipe()">🍅 Publicar Receta</button>
+        <button class="publish-btn" onclick="publishRecipe()" data-i18n="create.publish">🍅 Publicar Receta</button>
     </div>
 
     <div id="create-guest-view" style="display:none; text-align:center; padding:40px 10px;">
@@ -62,8 +63,8 @@
         <h2 style="font-size:1.6rem;margin:20px 0 10px;">¡Comparte tu talento!</h2>
         <p style="color:var(--text-muted);margin-bottom:30px;">Inicia sesión para subir tus propias recetas.</p>
         <div style="display:flex;flex-direction:column;gap:12px;max-width:300px;margin:0 auto;">
-            <button onclick="window.location.href='/auth/login'" class="btn-main">Iniciar Sesión</button>
-            <button onclick="window.location.href='/auth/register'" class="btn-secondary">Crear cuenta gratis</button>
+            <button onclick="window.location.href='/auth/login'" class="btn-main" data-i18n="create.login">Iniciar Sesión</button>
+            <button onclick="window.location.href='/auth/register'" class="btn-secondary" data-i18n="create.createAccount">Crear cuenta gratis</button>
         </div>
     </div>
 </div>
@@ -109,9 +110,9 @@ function addIngredient() {
     div.className = 'ingredient-row';
     const unitOptions = UNITS.map(u => `<option value="${u}">${u}</option>`).join('');
     div.innerHTML = `
-        <input type="number" class="ingr-qty"   placeholder="Cant." min="0" step="any">
+        <input type="number" class="ingr-qty"   placeholder="Cant." data-i18n-placeholder="create.ingrQtyPh" min="0" step="any">
         <select class="ingr-unit">${unitOptions}</select>
-        <input type="text"   class="ingr-name"  placeholder="Ingrediente">
+        <input type="text"   class="ingr-name"  placeholder="Ingrediente" data-i18n-placeholder="create.ingrNamePh">
         <button class="ingr-remove" onclick="this.parentElement.remove()" title="Eliminar">
             <i class="fas fa-times"></i>
         </button>`;
@@ -124,7 +125,7 @@ function addStep() {
     div.className = 'step-row';
     div.innerHTML = `
         <span class="step-num">${n}</span>
-        <input type="text" class="step-input" placeholder="Describe el paso">
+        <input type="text" class="step-input" placeholder="Describe el paso" data-i18n-placeholder="create.stepPh">
         <button class="ingr-remove" onclick="removeStep(this)" title="Eliminar">
             <i class="fas fa-times"></i>
         </button>`;
@@ -168,7 +169,7 @@ async function publishRecipe() {
     if (steps.length === 0)       errors.push('Añade al menos un paso');
 
     if (errors.length > 0) {
-        alert('Por favor corrige lo siguiente:\n\n• ' + errors.join('\n• '));
+        alert(t('create.errorFix') + '\n\n• ' + errors.join('\n• '));
         return;
     }
 
@@ -191,12 +192,12 @@ async function publishRecipe() {
         const response = await fetch('/publications/create', { method: 'POST', body: formData });
         const result   = await response.json();
         if (response.ok) {
-            alert('¡Receta publicada con éxito!');
+            alert(t('create.success'));
             window.location.href = '/';
         } else {
-            alert('Error: ' + (result.error || 'No se pudo publicar'));
+            alert('Error: ' + (result.error || t('create.publishError')));
         }
-    } catch { alert('Error al conectar con el servidor.'); }
+    } catch { alert(t('create.serverError')); }
 }
 
 document.addEventListener('DOMContentLoaded', checkAccess);

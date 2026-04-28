@@ -3,12 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mis Tables - Trastevere</title>
+    <title data-i18n="tables.title">Mis Tables - Trastevere</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="apple-touch-icon" href="/storage/images/touch-icon.png">
     <link rel="stylesheet" href="{{ url_for('static', filename='main.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='profile.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='tables.css') }}">
+    <script src="{{ url_for('static', filename='i18n.js') }}"></script>
 </head>
 <body>
 
@@ -17,11 +18,11 @@
 <div class="profile-container tables-main-wrapper">
 
     <div id="tables-logged-view" style="display:none;">
-        <h1 class="tables-title">Mis Tables</h1>
+        <h1 class="tables-title" data-i18n="tables.heading">Mis Tables</h1>
 
         <div class="create-table-form">
-            <input id="new-table-name" placeholder="Nombre de la nueva table">
-            <button onclick="createTable()" class="btn-main">Crear</button>
+            <input id="new-table-name" placeholder="Nombre de la nueva table" data-i18n-placeholder="tables.newPh">
+            <button onclick="createTable()" class="btn-main" data-i18n="tables.create">Crear</button>
         </div>
 
         <div id="tables-container" class="tables-container"></div>
@@ -29,13 +30,13 @@
 
     <div id="tables-guest-view" style="display:none;text-align:center;padding:40px 10px;">
         <i class="fas fa-layer-group" style="font-size:3.5rem;color:var(--primary);opacity:0.3;"></i>
-        <h2 style="font-size:1.5rem;margin:20px 0 10px;">Organiza tus colecciones</h2>
+        <h2 style="font-size:1.5rem;margin:20px 0 10px;" data-i18n="tables.organize">Organiza tus colecciones</h2>
         <p style="color:var(--text-muted);margin-bottom:28px;">
             Inicia sesión para crear Tables y guardar tus recetas favoritas.
         </p>
         <div style="display:flex;flex-direction:column;gap:10px;max-width:280px;margin:0 auto;">
-            <button onclick="window.location.href='/auth/login'" class="btn-main">Iniciar Sesión</button>
-            <button onclick="window.location.href='/auth/register'" class="btn-secondary">Crear cuenta gratis</button>
+            <button onclick="window.location.href='/auth/login'" class="btn-main" data-i18n="tables.login">Iniciar Sesión</button>
+            <button onclick="window.location.href='/auth/register'" class="btn-secondary" data-i18n="tables.createAccount">Crear cuenta gratis</button>
         </div>
     </div>
 </div>
@@ -60,7 +61,7 @@ async function loadTables() {
 
         if (tables.length === 0) {
             container.innerHTML = `<p style="text-align:center;color:var(--text-muted);margin-top:20px;">
-                Aún no tienes ninguna Table. ¡Crea la primera arriba!
+                ${t('tables.noTables')}
             </p>`;
             return;
         }

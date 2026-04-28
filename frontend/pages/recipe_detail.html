@@ -8,6 +8,7 @@
     <link rel="apple-touch-icon" href="/storage/images/touch-icon.png">
     <link rel="stylesheet" href="{{ url_for('static', filename='main.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='recipe_detail.css') }}">
+    <script src="{{ url_for('static', filename='i18n.js') }}"></script>
 </head>
 <body>
 
@@ -44,26 +45,24 @@ async function loadRecipe() {
     const container = document.getElementById('recipe-detail');
 
     if (data.error) {
-        container.innerHTML = '<p style="text-align:center;margin-top:60px;color:#888;">Receta no encontrada</p>';
+        container.innerHTML = '<p style="text-align:center;margin-top:60px;color:#888;">' + t('recipe.notFound') + '</p>';
         return;
     }
 
     const photos = data.images || [];
     const img1 = photos[0] || '/storage/images/default_photo.jpg';
-    // Init lightbox with available images
     setTimeout(() => initLightbox(photos.filter(p => p)), 100);
     const img2 = photos[1] || '/storage/images/default_photo.jpg';
     const img3 = photos[2] || '/storage/images/default_photo.jpg';
 
     const tags = (data.tags && data.tags.length > 0)
-        ? [...new Set(data.tags)].map(t => `<span class="tag">#${t}</span>`).join('')
+        ? [...new Set(data.tags)].map(tag => `<span class="tag">#${tag}</span>`).join('')
         : '';
 
     const ingredients = (data.ingredients || []).map(i => `<li>${i}</li>`).join('');
     const steps = (data.steps || []).map(s => `<li>${s}</li>`).join('');
 
     container.innerHTML = `
-        <!-- Imagen hero: solo la grande en móvil, grid en pantallas mayores -->
         <div class="image-grid">
             <img src="${img1}"
                  onerror="this.src='/storage/images/default_photo.jpg';"
@@ -78,7 +77,7 @@ async function loadRecipe() {
         <div class="recipe-content">
             <div class="save-container">
                 <button class="save-btn" onclick="openTableModal()">
-                    <i class="fas fa-bookmark"></i> Guardar en Table
+                    <i class="fas fa-bookmark"></i> ${t('recipe.saveBtn')}
                 </button>
             </div>
 
@@ -88,7 +87,7 @@ async function loadRecipe() {
                     <button class="modal-close-btn" onclick="closeTableModal()" title="Cerrar">
                         <i class="fas fa-times"></i>
                     </button>
-                    <h3>Guardar en Table</h3>
+                    <h3>${t('recipe.saveTitle')}</h3>
                     <p style="font-size:0.78rem;color:var(--text-muted);margin-bottom:12px;">
                         Elige una table
                     </p>
@@ -101,7 +100,7 @@ async function loadRecipe() {
             <div class="recipe-detail-meta">
                 <div class="recipe-detail-author" id="detail-author-btn">
                     <i class="fas fa-user-circle"></i>
-                    <span>${data.author || 'Cocinero Anónimo'}</span>
+                    <span>${data.author || t('recipe.anonymous')}</span>
                 </div>
                 <button class="detail-like-btn ${data.user_liked ? 'liked' : ''}"
                         id="detail-like-btn">
@@ -111,17 +110,16 @@ async function loadRecipe() {
             </div>
             <p class="description">${data.description || 'Sin descripción disponible.'}</p>
 
-            <!-- Columnas: apiladas en móvil, lado a lado en grande -->
             <div class="recipe-columns">
                 <div>
                     <div class="recipe-section-title">
-                        <i class="fas fa-list-ul"></i> Ingredientes
+                        <i class="fas fa-list-ul"></i> ${t('recipe.ingredients')}
                     </div>
                     <ul>${ingredients}</ul>
                 </div>
                 <div>
                     <div class="recipe-section-title">
-                        <i class="fas fa-utensils"></i> Pasos
+                        <i class="fas fa-utensils"></i> ${t('recipe.steps')}
                     </div>
                     <ol>${steps}</ol>
                 </div>
@@ -131,14 +129,12 @@ async function loadRecipe() {
         </div>
     `;
 
-    // Wire author click
     const authorBtn = document.getElementById('detail-author-btn');
     if (authorBtn && data.author_id) {
         authorBtn.addEventListener('click', () => {
             window.location.href = '/user/' + data.author_id;
         });
     }
-    // Wire like button
     const likeBtn = document.getElementById('detail-like-btn');
     if (likeBtn) {
         likeBtn.addEventListener('click', () => toggleDetailLike(data.id));
@@ -150,7 +146,7 @@ loadRecipe();
 async function openTableModal() {
     const res = await fetch('/user/profile');
     if (res.status === 401) {
-        alert('Inicia sesión para guardar recetas');
+        alert(t('recipe.loginSave'));
         window.location.href = '/auth/login';
         return;
     }
@@ -160,16 +156,16 @@ async function openTableModal() {
     modalContainer.innerHTML = '';
 
     if (!tablesList || tablesList.length === 0) {
-        modalContainer.innerHTML = `<p>No tienes tables aún.</p>
+        modalContainer.innerHTML = `<p>${t('tables.noTables')}</p>
             <button onclick="window.location.href='/tables'" class="btn-main" style="margin-top:10px;">
-                Crear mi primera Table
+                ${t('recipe.createTable')}
             </button>`;
     } else {
-        tablesList.forEach(t => {
+        tablesList.forEach(table => {
             const btn = document.createElement('button');
             btn.className = 'modal-table-btn';
-            btn.innerText = t.name;
-            btn.onclick = () => saveToTable(t.id, t.name);
+            btn.innerText = table.name;
+            btn.onclick = () => saveToTable(table.id, table.name);
             modalContainer.appendChild(btn);
         });
     }
@@ -202,7 +198,6 @@ let _lbIndex  = 0;
 
 function initLightbox(images) {
     _lbImages = images.filter(Boolean);
-    // Make images clickable
     document.querySelectorAll('.img-large, .img-right img').forEach((el, i) => {
         el.style.cursor = 'zoom-in';
         el.addEventListener('click', () => openLightbox(i));
@@ -222,12 +217,10 @@ function updateLightbox() {
     const dots = document.getElementById('lightbox-dots');
     img.src    = _lbImages[_lbIndex];
 
-    // Dots
     dots.innerHTML = _lbImages.map((_, i) =>
         `<span class="lb-dot ${i === _lbIndex ? 'active' : ''}" onclick="lightboxGo(${i})"></span>`
     ).join('');
 
-    // Show/hide arrows
     document.querySelector('.lightbox-arrow.left').style.opacity  = _lbImages.length > 1 ? '1' : '0';
     document.querySelector('.lightbox-arrow.right').style.opacity = _lbImages.length > 1 ? '1' : '0';
 }
@@ -246,7 +239,6 @@ function closeLightbox(e) {
     document.body.style.overflow = '';
 }
 
-// Swipe support
 let _lbTouchX = null;
 document.addEventListener('DOMContentLoaded', () => {
     const lb = document.getElementById('lightbox');
@@ -258,7 +250,6 @@ document.addEventListener('DOMContentLoaded', () => {
         _lbTouchX = null;
     }, { passive: true });
 
-    // Keyboard
     document.addEventListener('keydown', e => {
         const lb = document.getElementById('lightbox');
         if (lb.style.display === 'none') return;
@@ -267,7 +258,6 @@ document.addEventListener('DOMContentLoaded', () => {
         if (e.key === 'Escape')     { lb.style.display = 'none'; document.body.style.overflow = ''; }
     });
 });
-
 
 async function toggleDetailLike(pubId) {
     const btn = document.getElementById('detail-like-btn');
@@ -280,7 +270,7 @@ async function toggleDetailLike(pubId) {
         if (res.status === 401) {
             btn.classList.toggle('liked', wasLiked);
             btn.querySelector('i').className = wasLiked ? 'fas fa-heart' : 'far fa-heart';
-            if (confirm('Inicia sesión para dar like. ¿Ir al login?')) {
+            if (confirm(t('home.loginLike'))) {
                 window.location.href = '/auth/login';
             }
             return;
@@ -295,3 +285,5 @@ async function toggleDetailLike(pubId) {
     }
 }
 </script>
+</body>
+</html>
