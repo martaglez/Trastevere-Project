@@ -962,8 +962,8 @@ body.theme-dark .profile-stat-divider { background:#444; }
 .top-bar .logo-full,
 .top-bar img.logo,
 #main-logo {
-  height: 90px !important;
-  max-height: 90px !important;
+  height: 100px !important;
+  max-height: 100px !important;
   max-width: 220px !important;
   width: auto !important;
   object-fit: contain !important;

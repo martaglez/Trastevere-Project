@@ -6,7 +6,7 @@
                  alt="Trastevere"
                  class="logo-full"
                  id="main-logo"
-                 style="height:90px!important;max-height:90px!important;max-width:220px;width:auto;object-fit:contain;"
+                 style="height:100px!important;max-height:100px!important;width:auto;object-fit:contain;"
                  onerror="this.style.display='none'; document.querySelector('.app-name').style.display='block';">
             <span class="app-name">Trastevere</span>
         </a>
@@ -44,7 +44,7 @@
             <div id="coupons-container"></div>
         </div>
         <div class="settings-section">
-            <p class="settings-section-title">Tema de color</p>
+            <p class="settings-section-title" data-i18n="settings.colorTheme">Tema de color</p>
             <div class="premium-themes-grid">
                 <button class="premium-theme-btn" data-theme="default" onclick="setThemeFromPremium('default',this)">
                     🍅<span data-i18n="settings.themeOrange">Naranja</span>
@@ -88,7 +88,7 @@
         <div class="settings-section">
             <p class="settings-section-title" data-i18n="settings.subscription">Suscripción</p>
             <div id="settings-sub-basic" style="display:none;">
-                <div class="settings-item premium-upsell" onclick="upgradeToPremium()">
+                <div class="settings-item premium-upsell" onclick="window.location.href='/premium/pay'">
                     <i class="fas fa-crown"></i>
                     <div>
                         <div style="font-weight:700;" data-i18n="settings.goPremium">Hazte Premium</div>
@@ -149,9 +149,8 @@ async function updateBranding() {
                 const logoImg = document.getElementById('main-logo');
                 if (logoImg) {
                     logoImg.src = '/storage/images/logo_premium.png';
-                    logoImg.style.height = '100px';
-                    logoImg.style.maxHeight = '100px';
-                    logoImg.style.maxWidth = '3¡220px';
+                    logoImg.style.height = '90px';
+                    logoImg.style.maxHeight = '90px';
                     logoImg.style.width = 'auto';
                 }
                 document.body.classList.add('is-premium');
@@ -374,20 +373,58 @@ async function loadPremiumPanel() {
             recipeEl.innerHTML=`<div class="weekly-recipe-inner" onclick="window.location.href='/publications/view/${r.id}'">
                 <img src="${r.image||'/storage/images/default_photo.jpg'}" onerror="this.src='/storage/images/default_photo.jpg'" class="weekly-recipe-img">
                 <div class="weekly-recipe-info">
-                    <div class="weekly-recipe-label">Esta semana</div>
+                    <div class="weekly-recipe-label">${t('premium.weeklyLabel')}</div>
                     <div class="weekly-recipe-title">${r.title}</div>
-                    <div class="weekly-recipe-sub">Por el equipo Trastevere 🍅</div>
+                    <div class="weekly-recipe-sub">${t('premium.weeklyBy')}</div>
                 </div></div>`;
         }
+        const couponNames = [t('premium.coupon1'), t('premium.coupon2'), t('premium.coupon3')];
         const couponsEl=document.getElementById('coupons-container');
         if(data.coupons&&data.coupons.length>0){
-            couponsEl.innerHTML=data.coupons.map(c=>`<div class="coupon-card">
-                <div class="coupon-left"><div class="coupon-name">${c.name}</div><div class="coupon-code">${c.code}</div></div>
-                <div class="coupon-barcode">${generateBarcode(c.code)}</div></div>`).join('');
+            couponsEl.innerHTML = data.coupons.map((c, i) => {
+                const name = couponNames[i] || c.name;
+                return `<div class="coupon-card" onclick="openBarcodeModal('${c.code}', '${name}')">
+                    <div class="coupon-left">
+                        <div class="coupon-name">${name}</div>
+                        <div class="coupon-code">${c.code}</div>
+                    </div>
+                    <div class="coupon-barcode" style="cursor:zoom-in;">${generateBarcode(c.code)}</div>
+                </div>`;
+            }).join('');
         }
         const saved=localStorage.getItem('trastevere_theme')||'default';
         document.querySelectorAll('.premium-theme-btn').forEach(b=>b.classList.toggle('active',b.dataset.theme===saved));
     } catch(e){console.error('Error cargando panel premium:',e);}
+}
+
+function openBarcodeModal(code, name) {
+    let modal = document.getElementById('barcode-modal');
+    if (!modal) {
+        modal = document.createElement('div');
+        modal.id = 'barcode-modal';
+        modal.style.cssText = 'position:fixed;inset:0;z-index:4000;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0.7);';
+        modal.onclick = (e) => { if(e.target===modal) modal.style.display='none'; };
+        document.body.appendChild(modal);
+    }
+    modal.innerHTML = `
+        <div style="background:white;border-radius:20px;padding:28px 24px;max-width:340px;width:90%;text-align:center;position:relative;">
+            <button onclick="document.getElementById('barcode-modal').style.display='none'"
+                    style="position:absolute;top:12px;right:14px;background:none;border:none;font-size:1.2rem;cursor:pointer;color:#888;">✕</button>
+            <div style="font-family:var(--font-display);font-size:1.1rem;font-weight:700;color:#222;margin-bottom:6px;">${name}</div>
+            <div style="font-family:monospace;font-size:1rem;color:var(--primary);background:#fff0ec;padding:6px 14px;border-radius:8px;display:inline-block;margin-bottom:16px;letter-spacing:0.1em;">${code}</div>
+            <div style="background:white;padding:10px;border-radius:8px;overflow:hidden;">${generateLargeBarcode(code)}</div>
+            <p style="font-size:0.75rem;color:#aaa;margin-top:10px;">Toca fuera para cerrar</p>
+        </div>`;
+    modal.style.display = 'flex';
+}
+
+function generateLargeBarcode(code) {
+    let bars = '';
+    for (let i = 0; i < code.length; i++) {
+        const w = (code.charCodeAt(i) % 3) + 1;
+        bars += `<div style="display:inline-block;width:${w * 3}px;height:80px;background:#111;margin-right:2px;"></div>`;
+    }
+    return `<div style="background:white;padding:8px;line-height:0;">${bars}</div>`;
 }
 
 function generateBarcode(code){
