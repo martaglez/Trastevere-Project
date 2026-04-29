@@ -8,7 +8,6 @@
     <link rel="apple-touch-icon" href="/storage/images/touch-icon.png">
     <link rel="stylesheet" href="{{ url_for('static', filename='main.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='recipe_detail.css') }}">
-    <script src="{{ url_for('static', filename='i18n.js') }}"></script>
 </head>
 <body>
 
@@ -19,7 +18,7 @@
 <!-- Lightbox -->
 <div id="lightbox" style="display:none;" onclick="closeLightbox(event)">
     <div class="lightbox-overlay"></div>
-    <button class="lightbox-arrow left"  onclick="lightboxNav(-1);event.stopPropagation();">
+    <button class="lightbox-arrow left" onclick="lightboxNav(-1);event.stopPropagation();">
         <i class="fas fa-chevron-left"></i>
     </button>
     <img id="lightbox-img" src="" alt="">
@@ -32,7 +31,7 @@
     <div id="lightbox-dots" class="lightbox-dots"></div>
 </div>
 
-<!-- Modal edición — estático en el DOM, fuera del innerHTML dinámico -->
+<!-- Modal edición — estático en el DOM -->
 <div id="edit-modal" class="modal" style="display:none;">
     <div class="modal-content edit-modal-content" style="position:relative;">
         <button class="modal-close-btn" onclick="window.closeEditModal()"><i class="fas fa-times"></i></button>
@@ -78,14 +77,14 @@ async function loadRecipe() {
         : '';
 
     const ingredients = (data.ingredients || []).map(i => `<li>${i}</li>`).join('');
-    const steps = (data.steps || []).map(s => `<li>${s}</li>`).join('');
+    const steps       = (data.steps || []).map(s => `<li>${s}</li>`).join('');
+
+    const editLabel   = t('recipe.edit');
+    const deleteLabel = t('recipe.delete');
 
     container.innerHTML = `
         <div class="image-grid">
-            <img src="${img1}"
-                 onerror="this.src='/storage/images/default_photo.jpg';"
-                 class="img-large"
-                 alt="${data.title}">
+            <img src="${img1}" onerror="this.src='/storage/images/default_photo.jpg';" class="img-large" alt="${data.title}">
             <div class="img-right">
                 <img src="${img2}" onerror="this.src='/storage/images/default_photo.jpg';">
                 <img src="${img3}" onerror="this.src='/storage/images/default_photo.jpg';">
@@ -99,10 +98,10 @@ async function loadRecipe() {
                 </button>
                 <div id="owner-actions" style="display:none;gap:8px;">
                     <button class="edit-recipe-btn" onclick="window.openEditModal()">
-                        <i class="fas fa-edit"></i> Editar
+                        <i class="fas fa-edit"></i> ${editLabel}
                     </button>
                     <button class="delete-recipe-btn" onclick="window.deleteRecipe()">
-                        <i class="fas fa-trash"></i> Borrar
+                        <i class="fas fa-trash"></i> ${deleteLabel}
                     </button>
                 </div>
             </div>
@@ -114,9 +113,7 @@ async function loadRecipe() {
                         <i class="fas fa-times"></i>
                     </button>
                     <h3>${t('recipe.saveTitle')}</h3>
-                    <p style="font-size:0.78rem;color:var(--text-muted);margin-bottom:12px;">
-                        Elige una table
-                    </p>
+                    <p style="font-size:0.78rem;color:var(--text-muted);margin-bottom:12px;">Elige una table</p>
                     <div id="modal-tables-container"></div>
                 </div>
             </div>
@@ -128,8 +125,7 @@ async function loadRecipe() {
                     <i class="fas fa-user-circle"></i>
                     <span>${data.author || t('recipe.anonymous')}</span>
                 </div>
-                <button class="detail-like-btn ${data.user_liked ? 'liked' : ''}"
-                        id="detail-like-btn">
+                <button class="detail-like-btn ${data.user_liked ? 'liked' : ''}" id="detail-like-btn">
                     <i class="${data.user_liked ? 'fas' : 'far'} fa-heart"></i>
                     <span id="detail-like-count">${data.like_count > 0 ? data.like_count : ''}</span>
                 </button>
@@ -138,15 +134,11 @@ async function loadRecipe() {
 
             <div class="recipe-columns">
                 <div>
-                    <div class="recipe-section-title">
-                        <i class="fas fa-list-ul"></i> ${t('recipe.ingredients')}
-                    </div>
+                    <div class="recipe-section-title"><i class="fas fa-list-ul"></i> ${t('recipe.ingredients')}</div>
                     <ul>${ingredients}</ul>
                 </div>
                 <div>
-                    <div class="recipe-section-title">
-                        <i class="fas fa-utensils"></i> ${t('recipe.steps')}
-                    </div>
+                    <div class="recipe-section-title"><i class="fas fa-utensils"></i> ${t('recipe.steps')}</div>
                     <ol>${steps}</ol>
                 </div>
             </div>
@@ -158,9 +150,7 @@ async function loadRecipe() {
     // Wire author link
     const authorBtn = document.getElementById('detail-author-btn');
     if (authorBtn && data.author_id) {
-        authorBtn.addEventListener('click', () => {
-            window.location.href = '/user/' + data.author_id;
-        });
+        authorBtn.addEventListener('click', () => { window.location.href = '/user/' + data.author_id; });
     }
 
     // Wire like button
@@ -174,7 +164,9 @@ async function loadRecipe() {
         const meRes = await fetch('/user/profile');
         if (meRes.ok) {
             const me = await meRes.json();
-            if (me.id === data.author_id) {
+            const isAuthor = (data.author_id && me.id === data.author_id)
+                          || (me.username && me.username === data.author);
+            if (isAuthor) {
                 const od = document.getElementById('owner-actions');
                 if (od) od.style.display = 'flex';
             }
@@ -184,62 +176,55 @@ async function loadRecipe() {
 
 loadRecipe();
 
-// ── Edit & Delete ─────────────────────────────────────────────
+// ── Edit & Delete ────────────────────────────────────────────
 window.deleteRecipe = async function() {
     if (!confirm('¿Seguro que quieres borrar esta receta?')) return;
     const pubId = window.location.pathname.split('/').pop();
-    const res = await fetch('/publications/delete/' + pubId, {method:'POST'});
-    if (res.ok) { alert('Receta borrada.'); window.location.href='/'; }
-    else { const d=await res.json(); alert('Error: '+(d.error||'No se pudo borrar')); }
+    const res = await fetch('/publications/delete/' + pubId, { method: 'POST' });
+    if (res.ok) { alert('Receta borrada.'); window.location.href = '/'; }
+    else { const d = await res.json(); alert('Error: ' + (d.error || 'No se pudo borrar')); }
 };
 
 window.openEditModal = function() {
     const pubId = window.location.pathname.split('/').pop();
-    fetch('/publications/' + pubId)
-    .then(r=>r.json()).then(d=>{
-        document.getElementById('edit-title').value       = d.title||'';
-        document.getElementById('edit-description').value = d.description||'';
-        document.getElementById('edit-ingredients').value = (d.ingredients||[]).join('\n');
-        document.getElementById('edit-steps').value       = (d.steps||[]).join('\n');
-        document.getElementById('edit-tags').value        = (d.tags||[]).join(', ');
-        document.getElementById('edit-modal').style.display='flex';
-        document.body.style.overflow='hidden';
+    fetch('/publications/' + pubId).then(r => r.json()).then(d => {
+        document.getElementById('edit-title').value       = d.title || '';
+        document.getElementById('edit-description').value = d.description || '';
+        document.getElementById('edit-ingredients').value = (d.ingredients || []).join('\n');
+        document.getElementById('edit-steps').value       = (d.steps || []).join('\n');
+        document.getElementById('edit-tags').value        = (d.tags || []).join(', ');
+        document.getElementById('edit-modal').style.display = 'flex';
+        document.body.style.overflow = 'hidden';
     });
 };
 
 window.closeEditModal = function() {
-    document.getElementById('edit-modal').style.display='none';
-    document.body.style.overflow='';
+    document.getElementById('edit-modal').style.display = 'none';
+    document.body.style.overflow = '';
 };
 
 window.saveEdit = async function() {
-    const pubId=window.location.pathname.split('/').pop();
-    const title=document.getElementById('edit-title').value.trim();
-    if(!title){alert('El título es obligatorio');return;}
-    const fd=new FormData();
-    fd.append('title',title);
-    fd.append('description',document.getElementById('edit-description').value.trim());
-    fd.append('ingredients',JSON.stringify(document.getElementById('edit-ingredients').value.split('\n').map(s=>s.trim()).filter(Boolean)));
-    fd.append('steps',JSON.stringify(document.getElementById('edit-steps').value.split('\n').map(s=>s.trim()).filter(Boolean)));
-    fd.append('tags',JSON.stringify(document.getElementById('edit-tags').value.split(',').map(s=>s.trim()).filter(Boolean)));
-    const res=await fetch('/publications/edit/'+pubId,{method:'POST',body:fd});
-    if(res.ok){alert('¡Receta actualizada!');window.closeEditModal();window.location.reload();}
-    else{const d=await res.json();alert('Error:'+(d.error||'No se pudo guardar'));}
+    const pubId = window.location.pathname.split('/').pop();
+    const title = document.getElementById('edit-title').value.trim();
+    if (!title) { alert('El título es obligatorio'); return; }
+    const fd = new FormData();
+    fd.append('title', title);
+    fd.append('description', document.getElementById('edit-description').value.trim());
+    fd.append('ingredients', JSON.stringify(document.getElementById('edit-ingredients').value.split('\n').map(s => s.trim()).filter(Boolean)));
+    fd.append('steps',       JSON.stringify(document.getElementById('edit-steps').value.split('\n').map(s => s.trim()).filter(Boolean)));
+    fd.append('tags',        JSON.stringify(document.getElementById('edit-tags').value.split(',').map(s => s.trim()).filter(Boolean)));
+    const res = await fetch('/publications/edit/' + pubId, { method: 'POST', body: fd });
+    if (res.ok) { alert('¡Receta actualizada!'); window.closeEditModal(); window.location.reload(); }
+    else { const d = await res.json(); alert('Error: ' + (d.error || 'No se pudo guardar')); }
 };
 
-// ── Table modal ───────────────────────────────────────────────
+// ── Table modal ──────────────────────────────────────────────
 async function openTableModal() {
     const res = await fetch('/user/profile');
-    if (res.status === 401) {
-        alert(t('recipe.loginSave'));
-        window.location.href = '/auth/login';
-        return;
-    }
-    const tablesRes = await fetch('/tables/');
-    const tablesList = await tablesRes.json();
+    if (res.status === 401) { alert(t('recipe.loginSave')); window.location.href = '/auth/login'; return; }
+    const tablesList = await (await fetch('/tables/')).json();
     const modalContainer = document.getElementById('modal-tables-container');
     modalContainer.innerHTML = '';
-
     if (!tablesList || tablesList.length === 0) {
         modalContainer.innerHTML = `<p>${t('tables.noTables')}</p>
             <button onclick="window.location.href='/tables'" class="btn-main" style="margin-top:10px;">
@@ -257,29 +242,21 @@ async function openTableModal() {
     document.getElementById('table-modal').style.display = 'flex';
 }
 
-function closeTableModal() {
-    document.getElementById('table-modal').style.display = 'none';
-}
+function closeTableModal() { document.getElementById('table-modal').style.display = 'none'; }
 
 async function saveToTable(tableId, tableName) {
-    const path = window.location.pathname.split('/');
-    const pubId = path[path.length - 1];
+    const pubId = window.location.pathname.split('/').pop();
     const response = await fetch('/tables/add', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ table_id: tableId, publication_id: parseInt(pubId) })
     });
-    if (response.ok) {
-        alert(`¡Guardado en "${tableName}"!`);
-        closeTableModal();
-    } else {
-        alert('Esta receta ya está en esa Table.');
-    }
+    if (response.ok) { alert(`¡Guardado en "${tableName}"!`); closeTableModal(); }
+    else { alert('Esta receta ya está en esa Table.'); }
 }
 
-// ── Lightbox ──────────────────────────────────────────────────
-let _lbImages = [];
-let _lbIndex  = 0;
+// ── Lightbox ─────────────────────────────────────────────────
+let _lbImages = [], _lbIndex = 0;
 
 function initLightbox(images) {
     _lbImages = images.filter(Boolean);
@@ -288,7 +265,6 @@ function initLightbox(images) {
         el.addEventListener('click', () => openLightbox(i));
     });
 }
-
 function openLightbox(index) {
     if (!_lbImages.length) return;
     _lbIndex = index;
@@ -296,37 +272,25 @@ function openLightbox(index) {
     document.body.style.overflow = 'hidden';
     updateLightbox();
 }
-
 function updateLightbox() {
-    const img  = document.getElementById('lightbox-img');
-    const dots = document.getElementById('lightbox-dots');
-    img.src    = _lbImages[_lbIndex];
-    dots.innerHTML = _lbImages.map((_, i) =>
-        `<span class="lb-dot ${i === _lbIndex ? 'active' : ''}" onclick="lightboxGo(${i})"></span>`
-    ).join('');
+    document.getElementById('lightbox-img').src = _lbImages[_lbIndex];
+    document.getElementById('lightbox-dots').innerHTML = _lbImages.map((_, i) =>
+        `<span class="lb-dot ${i === _lbIndex ? 'active' : ''}" onclick="lightboxGo(${i})"></span>`).join('');
     document.querySelector('.lightbox-arrow.left').style.opacity  = _lbImages.length > 1 ? '1' : '0';
     document.querySelector('.lightbox-arrow.right').style.opacity = _lbImages.length > 1 ? '1' : '0';
 }
-
-function lightboxNav(dir) {
-    _lbIndex = (_lbIndex + dir + _lbImages.length) % _lbImages.length;
-    updateLightbox();
-}
-
-function lightboxGo(i) { _lbIndex = i; updateLightbox(); }
-
+function lightboxNav(dir) { _lbIndex = (_lbIndex + dir + _lbImages.length) % _lbImages.length; updateLightbox(); }
+function lightboxGo(i)    { _lbIndex = i; updateLightbox(); }
 function closeLightbox(e) {
-    if (e && e.target !== document.getElementById('lightbox') &&
-        !e.target.classList.contains('lightbox-overlay')) return;
+    if (e && e.target !== document.getElementById('lightbox') && !e.target.classList.contains('lightbox-overlay')) return;
     document.getElementById('lightbox').style.display = 'none';
     document.body.style.overflow = '';
 }
-
 let _lbTouchX = null;
 document.addEventListener('DOMContentLoaded', () => {
     const lb = document.getElementById('lightbox');
     lb.addEventListener('touchstart', e => { _lbTouchX = e.touches[0].clientX; }, { passive: true });
-    lb.addEventListener('touchend',   e => {
+    lb.addEventListener('touchend', e => {
         if (_lbTouchX === null) return;
         const dx = e.changedTouches[0].clientX - _lbTouchX;
         if (Math.abs(dx) > 50) lightboxNav(dx < 0 ? 1 : -1);
@@ -341,7 +305,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 });
 
-// ── Like ──────────────────────────────────────────────────────
+// ── Like ─────────────────────────────────────────────────────
 async function toggleDetailLike(pubId) {
     const btn = document.getElementById('detail-like-btn');
     const cnt = document.getElementById('detail-like-count');

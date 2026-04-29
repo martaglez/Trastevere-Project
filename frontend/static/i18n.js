@@ -184,6 +184,8 @@ const TRANSLATIONS = {
   'recipe.anonymous':    { es: 'Cocinero Anónimo',        en: 'Anonymous Cook' },
   'recipe.loginSave':    { es: 'Inicia sesión para guardar recetas', en: 'Log in to save recipes' },
   'recipe.createTable':  { es: 'Crear mi primera Table',  en: 'Create my first Table' },
+  'recipe.edit':   { es: 'Editar', en: 'Edit' },
+  'recipe.delete': { es: 'Borrar', en: 'Delete' },
 
   // ── Public profile page ───────────────────────────────────────────────────
   'public.recipes':      { es: 'Recetas',    en: 'Recipes' },
