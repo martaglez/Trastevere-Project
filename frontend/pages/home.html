@@ -20,13 +20,13 @@
     </div>
 
     <div class="category-chips">
-        <div class="chip active" onclick="filterFeed(this, null)" data-i18n="home.chipAll">Todo</div>
-        <div class="chip" onclick="filterFeed(this, 'pasta')" data-i18n="home.chipPasta">🍝 Pasta</div>
-        <div class="chip" onclick="filterFeed(this, 'ensalada')" data-i18n="home.chipSalads">🥗 Ensaladas</div>
-        <div class="chip" onclick="filterFeed(this, 'postre')" data-i18n="home.chipDesserts">🍰 Postres</div>
-        <div class="chip" onclick="filterFeed(this, 'mexicana')" data-i18n="home.chipMexican">🌮 Mexicana</div>
-        <div class="chip" onclick="filterFeed(this, 'asiatica')" data-i18n="home.chipAsian">🍜 Asiática</div>
-        <div class="chip" onclick="filterFeed(this, 'carne')" data-i18n="home.chipMeat">🥩 Carnes</div>
+        <div class="chip active" onclick="filterFeed(this)"><span data-i18n="home.chipAll">Todo</span></div>
+        <div class="chip" onclick="filterFeed(this, 'pasta')"><span data-i18n="home.chipPasta">🍝 Pasta</span></div>
+        <div class="chip" onclick="filterFeed(this, 'ensalada', 'salad')"><span data-i18n="home.chipSalads">🥗 Ensaladas</span></div>
+        <div class="chip" onclick="filterFeed(this, 'postre', 'dessert')"><span data-i18n="home.chipDesserts">🍰 Postres</span></div>
+        <div class="chip" onclick="filterFeed(this, 'mexicana', 'mexican')"><span data-i18n="home.chipMexican">🌮 Mexicana</span></div>
+        <div class="chip" onclick="filterFeed(this, 'asiatica', 'asian')"><span data-i18n="home.chipAsian">🍜 Asiática</span></div>
+        <div class="chip" onclick="filterFeed(this, 'carne', 'meat')"><span data-i18n="home.chipMeat">🥩 Carnes</span></div>
     </div>
 
     <div class="feed-container" id="feed-list"></div>
@@ -151,23 +151,16 @@
         });
     }
 
-    function filterFeed(chipEl, keyword) {
+    function filterFeed(chipEl, ...keywords) {
         document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
         chipEl.classList.add('active');
-        if (!keyword) { renderFeed(allRecipes); return; }
-        const kw = normalize(keyword);
+        if (!keywords.length || !keywords[0]) { renderFeed(allRecipes); return; }
+        const kws = keywords.map(normalize);
         const filtered = allRecipes.filter(item => {
-            const inTitle = normalize(item.title || '').includes(kw);
-            const inDesc  = normalize(item.description || '').includes(kw);
-            // Tags: handle both array and JSON string formats
-            let tags = item.tags;
-            if (typeof tags === 'string') { try { tags = JSON.parse(tags); } catch(e) { tags = [tags]; } }
-            const inTags = Array.isArray(tags) && tags.some(t => normalize(String(t)).includes(kw));
-            // Ingredients: same safety
-            let ingr = item.ingredients;
-            if (typeof ingr === 'string') { try { ingr = JSON.parse(ingr); } catch(e) { ingr = [ingr]; } }
-            const inIngr = Array.isArray(ingr) && ingr.some(i => normalize(String(i)).includes(kw));
-            return inTitle || inDesc || inTags || inIngr;
+            const inTitle = kws.some(kw => normalize(item.title || '').includes(kw));
+            const inTags  = Array.isArray(item.tags) &&
+                            item.tags.some(t => kws.some(kw => normalize(String(t)).includes(kw)));
+            return inTitle || inTags;
         });
         renderFeed(filtered);
     }

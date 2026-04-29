@@ -87,10 +87,6 @@ def get_search_data():
     finally:
         db.close()
 
-@app.route('/home/feed')
-def get_home_feed():
-    return get_search_data()
-
 @app.route('/api/recipes/random')
 def get_random_recipe():
     """Devuelve una receta aleatoria para el botón dado."""

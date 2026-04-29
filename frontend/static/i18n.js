@@ -186,6 +186,7 @@ const TRANSLATIONS = {
   'recipe.createTable':  { es: 'Crear mi primera Table',  en: 'Create my first Table' },
   'recipe.edit':   { es: 'Editar', en: 'Edit' },
   'recipe.delete': { es: 'Borrar', en: 'Delete' },
+  'recipe.chooseTable': { es: 'Elige una table', en: 'Choose a table' },
 
   // ── Public profile page ───────────────────────────────────────────────────
   'public.recipes':      { es: 'Recetas',    en: 'Recipes' },

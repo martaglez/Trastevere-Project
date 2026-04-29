@@ -72,7 +72,43 @@
 {% include 'bottom_bar.html' %}
 
 <script>
-const UNITS = ['g','kg','ml','l','tsp','tbsp','taza','unidad','al gusto','pizca','láminas','dientes'];
+function getUnits() {
+    const lang = localStorage.getItem('trastevere_lang') || 'es';
+    if (lang === 'en') {
+        return [
+            { value: 'g',        label: 'g' },
+            { value: 'kg',       label: 'kg' },
+            { value: 'lb',       label: 'lb' },
+            { value: 'ml',       label: 'ml' },
+            { value: 'l',        label: 'l' },
+            { value: 'tsp',      label: 'tsp' },
+            { value: 'tbsp',     label: 'tbsp' },
+            { value: 'cup',      label: 'cup' },
+            { value: 'unit',     label: 'unit(s)' },
+            { value: 'slice',    label: 'slice(s)' },
+            { value: 'fillet',   label: 'fillet(s)' },
+            { value: 'to taste', label: 'to taste' },
+            { value: 'pinch',    label: 'pinch' },
+            { value: 'cloves',   label: 'cloves' },
+        ];
+    }
+    return [
+        { value: 'g',          label: 'g' },
+        { value: 'kg',         label: 'kg' },
+        { value: 'libra/s',    label: 'libra/s' },
+        { value: 'ml',         label: 'ml' },
+        { value: 'l',          label: 'l' },
+        { value: 'cucharadita',label: 'cucharadita' },
+        { value: 'cucharada',  label: 'cucharada' },
+        { value: 'taza',       label: 'taza' },
+        { value: 'unidad/es',  label: 'unidad/es' },
+        { value: 'loncha/s',   label: 'loncha/s' },
+        { value: 'filete/s',   label: 'filete/s' },
+        { value: 'al gusto',   label: 'al gusto' },
+        { value: 'pizca',      label: 'pizca' },
+        { value: 'dientes',    label: 'dientes' },
+    ];
+}
 
 async function checkAccess() {
     try {
@@ -81,6 +117,7 @@ async function checkAccess() {
             document.getElementById('create-guest-view').style.display = 'block';
         } else {
             document.getElementById('create-logged-view').style.display = 'block';
+            applyLanguage();
             addIngredient();
             addStep();
         }
@@ -108,24 +145,45 @@ function previewImage(index) {
 function addIngredient() {
     const div = document.createElement('div');
     div.className = 'ingredient-row';
-    const unitOptions = UNITS.map(u => `<option value="${u}">${u}</option>`).join('');
+    const units = getUnits();
+    const unitOptions = units.map(u => `<option value="${u.value}">${u.label}</option>`).join('');
+    const lang = localStorage.getItem('trastevere_lang') || 'es';
+    const qtyPh  = lang === 'en' ? 'Qty.'       : 'Cant.';
+    const ingrPh = lang === 'en' ? 'Ingredient' : 'Ingrediente';
     div.innerHTML = `
-        <input type="number" class="ingr-qty"   placeholder="Cant." data-i18n-placeholder="create.ingrQtyPh" min="0" step="any">
-        <select class="ingr-unit">${unitOptions}</select>
-        <input type="text"   class="ingr-name"  placeholder="Ingrediente" data-i18n-placeholder="create.ingrNamePh">
+        <input type="number" class="ingr-qty" placeholder="${qtyPh}" min="0" step="any">
+        <select class="ingr-unit" onchange="toggleQtyForUnit(this)">${unitOptions}</select>
+        <input type="text" class="ingr-name" placeholder="${ingrPh}">
         <button class="ingr-remove" onclick="this.parentElement.remove()" title="Eliminar">
             <i class="fas fa-times"></i>
         </button>`;
     document.getElementById('ingredients').appendChild(div);
 }
 
+function toggleQtyForUnit(selectEl) {
+    const tasteValues = ['al gusto', 'to taste'];
+    const qtyInput = selectEl.parentElement.querySelector('.ingr-qty');
+    if (tasteValues.includes(selectEl.value)) {
+        qtyInput.value = '';
+        qtyInput.disabled = true;
+        qtyInput.style.opacity = '0.35';
+        qtyInput.style.cursor = 'not-allowed';
+    } else {
+        qtyInput.disabled = false;
+        qtyInput.style.opacity = '1';
+        qtyInput.style.cursor = '';
+    }
+}
+
 function addStep() {
     const n   = document.getElementById('steps').children.length + 1;
     const div = document.createElement('div');
     div.className = 'step-row';
+    const stepLang = localStorage.getItem('trastevere_lang') || 'es';
+    const stepPh = stepLang === 'en' ? 'Describe the step' : 'Describe el paso';
     div.innerHTML = `
         <span class="step-num">${n}</span>
-        <input type="text" class="step-input" placeholder="Describe el paso" data-i18n-placeholder="create.stepPh">
+        <input type="text" class="step-input" placeholder="${stepPh}">
         <button class="ingr-remove" onclick="removeStep(this)" title="Eliminar">
             <i class="fas fa-times"></i>
         </button>`;

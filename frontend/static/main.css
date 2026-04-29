@@ -1143,3 +1143,86 @@ body.theme-dark .detail-like-btn.liked { background: rgba(255,71,87,0.15); }
 .star-rate-btn.selected {
   color: #f7971e;
 }
+
+/* ============================================================
+   MODAL — centrado en desktop
+   ============================================================ */
+@media (min-width: 768px) {
+  .modal {
+    align-items: center;
+  }
+  .modal-content {
+    border-radius: 20px;
+    width: auto;
+    min-width: 360px;
+    max-width: 500px;
+  }
+}
+
+/* ============================================================
+   EDIT RECIPE MODAL
+   ============================================================ */
+.edit-modal-content {
+  max-height: 85vh;
+  overflow-y: auto;
+  border-radius: 20px 20px 0 0;
+  width: 100%;
+  max-width: 560px;
+  text-align: left;
+  padding: 24px 20px 32px;
+  background: white;
+}
+@media (min-width: 768px) {
+  .edit-modal-content {
+    border-radius: 20px;
+  }
+}
+.edit-modal-content h3 {
+  font-family: var(--font-display);
+  font-size: 1.2rem;
+  color: var(--text);
+  margin-bottom: 16px;
+}
+.edit-input {
+  width: 100%; box-sizing: border-box;
+  padding: 10px 14px; border: 1.5px solid var(--border);
+  border-radius: 10px; font-size: 0.92rem;
+  font-family: var(--font-body); color: var(--text);
+  background: white; outline: none; margin-bottom: 10px;
+  transition: border-color 0.2s;
+}
+.edit-input:focus { border-color: var(--primary); }
+.edit-textarea {
+  width: 100%; box-sizing: border-box;
+  padding: 10px 14px; border: 1.5px solid var(--border);
+  border-radius: 10px; font-size: 0.88rem;
+  font-family: var(--font-body); color: var(--text);
+  background: white; outline: none; margin-bottom: 10px;
+  resize: vertical; min-height: 70px; transition: border-color 0.2s;
+}
+.edit-textarea:focus { border-color: var(--primary); }
+.edit-label {
+  display: block; font-size: 0.75rem; font-weight: 700;
+  color: var(--text-muted); text-transform: uppercase;
+  letter-spacing: 0.06em; margin-bottom: 5px;
+}
+.save-container { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 16px; }
+.edit-recipe-btn {
+  display: flex; align-items: center; gap: 6px;
+  padding: 10px 16px; background: var(--primary-light); color: var(--primary);
+  border: 1.5px solid var(--primary); border-radius: 10px;
+  font-family: var(--font-body); font-size: 0.88rem; font-weight: 700;
+  cursor: pointer; transition: all 0.2s;
+}
+.edit-recipe-btn:hover { background: var(--primary); color: white; }
+.delete-recipe-btn {
+  display: flex; align-items: center; gap: 6px;
+  padding: 10px 16px; background: #fff0f0; color: #e05252;
+  border: 1.5px solid #e05252; border-radius: 10px;
+  font-family: var(--font-body); font-size: 0.88rem; font-weight: 700;
+  cursor: pointer; transition: all 0.2s;
+}
+.delete-recipe-btn:hover { background: #e05252; color: white; }
+body.theme-dark .edit-modal-content { background: #2a2a2a; }
+body.theme-dark .edit-input,
+body.theme-dark .edit-textarea { background: #333; color: #f0f0f0; border-color: #444; }
