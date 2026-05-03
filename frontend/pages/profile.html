@@ -65,9 +65,12 @@
                 </button>
             </div>
 
-            <div style="text-align:center;margin-top:14px;">
-                <button id="save-btn" style="display:none;" onclick="saveProfile()" class="btn-main" data-i18n="profile.saveChanges">
+            <div style="text-align:center;margin-top:14px;display:flex;gap:10px;justify-content:center;">
+                <button id="save-btn" style="display:none;" onclick="saveProfile()" class="btn-main">
                     Guardar cambios
+                </button>
+                <button id="cancel-btn" style="display:none;" onclick="cancelEdit()" class="btn-secondary">
+                    Cancelar
                 </button>
             </div>
         </div>
@@ -97,6 +100,7 @@
 
     <script>
     let _myUserId = null;
+    let _currentProfileData = null;
 
     async function loadProfile() {
         try {
@@ -109,6 +113,8 @@
             document.getElementById('logged-in-view').style.display = 'block';
             document.getElementById('user-name').innerText  = user.username;
 
+            
+
             // Stats sociales
             _myUserId = user.id;
             fetch('/profiles/' + user.id).then(r=>r.json()).then(p=>{
@@ -118,6 +124,7 @@
                 document.getElementById('stat-stars').textContent      = (p.stars||0).toFixed(1);
                 document.getElementById('profile-stats').style.display = 'flex';
             }).catch(()=>{});
+            _currentProfileData = user;
             document.getElementById('user-email').innerText = user.email;
             document.getElementById('user-phone').value = user.phone_number || '';
             document.getElementById('user-dni').value   = user.dni || '';
@@ -138,7 +145,18 @@
         document.getElementById('user-phone').disabled = false;
         document.getElementById('user-dni').disabled   = false;
         document.getElementById('user-phone').focus();
-        document.getElementById('save-btn').style.display = 'inline-block';
+        document.getElementById('save-btn').style.display   = 'inline-block';
+        document.getElementById('cancel-btn').style.display = 'inline-block';
+    }
+
+    function cancelEdit() {
+        document.getElementById('user-phone').disabled = true;
+        document.getElementById('user-dni').disabled   = true;
+        document.getElementById('save-btn').style.display   = 'none';
+        document.getElementById('cancel-btn').style.display = 'none';
+        // Restaurar los valores originales sin recargar la página
+        document.getElementById('user-phone').value = _currentProfileData?.phone_number || '';
+        document.getElementById('user-dni').value   = _currentProfileData?.dni || '';
     }
 
     async function saveProfile() {
