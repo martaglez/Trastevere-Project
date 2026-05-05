@@ -26,16 +26,25 @@
 </header>
 
 <!-- About box -->
-<div id="about-box" style="display:none; pointer-events:none; position:fixed; inset:0; background:rgba(0,0,0,0.45); z-index:3000;">
-    <div style="display:flex; justify-content:center; align-items:center; width:100%; height:100%;">
-        <div style="background:white; border-radius:16px; padding:28px 24px; max-width:360px; width:90%; text-align:center; box-shadow:0 8px 32px rgba(0,0,0,0.18);">
-            <h3 style="margin:0 0 16px; font-size:1.2rem;">ℹ️ About Trastevere</h3>
-            <p><strong>Tipo de software:</strong> Apache 2.0</p>
-            <p><strong>Versión:</strong> <span id="about-version">2.1</span></p>
-            <p><strong>Build:</strong> <span id="about-build"></span></p>
-            <p><strong>Autores:</strong> <span id="about-authors"></span></p>
-            <button onclick="closeAbout()" class="btn-main" style="margin-top:12px;">Cerrar</button>
-        </div>
+<div id="about-box" onclick="if(event.target===this)closeAbout()"
+     style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);
+            z-index:3000;align-items:center;justify-content:center;">
+    <div style="background:white;border-radius:20px;padding:32px 28px;max-width:340px;
+                width:88%;text-align:center;box-shadow:0 8px 32px rgba(0,0,0,0.18);">
+        <div style="font-size:2rem;margin-bottom:10px;">ℹ️</div>
+        <h3 style="font-family:var(--font-display);font-size:1.2rem;margin-bottom:16px;"
+            data-i18n="profile.aboutTitle">Trastevere App</h3>
+        <p style="margin-bottom:6px;font-size:0.9rem;">
+            <strong data-i18n="profile.version">Versión:</strong> <span id="about-version"></span>
+        </p>
+        <p style="margin-bottom:6px;font-size:0.9rem;">
+            <strong data-i18n="profile.build">Build:</strong> <span id="about-build"></span>
+        </p>
+        <p style="margin-bottom:20px;font-size:0.9rem;">
+            <strong data-i18n="profile.authors">Autores:</strong> <span id="about-authors"></span>
+        </p>
+        <button onclick="closeAbout()" class="btn-main" style="width:100%;"
+                data-i18n="profile.close">Cerrar</button>
     </div>
 </div>
 
@@ -148,9 +157,17 @@
             </div>
         </div>
 
-        <div class="settings-section">
+        <div class="settings-section" id="settings-logged-in-actions" style="display:none;">
+            <div class="settings-item danger" onclick="requestDeleteAccount()">
+                <i class="fas fa-user-times"></i> <span data-i18n="settings.deleteAccount">Eliminar cuenta</span>
+            </div>
             <a href="/auth/logout" class="settings-item danger">
                 <i class="fas fa-sign-out-alt"></i> <span data-i18n="settings.logout">Cerrar sesión</span>
+            </a>
+        </div>
+        <div class="settings-section" id="settings-guest-actions" style="display:none;">
+            <a href="/auth/login" class="settings-item">
+                <i class="fas fa-sign-in-alt"></i> <span data-i18n="settings.login">Iniciar sesión</span>
             </a>
         </div>
     </div>
@@ -183,6 +200,8 @@ async function updateBranding() {
             const row = document.getElementById('settings-user-row');
             if (row) {
                 row.style.display = 'flex';
+                document.getElementById('settings-logged-in-actions').style.display = 'block';
+                document.getElementById('settings-guest-actions').style.display = 'none';
                 document.getElementById('settings-username').textContent = _currentUser.username;
                 document.getElementById('settings-avatar').src =
                     _currentUser.profile_pic || '/storage/images/default_user.jpg';
@@ -195,6 +214,8 @@ async function updateBranding() {
             }
         } else {
             // 401 u otro error: usuario sin sesión
+            document.getElementById('settings-logged-in-actions').style.display = 'none';
+            document.getElementById('settings-guest-actions').style.display = 'block';
             _updatePremiumBtn(false);
             _resetPremiumThemeIfNeeded();
         }
@@ -465,6 +486,8 @@ function setThemeFromPremium(name,btn){
 
 // ── About ────────────────────────────────────────────────────
 async function openAbout() {
+    document.getElementById('about-box').style.display = 'flex';
+    applyLanguage();
     const response = await fetch('/user/about');
     const data = await response.json();
 
@@ -492,6 +515,20 @@ function _updatePremiumBtn(isPremium){
     } else {
         btn.classList.remove('is-premium'); btn.title=t('settings.goPremium');
         btn.innerHTML='<i class="fas fa-crown"></i><span class="crown-lock">🔒</span>';
+    }
+}
+
+
+// ── Eliminar cuenta ───────────────────────────────────────────
+async function requestDeleteAccount() {
+    if (!confirm('¿Seguro que quieres eliminar tu cuenta? Recibirás un email de confirmación.')) return;
+    const res  = await fetch('/auth/request-delete', { method: 'POST' });
+    const data = await res.json();
+    if (res.ok) {
+        alert('📬 ' + data.message);
+        toggleSettings();
+    } else {
+        alert('Error: ' + (data.error || 'No se pudo procesar.'));
     }
 }
 

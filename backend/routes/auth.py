@@ -1,9 +1,35 @@
+import os
+import secrets
+from datetime import datetime, timedelta, timezone
+
 from flask import Blueprint, request, jsonify, render_template, session, redirect, url_for
 from werkzeug.security import check_password_hash, generate_password_hash
 from database.database import SessionLocal
 from database.schema.models import User
 
 auth_bp = Blueprint('auth', __name__)
+
+# Token store en memoria (reset + delete)
+_tokens: dict = {}
+
+def _make_token(user_id: int, token_type: str) -> str:
+    token = secrets.token_urlsafe(32)
+    _tokens[token] = {
+        'user_id': user_id,
+        'expires': datetime.now(timezone.utc) + timedelta(hours=1),
+        'type':    token_type,
+    }
+    return token
+
+def _use_token(token: str, token_type: str):
+    entry = _tokens.get(token)
+    if not entry: return None
+    if entry['type'] != token_type: return None
+    if datetime.now(timezone.utc) > entry['expires']:
+        _tokens.pop(token, None); return None
+    _tokens.pop(token, None)
+    return entry['user_id']
+
 
 @auth_bp.route('/login', methods=['GET', 'POST'])
 def login():
@@ -60,6 +86,14 @@ def register():
             db.commit()
             db.refresh(new_user)
             session['user_id'] = new_user.id
+
+            # Email de bienvenida (no bloqueante)
+            try:
+                from backend.routes.email_service import send_welcome_email
+                send_welcome_email(email, username)
+            except Exception as mail_err:
+                print(f"[email] Welcome email failed: {mail_err}")
+
             return jsonify({"message": "Usuario creado con éxito", "id": new_user.id}), 201
         except Exception as e:
             db.rollback()
@@ -74,3 +108,88 @@ def logout():
     # 4. LIMPIAMOS LA SESIÓN: Así el navegador olvida quién eres
     session.clear()
     return redirect('/')
+
+# ── FORGOT PASSWORD ──────────────────────────────────────────────────────────
+@auth_bp.route('/forgot-password', methods=['GET', 'POST'])
+def forgot_password():
+    if request.method == 'POST':
+        email = (request.json or {}).get('email', '').strip()
+        db = SessionLocal()
+        try:
+            user = db.query(User).filter(User.email == email).first()
+        finally:
+            db.close()
+        if user:
+            token = _make_token(user.id, 'reset')
+            try:
+                from backend.routes.email_service import send_reset_email
+                send_reset_email(email, user.username, token)
+            except Exception as e:
+                print(f"[email] Reset email failed: {e}")
+        return jsonify({"message": "Si existe esa cuenta recibirás un email."}), 200
+    return render_template('forgot_password.html')
+
+
+@auth_bp.route('/reset-password/<token>', methods=['GET', 'POST'])
+def reset_password(token):
+    if request.method == 'POST':
+        new_password = (request.json or {}).get('password', '').strip()
+        if len(new_password) < 6:
+            return jsonify({"error": "La contraseña debe tener al menos 6 caracteres"}), 400
+        user_id = _use_token(token, 'reset')
+        if not user_id:
+            return jsonify({"error": "El enlace no es válido o ha expirado"}), 400
+        db = SessionLocal()
+        try:
+            user = db.query(User).filter(User.id == user_id).first()
+            if user:
+                user.password_hash = generate_password_hash(new_password)
+                db.commit()
+            return jsonify({"message": "Contraseña actualizada correctamente"}), 200
+        except Exception as e:
+            db.rollback(); return jsonify({"error": str(e)}), 500
+        finally:
+            db.close()
+    entry = _tokens.get(token)
+    valid = bool(entry and entry['type'] == 'reset' and datetime.now(timezone.utc) <= entry['expires'])
+    return render_template('reset_password.html', token=token, valid=valid)
+
+
+# ── DELETE ACCOUNT ────────────────────────────────────────────────────────────
+@auth_bp.route('/request-delete', methods=['POST'])
+def request_delete():
+    user_id = session.get('user_id')
+    if not user_id:
+        return jsonify({"error": "No has iniciado sesión"}), 401
+    db = SessionLocal()
+    try:
+        user = db.query(User).filter(User.id == user_id).first()
+        if not user:
+            return jsonify({"error": "Usuario no encontrado"}), 404
+        token = _make_token(user_id, 'delete')
+        try:
+            from backend.routes.email_service import send_delete_email
+            send_delete_email(user.email, user.username, token)
+        except Exception as e:
+            print(f"[email] Delete email failed: {e}")
+        return jsonify({"message": "Te hemos enviado un email de confirmación."}), 200
+    finally:
+        db.close()
+
+
+@auth_bp.route('/confirm-delete/<token>')
+def confirm_delete(token):
+    user_id = _use_token(token, 'delete')
+    if not user_id:
+        return render_template('account_deleted.html', success=False)
+    db = SessionLocal()
+    try:
+        user = db.query(User).filter(User.id == user_id).first()
+        if user:
+            db.delete(user); db.commit()
+        session.clear()
+        return render_template('account_deleted.html', success=True)
+    except Exception as e:
+        db.rollback(); return render_template('account_deleted.html', success=False)
+    finally:
+        db.close()

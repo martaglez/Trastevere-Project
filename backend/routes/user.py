@@ -120,6 +120,6 @@ def update_profile():
 def about():
     return jsonify({
         "version": "2.2.3",
-        "build":   "2026-04-28",
+        "build":   "2026-05-05",
         "authors": "CEU San Pablo & Trastevere Team"
     })

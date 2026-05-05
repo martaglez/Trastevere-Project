@@ -87,13 +87,16 @@
         </div>
     </div>
 
-    <!-- About box -->
-    <div id="about-box" style="display:none;">
-        <h3 data-i18n="profile.aboutTitle">Trastevere App</h3>
-        <p><strong data-i18n="profile.version">Versión:</strong> <span id="about-version"></span></p>
-        <p><strong data-i18n="profile.build">Build:</strong> <span id="about-build"></span></p>
-        <p><strong data-i18n="profile.authors">Autores:</strong> <span id="about-authors"></span></p>
-        <button onclick="closeAbout()" class="btn-main" style="margin-top:12px;" data-i18n="profile.close">Cerrar</button>
+    <!-- About box — modal con overlay (estilos en profile.css) -->
+    <div id="about-box" onclick="if(event.target===this)closeAbout()">
+        <div>
+            <p>ℹ️ About Trastevere</p>
+            <p><strong>Tipo de software:</strong> Apache 2.0</p>
+            <p><strong>Versión:</strong> <span id="about-version"></span></p>
+            <p><strong>Build:</strong> <span id="about-build"></span></p>
+            <p style="margin-bottom:20px;"><strong>Autores:</strong> <span id="about-authors"></span></p>
+            <button onclick="closeAbout()" class="btn-main" style="width:100%;">Cerrar</button>
+        </div>
     </div>
 
     {% include 'bottom_bar.html' %}
@@ -192,12 +195,15 @@
     };
 
     async function openAbout() {
+        const box = document.getElementById('about-box');
+        box.style.display = 'flex';
+        box.style.alignItems = 'center';
+        box.style.justifyContent = 'center';
         const response = await fetch('/user/about');
         const data = await response.json();
         document.getElementById('about-version').innerText = data.version;
         document.getElementById('about-build').innerText   = data.build;
         document.getElementById('about-authors').innerText = data.authors;
-        document.getElementById('about-box').style.display = 'block';
     }
 
     function closeAbout() {
