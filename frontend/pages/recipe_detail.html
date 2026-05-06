@@ -66,6 +66,22 @@ async function loadRecipe() {
         return;
     }
 
+    // Si es un borrador, redirigir a create con los datos precargados
+    const draftTags = data.tags || [];
+    if (draftTags.includes('draft')) {
+        sessionStorage.setItem('draft_data', JSON.stringify({
+            id:          data.id,
+            title:       data.title,
+            description: data.description,
+            ingredients: data.ingredients || [],
+            steps:       data.steps || [],
+            tags:        draftTags.filter(tag => tag !== 'draft'),
+            images:      data.images || []
+        }));
+        window.location.href = '/create?draft=' + data.id;
+        return;
+    }
+
     const photos = data.images || [];
     const img1 = photos[0] || '/storage/images/default_photo.jpg';
     setTimeout(() => initLightbox(photos.filter(p => p)), 100);

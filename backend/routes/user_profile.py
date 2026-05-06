@@ -45,9 +45,18 @@ def public_profile(user_id):
 
         follower_count  = db.query(Follow).filter(Follow.following_id == user_id).count()
         following_count = db.query(Follow).filter(Follow.follower_id  == user_id).count()
-        publications    = db.query(Publication).filter(
+        all_pubs = db.query(Publication).filter(
             Publication.user_id == user_id
         ).order_by(Publication.id.desc()).all()
+
+        # Excluir borradores del perfil público
+        publications = [
+            p for p in all_pubs
+            if 'draft' not in (
+                (json.loads(p.image_meta) if isinstance(p.image_meta, str) else (p.image_meta or {}))
+                .get('tags', [])
+            )
+        ]
 
         return jsonify({
             'id':              user.id,

@@ -23,6 +23,10 @@ def get_feed():
             tags        = meta.get("tags", [])
             ingredients = meta.get("ingredients", [])
 
+            # Skip draft publications
+            if 'draft' in [str(t).lower() for t in tags]:
+                continue
+
             feed.append({
                 "id":          pub.id,
                 "title":       pub.title,
