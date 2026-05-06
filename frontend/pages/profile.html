@@ -87,17 +87,7 @@
         </div>
     </div>
 
-    <!-- About box — modal con overlay (estilos en profile.css) -->
-    <div id="about-box" onclick="if(event.target===this)closeAbout()">
-        <div>
-            <p>ℹ️ About Trastevere</p>
-            <p><strong>Tipo de software:</strong> Apache 2.0</p>
-            <p><strong>Versión:</strong> <span id="about-version"></span></p>
-            <p><strong>Build:</strong> <span id="about-build"></span></p>
-            <p style="margin-bottom:20px;"><strong>Autores:</strong> <span id="about-authors"></span></p>
-            <button onclick="closeAbout()" class="btn-main" style="width:100%;">Cerrar</button>
-        </div>
-    </div>
+
 
     {% include 'bottom_bar.html' %}
 
@@ -199,6 +189,7 @@
         box.style.display = 'flex';
         box.style.alignItems = 'center';
         box.style.justifyContent = 'center';
+        box.style.pointerEvents = 'auto';
         const response = await fetch('/user/about');
         const data = await response.json();
         document.getElementById('about-version').innerText = data.version;
@@ -207,10 +198,27 @@
     }
 
     function closeAbout() {
-        document.getElementById('about-box').style.display = 'none';
+        const box = document.getElementById('about-box');
+        box.style.display = 'none';
+        box.style.pointerEvents = 'none';
     }
 
     window.onload = loadProfile;
     </script>
+<!-- About box — modal con overlay (estilos en profile.css) -->
+    <div id="about-box" onclick="if(event.target===this)closeAbout()"
+         style="display:none;pointer-events:none;position:fixed;inset:0;
+                background:rgba(0,0,0,0.45);z-index:3000;
+                align-items:center;justify-content:center;">
+        <div style="background:white;border-radius:16px;padding:28px 24px;max-width:360px;
+                    width:90%;text-align:center;box-shadow:0 8px 32px rgba(0,0,0,0.18);">
+            <h3 style="margin:0 0 16px;font-size:1.2rem;font-family:Arial,Helvetica,sans-serif;font-weight:700;">ℹ️ About Trastevere</h3>
+            <p style="font-size:0.9rem;margin-bottom:6px;"><strong>Tipo de software:</strong> Apache 2.0</p>
+            <p style="font-size:0.9rem;margin-bottom:6px;"><strong>Versión:</strong> <span id="about-version"></span></p>
+            <p style="font-size:0.9rem;margin-bottom:6px;"><strong>Build:</strong> <span id="about-build"></span></p>
+            <p style="font-size:0.9rem;margin-bottom:20px;"><strong>Autores:</strong> <span id="about-authors"></span></p>
+            <button onclick="closeAbout()" class="btn-main" style="width:100%;margin-top:12px;">Cerrar</button>
+        </div>
+    </div>
 </body>
 </html>
