@@ -4,7 +4,7 @@ import cloudinary
 import cloudinary.uploader
 from flask import Blueprint, request, jsonify, session, render_template
 from database.database import SessionLocal
-from database.schema.models import Publication, User
+from database.schema.models import Publication, User, Collection, CollectionItem
 
 publications_bp = Blueprint('publications', __name__)
 
@@ -74,6 +74,75 @@ def create_publication():
     finally:
         db.close()
 
+
+
+@publications_bp.route('/save-draft', methods=['POST'])
+def save_draft():
+    user_id = session.get('user_id')
+    if not user_id:
+        return jsonify({"error": "Debes iniciar sesión"}), 401
+
+    title = request.form.get('title', '').strip()
+    if not title:
+        return jsonify({"error": "El título es obligatorio para guardar el borrador"}), 400
+
+    description = request.form.get('description', '')
+    try:
+        ingredients = json.loads(request.form.get('ingredients', '[]'))
+        steps       = json.loads(request.form.get('steps', '[]'))
+        tags        = json.loads(request.form.get('tags', '[]'))
+    except Exception:
+        ingredients, steps, tags = [], [], []
+
+    if 'draft' not in tags:
+        tags.append('draft')
+
+    db = SessionLocal()
+    try:
+        saved_urls = []
+        for i in range(3):
+            file = request.files.get(f'file_{i}')
+            if file and file.filename != '':
+                url = upload_to_cloudinary(file)
+                saved_urls.append(url)
+
+        new_pub = Publication(
+            title      = title,
+            body       = description,
+            user_id    = user_id,
+            image_meta = {
+                "urls":        saved_urls,
+                "ingredients": list(ingredients),
+                "steps":       list(steps),
+                "tags":        list(tags)
+            },
+            save_counter = 0
+        )
+        db.add(new_pub)
+        db.commit()
+        db.refresh(new_pub)
+
+        # Buscar o crear Table "Borradores"
+        draft_col = db.query(Collection).filter(
+            Collection.user_id == user_id,
+            Collection.name == "Borradores"
+        ).first()
+        if not draft_col:
+            draft_col = Collection(name="Borradores", user_id=user_id)
+            db.add(draft_col)
+            db.commit()
+            db.refresh(draft_col)
+
+        db.add(CollectionItem(collection_id=draft_col.id, publication_id=new_pub.id))
+        db.commit()
+
+        return jsonify({"status": "draft_saved", "id": new_pub.id}), 201
+
+    except Exception as e:
+        db.rollback()
+        return jsonify({"error": str(e)}), 500
+    finally:
+        db.close()
 
 @publications_bp.route('/all', methods=['GET'])
 def all_publications():

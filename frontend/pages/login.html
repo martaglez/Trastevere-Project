@@ -28,6 +28,9 @@
 
         <button onclick="handleLogin()" class="btn-main" data-i18n="login.btn">Entrar</button>
 
+        <p style="text-align:center;margin-top:14px;margin-bottom:4px;font-size:0.85rem;">
+            <a href="/auth/forgot-password" style="color:var(--text-muted);" data-i18n="login.forgotPassword">¿Olvidaste tu contraseña?</a>
+        </p>
         <p><span data-i18n="login.noAccount">¿No tienes cuenta?</span> <a href="{{ url_for('auth.register') }}" data-i18n="login.register">Regístrate gratis</a></p>
     </div>
 

@@ -55,7 +55,21 @@
         <div id="steps"></div>
         <button onclick="addStep()" class="btn-add-item" data-i18n="create.addStep">+ Añadir paso</button>
 
-        <button class="publish-btn" onclick="publishRecipe()" data-i18n="create.publish">🍅 Publicar Receta</button>
+        <div id="draft-banner" style="display:none;background:var(--primary-light);border:1.5px dashed var(--primary);
+             border-radius:10px;padding:10px 14px;margin-bottom:12px;font-size:0.85rem;
+             color:var(--primary);align-items:center;gap:8px;">
+            💾 <strong>Continuando borrador</strong> — Al publicar se eliminará de Borradores automáticamente.
+        </div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin-top:4px;">
+            <button class="publish-btn" onclick="publishRecipe()" data-i18n="create.publish" style="flex:1;min-width:180px;">🍅 Publicar Receta</button>
+            <button onclick="saveDraft()"
+                    style="flex:1;min-width:180px;padding:12px 20px;border:2px dashed var(--primary);
+                           background:var(--primary-light);color:var(--primary);border-radius:12px;
+                           font-family:var(--font-body);font-size:0.95rem;font-weight:700;cursor:pointer;
+                           transition:all 0.2s;">
+                💾 <span data-i18n="create.saveDraft">Guardar borrador</span>
+            </button>
+        </div>
     </div>
 
     <div id="create-guest-view" style="display:none; text-align:center; padding:40px 10px;">
@@ -120,6 +134,7 @@ async function checkAccess() {
             applyLanguage();
             addIngredient();
             addStep();
+            loadDraftIfAny();
         }
     } catch { document.getElementById('create-guest-view').style.display = 'block'; }
 }
@@ -196,6 +211,84 @@ function removeStep(btn) {
     document.querySelectorAll('.step-num').forEach((el, i) => el.textContent = i + 1);
 }
 
+function loadDraftIfAny() {
+    const urlParams = new URLSearchParams(window.location.search);
+    if (!urlParams.get('draft')) return;
+    const raw = sessionStorage.getItem('draft_data');
+    if (!raw) return;
+    const d = JSON.parse(raw);
+    sessionStorage.removeItem('draft_data');
+    window._draftId = d.id;
+    const banner = document.getElementById('draft-banner');
+    if (banner) banner.style.display = 'flex';
+    document.getElementById('title').value       = d.title || '';
+    document.getElementById('description').value = d.description || '';
+    document.getElementById('tags').value        = (d.tags || []).join(', ');
+    const ingrContainer = document.getElementById('ingredients');
+    ingrContainer.innerHTML = '';
+    if (d.ingredients && d.ingredients.length > 0) {
+        d.ingredients.forEach(ingr => {
+            addIngredient();
+            const rows = ingrContainer.querySelectorAll('.ingredient-row');
+            rows[rows.length-1].querySelector('.ingr-name').value = ingr;
+        });
+    } else { addIngredient(); }
+    const stepsContainer = document.getElementById('steps');
+    stepsContainer.innerHTML = '';
+    if (d.steps && d.steps.length > 0) {
+        d.steps.forEach(step => {
+            addStep();
+            const rows = stepsContainer.querySelectorAll('.step-row');
+            rows[rows.length-1].querySelector('.step-input').value = step;
+        });
+    } else { addStep(); }
+}
+
+async function saveDraft() {
+    const title = document.getElementById('title').value.trim();
+    if (!title) {
+        alert('El título es obligatorio para guardar el borrador.');
+        return;
+    }
+    const ingredientRows = document.querySelectorAll('.ingredient-row');
+    const ingredients = [];
+    ingredientRows.forEach(row => {
+        const qty  = row.querySelector('.ingr-qty').value.trim();
+        const unit = row.querySelector('.ingr-unit').value;
+        const name = row.querySelector('.ingr-name').value.trim();
+        if (name) ingredients.push(qty ? `${qty} ${unit} ${name}` : name);
+    });
+    const steps    = [...document.querySelectorAll('.step-input')].map(s => s.value.trim()).filter(Boolean);
+    const tagsRaw  = document.getElementById('tags').value;
+    const tagsArr  = tagsRaw.split(',').map(s => s.trim()).filter(Boolean);
+    const desc     = document.getElementById('description').value.trim();
+    const formData = new FormData();
+    formData.append('title',       title);
+    formData.append('description', desc);
+    formData.append('tags',        JSON.stringify(tagsArr));
+    formData.append('ingredients', JSON.stringify(ingredients));
+    formData.append('steps',       JSON.stringify(steps));
+    for (let i = 0; i < 3; i++) {
+        const fi = document.getElementById(`file_${i}`);
+        if (fi?.files.length > 0) formData.append(`file_${i}`, fi.files[0]);
+    }
+    try {
+        // Si ya era un borrador, borrar el anterior antes de crear el nuevo
+        if (window._draftId) {
+            await fetch('/publications/delete/' + window._draftId, { method: 'POST' });
+            window._draftId = null;
+        }
+        const response = await fetch('/publications/save-draft', { method: 'POST', body: formData });
+        const result   = await response.json();
+        if (response.ok) {
+            alert('💾 Borrador guardado en tu Table "Borradores". ¡Puedes continuarlo cuando quieras!');
+            window.location.href = '/';
+        } else {
+            alert('Error: ' + (result.error || 'No se pudo guardar el borrador'));
+        }
+    } catch { alert('Error de conexión con el servidor.'); }
+}
+
 async function publishRecipe() {
     const title       = document.getElementById('title').value.trim();
     const description = document.getElementById('description').value.trim();
@@ -250,6 +343,9 @@ async function publishRecipe() {
         const response = await fetch('/publications/create', { method: 'POST', body: formData });
         const result   = await response.json();
         if (response.ok) {
+            if (window._draftId) {
+                await fetch('/publications/delete/' + window._draftId, { method: 'POST' });
+            }
             alert(t('create.success'));
             window.location.href = '/';
         } else {

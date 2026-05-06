@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cuenta eliminada - Trastevere</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='main.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='auth.css') }}">
+</head>
+<body>
+<div class="auth-container" style="text-align:center;padding:40px 20px;">
+    {% if success %}
+    <div style="font-size:3.5rem;margin-bottom:16px;">👋</div>
+    <h2 style="color:var(--text);">Cuenta eliminada</h2>
+    <p style="color:var(--text-muted);margin:12px 0 24px;">
+        Tu cuenta y todos tus datos han sido eliminados correctamente.<br>
+        Esperamos verte de nuevo pronto.
+    </p>
+    {% else %}
+    <div style="font-size:3.5rem;margin-bottom:16px;">⚠️</div>
+    <h2>Enlace inválido</h2>
+    <p style="color:var(--text-muted);margin:12px 0 24px;">
+        El enlace no es válido o ha expirado. Tu cuenta no ha sido eliminada.
+    </p>
+    {% endif %}
+    <a href="/" style="display:inline-block;padding:10px 24px;
+       background:var(--primary);color:white;border-radius:10px;
+       text-decoration:none;font-weight:700;">
+        Ir a Trastevere
+    </a>
+</div>
+</body>
+</html>

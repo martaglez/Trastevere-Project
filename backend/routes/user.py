@@ -121,6 +121,6 @@ def about():
     return jsonify({
         "software": "apache 2.0",
         "version": "2.2.3",
-        "build":   "2026-04-28",
+        "build":   "2026-05-05",
         "authors": "CEU San Pablo & Trastevere Team"
     })
