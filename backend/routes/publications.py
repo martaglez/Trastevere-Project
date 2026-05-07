@@ -130,7 +130,6 @@ def save_draft():
         db.commit()
         db.refresh(new_pub)
 
-        # Buscar o crear Table según idioma
         lang = request.form.get('lang', 'es')
         DRAFT_NAME = "Drafts" if lang == 'en' else "Borradores"
         draft_col = db.query(Collection).filter(
