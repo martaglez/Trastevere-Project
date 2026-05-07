@@ -101,7 +101,8 @@
                     dni: dni || null,
                     phone_number: phone || null,
                     wantPremium,
-                    card_number: null   // Ya no guardamos tarjeta aquí
+                    card_number: null,
+                    lang: localStorage.getItem('trastevere_lang') || 'es'
                 })
             });
             const data = await response.json();

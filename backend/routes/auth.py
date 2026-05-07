@@ -90,7 +90,8 @@ def register():
             # Email de bienvenida (no bloqueante)
             try:
                 from backend.routes.email_service import send_welcome_email
-                send_welcome_email(email, username)
+                lang = data.get('lang', 'es')
+                send_welcome_email(email, username, lang)
             except Exception as mail_err:
                 print(f"[email] Welcome email failed: {mail_err}")
 
@@ -123,7 +124,8 @@ def forgot_password():
             token = _make_token(user.id, 'reset')
             try:
                 from backend.routes.email_service import send_reset_email
-                send_reset_email(email, user.username, token)
+                lang = (request.json or {}).get('lang', 'es')
+                send_reset_email(email, user.username, token, lang)
             except Exception as e:
                 print(f"[email] Reset email failed: {e}")
         return jsonify({"message": "Si existe esa cuenta recibirás un email."}), 200
@@ -169,7 +171,8 @@ def request_delete():
         token = _make_token(user_id, 'delete')
         try:
             from backend.routes.email_service import send_delete_email
-            send_delete_email(user.email, user.username, token)
+            lang = (request.json or {}).get('lang', 'es')
+            send_delete_email(user.email, user.username, token, lang)
         except Exception as e:
             print(f"[email] Delete email failed: {e}")
         return jsonify({"message": "Te hemos enviado un email de confirmación."}), 200

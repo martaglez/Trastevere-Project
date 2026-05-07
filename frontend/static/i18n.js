@@ -85,6 +85,12 @@ const TRANSLATIONS = {
   'login.register':    { es: 'Regístrate gratis', en: 'Sign up for free' },
   'login.errorEmpty':  { es: 'Por favor, completa todos los campos.', en: 'Please fill in all fields.' },
   'login.errorFailed': { es: 'Correo o contraseña incorrectos.', en: 'Incorrect email or password.' },
+  'forgot.title':      { es: 'Recuperar contraseña - Trastevere', en: 'Recover password - Trastevere' },
+  'forgot.heading':    { es: 'Recuperar contraseña',  en: 'Recover password' },
+  'forgot.hint':       { es: 'Introduce tu email y te enviaremos un enlace para restablecer tu contraseña.', en: 'Enter your email and we will send you a link to reset your password.' },
+  'forgot.send':       { es: 'Enviar enlace',          en: 'Send link' },
+  'forgot.back':       { es: '← Volver al login',      en: '← Back to login' },
+  'forgot.alertEmpty': { es: 'Introduce tu email.',     en: 'Please enter your email.' },
 
   // ── Register page ─────────────────────────────────────────────────────────
   'register.title':    { es: 'Registro - Trastevere', en: 'Register - Trastevere' },
@@ -150,6 +156,7 @@ const TRANSLATIONS = {
   'create.steps':        { es: 'Pasos de preparación', en: 'Preparation steps' },
   'create.addStep':      { es: '+ Añadir paso', en: '+ Add step' },
   'create.publish':      { es: '🍅 Publicar Receta', en: '🍅 Publish Recipe' },
+  'create.saveDraft':    { es: '💾 Guardar borrador', en: '💾 Save draft' },
   'create.login':        { es: 'Iniciar Sesión', en: 'Log in' },
   'create.createAccount':{ es: 'Crear cuenta gratis', en: 'Create free account' },
   'create.ingrQtyPh':    { es: 'Cant.', en: 'Qty.' },
@@ -164,6 +171,8 @@ const TRANSLATIONS = {
   'create.errorSteps':   { es: 'Debes añadir al menos un paso.', en: 'You must add at least one step.' },
   'create.errorFix':     { es: 'Por favor corrige lo siguiente:', en: 'Please fix the following:' },
   'create.serverError':  { es: 'Error al conectar con el servidor.', en: 'Error connecting to the server.' },
+  'create.guestTitle':   { es: '¡Comparte tu talento!',               en: 'Share your talent!' },
+  'create.guestSub':     { es: 'Inicia sesión para subir tus propias recetas.', en: 'Log in to upload your own recipes.' },
   'create.publishError': { es: 'No se pudo publicar', en: 'Could not publish' },
 
   // ── Tables page ───────────────────────────────────────────────────────────
@@ -177,6 +186,7 @@ const TRANSLATIONS = {
   'tables.empty':        { es: 'Aún no hay recetas guardadas aquí.', en: 'No recipes saved here yet.' },
   'tables.noTables': { es: 'Aún no tienes ninguna Table. ¡Crea la primera arriba!', en: "You don't have any Tables yet. Create your first one above!" },
   'tables.saved':        { es: 'recetas guardadas', en: 'saved recipes' },
+  'tables.guestSub':     { es: 'Inicia sesión para crear Tables y guardar tus recetas favoritas.', en: 'Log in to create Tables and save your favourite recipes.' },
 
   // ── Recipe detail page ────────────────────────────────────────────────────
   'recipe.notFound':     { es: 'Receta no encontrada',   en: 'Recipe not found' },

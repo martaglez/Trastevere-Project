@@ -46,6 +46,11 @@ def create_publication():
             if file and file.filename != '':
                 url = upload_to_cloudinary(file)
                 saved_urls.append(url)
+            else:
+                # Mantener URL existente si viene de un borrador
+                existing = request.form.get(f'existing_url_{i}')
+                if existing:
+                    saved_urls.append(existing)
 
         if not saved_urls:
             saved_urls.append("/storage/images/default_photo.jpg")
@@ -122,13 +127,16 @@ def save_draft():
         db.commit()
         db.refresh(new_pub)
 
-        # Buscar o crear Table "Borradores"
+        # Buscar o crear Table "Borradores" / "Drafts" según idioma
+        lang = request.form.get('lang', 'es')
+        DRAFT_NAME = "Drafts" if lang == 'en' else "Borradores"
+        # Buscar en ambos nombres por si el usuario cambió de idioma
         draft_col = db.query(Collection).filter(
             Collection.user_id == user_id,
-            Collection.name == "Borradores"
+            Collection.name.in_(["Borradores", "Drafts"])
         ).first()
         if not draft_col:
-            draft_col = Collection(name="Borradores", user_id=user_id)
+            draft_col = Collection(name=DRAFT_NAME, user_id=user_id)
             db.add(draft_col)
             db.commit()
             db.refresh(draft_col)
