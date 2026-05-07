@@ -67,7 +67,7 @@
                            background:var(--primary-light);color:var(--primary);border-radius:12px;
                            font-family:var(--font-body);font-size:0.95rem;font-weight:700;cursor:pointer;
                            transition:all 0.2s;">
-                <span data-i18n="create.saveDraft">Guardar borrador</span>
+                💾 <span data-i18n="create.saveDraft">Guardar borrador</span>
             </button>
         </div>
     </div>
@@ -271,7 +271,14 @@ async function saveDraft() {
     formData.append('lang',        localStorage.getItem('trastevere_lang') || 'es');
     for (let i = 0; i < 3; i++) {
         const fi = document.getElementById(`file_${i}`);
-        if (fi?.files.length > 0) formData.append(`file_${i}`, fi.files[0]);
+        if (fi?.files.length > 0) {
+            formData.append(`file_${i}`, fi.files[0]);
+        } else {
+            const container = document.getElementById(`preview_container_${i}`);
+            if (container && container.dataset.existingUrl) {
+                formData.append(`existing_url_${i}`, container.dataset.existingUrl);
+            }
+        }
     }
     try {
         // Si ya era un borrador, borrar el anterior antes de crear el nuevo

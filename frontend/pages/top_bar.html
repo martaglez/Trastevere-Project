@@ -535,7 +535,12 @@ function _updatePremiumBtn(isPremium){
 // ── Eliminar cuenta ───────────────────────────────────────────
 async function requestDeleteAccount() {
     if (!confirm('¿Seguro que quieres eliminar tu cuenta? Recibirás un email de confirmación.')) return;
-    const res  = await fetch('/auth/request-delete', { method: 'POST' });
+    const lang = localStorage.getItem('trastevere_lang') || 'es';
+    const res  = await fetch('/auth/request-delete', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ lang })
+    });
     const data = await res.json();
     if (res.ok) {
         alert('📬 ' + data.message);
