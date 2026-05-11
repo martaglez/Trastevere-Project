@@ -499,18 +499,15 @@ function setThemeFromPremium(name,btn){
 
 // ── About ────────────────────────────────────────────────────
 async function openAbout() {
-    document.getElementById('about-box').style.display = 'flex';
-    applyLanguage();
+    const aboutBox = document.getElementById('about-box');
+    aboutBox.style.display = 'flex';
+    aboutBox.style.pointerEvents = 'auto';
     const response = await fetch('/user/about');
     const data = await response.json();
-
     document.getElementById('about-version').innerText = data.version;
     document.getElementById('about-build').innerText   = data.build;
     document.getElementById('about-authors').innerText = data.authors;
-
-    const aboutBox = document.getElementById('about-box');
-    aboutBox.style.display = 'block';
-    aboutBox.style.pointerEvents = 'auto';   // 👈 AÑADIR
+    applyLanguage();
 }
 
 function closeAbout() {

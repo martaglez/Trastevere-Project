@@ -70,6 +70,9 @@ def get_search_data():
             urls        = meta.get("urls", [])
             img_url     = urls[0] if (isinstance(urls, list) and len(urls) > 0) else "/storage/images/default_photo.jpg"
 
+            if 'draft' in [str(t).lower() for t in tags]:
+                continue
+            
             feed.append({
                 "id":          pub.id,
                 "title":       pub.title,
@@ -89,10 +92,13 @@ def get_search_data():
 
 @app.route('/api/recipes/random')
 def get_random_recipe():
-    """Devuelve una receta aleatoria para el botón dado."""
     db = SessionLocal()
     try:
         pubs = db.query(Publication).all()
+        # Filtrar borradores
+        pubs = [p for p in pubs if 'draft' not in (
+            (p.image_meta if isinstance(p.image_meta, dict) else {}).get('tags', [])
+        )]
         if not pubs:
             return jsonify({"error": "No hay recetas"}), 404
         pub = _random.choice(pubs)
