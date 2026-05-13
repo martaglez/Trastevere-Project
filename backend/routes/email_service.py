@@ -14,8 +14,9 @@ def send_welcome_email(to_email: str, username: str, lang: str = 'es'):
     if lang == 'en':
         subject = "Welcome to Trastevere! 🍅"
         body = f"""
+        <style>@import url('https://use.typekit.net/yof1ufo.css');</style>
         <div style="font-family:sans-serif;max-width:500px;margin:0 auto;padding:32px 24px;background:#fdf6ee;border-radius:16px;">
-            <h1 style="font-family:Georgia,serif;color:#ff6347;font-size:2rem;margin-bottom:8px;">Trastevere 🍅</h1>
+            <h1 style="font-family:'the-seasons',Georgia,serif;color:#ff6347;font-size:2rem;margin-bottom:8px;">Trastevere 🍅</h1>
             <h2 style="color:#222;font-size:1.3rem;margin-bottom:16px;">Hi, {username}!</h2>
             <p style="color:#555;line-height:1.6;">
                 Welcome to <strong>Trastevere</strong>, your recipe social network.<br>
@@ -32,8 +33,9 @@ def send_welcome_email(to_email: str, username: str, lang: str = 'es'):
     else:
         subject = "¡Bienvenido a Trastevere! 🍅"
         body = f"""
+        <style>@import url('https://use.typekit.net/yof1ufo.css');</style>
         <div style="font-family:sans-serif;max-width:500px;margin:0 auto;padding:32px 24px;background:#fdf6ee;border-radius:16px;">
-            <h1 style="font-family:Georgia,serif;color:#ff6347;font-size:2rem;margin-bottom:8px;">Trastevere 🍅</h1>
+            <h1 style="font-family:'the-seasons',Georgia,serif;color:#ff6347;font-size:2rem;margin-bottom:8px;">Trastevere 🍅</h1>
             <h2 style="color:#222;font-size:1.3rem;margin-bottom:16px;">¡Hola, {username}!</h2>
             <p style="color:#555;line-height:1.6;">
                 Bienvenido a <strong>Trastevere</strong>, tu red social de recetas.<br>
@@ -55,8 +57,9 @@ def send_reset_email(to_email: str, username: str, token: str, lang: str = 'es')
     if lang == 'en':
         subject = "Reset your Trastevere password"
         body = f"""
+        <style>@import url('https://use.typekit.net/yof1ufo.css');</style>
         <div style="font-family:sans-serif;max-width:500px;margin:0 auto;padding:32px 24px;background:#fdf6ee;border-radius:16px;">
-            <h1 style="font-family:Georgia,serif;color:#ff6347;font-size:2rem;margin-bottom:8px;">Trastevere 🍅</h1>
+            <h1 style="font-family:'the-seasons',Georgia,serif;color:#ff6347;font-size:2rem;margin-bottom:8px;">Trastevere 🍅</h1>
             <h2 style="color:#222;font-size:1.2rem;margin-bottom:16px;">Hi, {username}</h2>
             <p style="color:#555;line-height:1.6;">
                 We received a request to reset your password.<br>
@@ -74,8 +77,9 @@ def send_reset_email(to_email: str, username: str, token: str, lang: str = 'es')
     else:
         subject = "Recupera tu contraseña de Trastevere"
         body = f"""
+        <style>@import url('https://use.typekit.net/yof1ufo.css');</style>
         <div style="font-family:sans-serif;max-width:500px;margin:0 auto;padding:32px 24px;background:#fdf6ee;border-radius:16px;">
-            <h1 style="font-family:Georgia,serif;color:#ff6347;font-size:2rem;margin-bottom:8px;">Trastevere 🍅</h1>
+            <h1 style="font-family:'the-seasons',Georgia,serif;color:#ff6347;font-size:2rem;margin-bottom:8px;">Trastevere 🍅</h1>
             <h2 style="color:#222;font-size:1.2rem;margin-bottom:16px;">Hola, {username}</h2>
             <p style="color:#555;line-height:1.6;">
                 Recibimos una solicitud para restablecer tu contraseña.<br>
@@ -98,8 +102,9 @@ def send_delete_email(to_email: str, username: str, token: str, lang: str = 'es'
     if lang == 'en':
         subject = "Confirm your Trastevere account deletion"
         body = f"""
+        <style>@import url('https://use.typekit.net/yof1ufo.css');</style>
         <div style="font-family:sans-serif;max-width:500px;margin:0 auto;padding:32px 24px;background:#fdf6ee;border-radius:16px;">
-            <h1 style="font-family:Georgia,serif;color:#ff6347;font-size:2rem;margin-bottom:8px;">Trastevere 🍅</h1>
+            <h1 style="font-family:'the-seasons',Georgia,serif;color:#ff6347;font-size:2rem;margin-bottom:8px;">Trastevere 🍅</h1>
             <h2 style="color:#222;font-size:1.2rem;margin-bottom:16px;">Hi, {username}</h2>
             <p style="color:#555;line-height:1.6;">
                 We received a request to <strong>delete your account</strong>.<br>
@@ -118,8 +123,9 @@ def send_delete_email(to_email: str, username: str, token: str, lang: str = 'es'
     else:
         subject = "Confirma la eliminación de tu cuenta de Trastevere"
         body = f"""
+        <style>@import url('https://use.typekit.net/yof1ufo.css');</style>
         <div style="font-family:sans-serif;max-width:500px;margin:0 auto;padding:32px 24px;background:#fdf6ee;border-radius:16px;">
-            <h1 style="font-family:Georgia,serif;color:#ff6347;font-size:2rem;margin-bottom:8px;">Trastevere 🍅</h1>
+            <h1 style="font-family:'the-seasons',Georgia,serif;color:#ff6347;font-size:2rem;margin-bottom:8px;">Trastevere 🍅</h1>
             <h2 style="color:#222;font-size:1.2rem;margin-bottom:16px;">Hola, {username}</h2>
             <p style="color:#555;line-height:1.6;">
                 Recibimos una solicitud para <strong>eliminar tu cuenta</strong>.<br>

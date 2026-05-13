@@ -66,12 +66,14 @@ const TRANSLATIONS = {
   'home.loginLike':    { es: 'Inicia sesión para dar like. ¿Ir al login?', en: 'Log in to like recipes. Go to login?' },
 
   // ── Search page ───────────────────────────────────────────────────────────
-  'search.placeholder': { es: 'Buscar recetas o @usuarios...', en: 'Search recipes or @users...' },
-  'search.btn':         { es: 'Buscar',    en: 'Search' },
-  'search.tabRecipes':  { es: 'Recetas',   en: 'Recipes' },
-  'search.tabUsers':    { es: 'Usuarios',  en: 'Users' },
-  'search.noRecipes':   { es: 'No hay recetas para',  en: 'No recipes for' },
-  'search.noUsers':     { es: 'No hay usuarios para', en: 'No users for' },
+  'search.placeholder':  { es: 'Buscar recetas o @usuarios...', en: 'Search recipes or @users...' },
+  'search.btn':          { es: 'Buscar',    en: 'Search' },
+  'search.tabRecipes':   { es: 'Recetas',   en: 'Recipes' },
+  'search.tabUsers':     { es: 'Usuarios',  en: 'Users' },
+  'search.noRecipes':    { es: 'No hay recetas para',  en: 'No recipes for' },
+  'search.noUsers':      { es: 'No hay usuarios para', en: 'No users for' },
+  'search.history':      { es: 'Búsquedas recientes',  en: 'Recent searches' },
+  'search.clearHistory': { es: 'Borrar',               en: 'Clear' },
 
   // ── Login page ────────────────────────────────────────────────────────────
   'login.title':       { es: 'Iniciar Sesión - Trastevere', en: 'Login - Trastevere' },
@@ -184,7 +186,7 @@ const TRANSLATIONS = {
   'tables.login':        { es: 'Iniciar Sesión', en: 'Log in' },
   'tables.createAccount':{ es: 'Crear cuenta gratis', en: 'Create free account' },
   'tables.empty':        { es: 'Aún no hay recetas guardadas aquí.', en: 'No recipes saved here yet.' },
-  'tables.noTables': { es: 'Aún no tienes ninguna Table. ¡Crea la primera arriba!', en: "You don't have any Tables yet. Create your first one above!" },
+  'tables.noTables':     { es: 'Aún no tienes ninguna Table. ¡Crea la primera arriba!', en: "You don't have any Tables yet. Create your first one above!" },
   'tables.saved':        { es: 'recetas guardadas', en: 'saved recipes' },
   'tables.guestSub':     { es: 'Inicia sesión para crear Tables y guardar tus recetas favoritas.', en: 'Log in to create Tables and save your favourite recipes.' },
 
@@ -197,9 +199,9 @@ const TRANSLATIONS = {
   'recipe.anonymous':    { es: 'Cocinero Anónimo',        en: 'Anonymous Cook' },
   'recipe.loginSave':    { es: 'Inicia sesión para guardar recetas', en: 'Log in to save recipes' },
   'recipe.createTable':  { es: 'Crear mi primera Table',  en: 'Create my first Table' },
-  'recipe.edit':   { es: 'Editar', en: 'Edit' },
-  'recipe.delete': { es: 'Borrar', en: 'Delete' },
-  'recipe.chooseTable': { es: 'Elige una table', en: 'Choose a table' },
+  'recipe.edit':         { es: 'Editar', en: 'Edit' },
+  'recipe.delete':       { es: 'Borrar', en: 'Delete' },
+  'recipe.chooseTable':  { es: 'Elige una table', en: 'Choose a table' },
 
   // ── Public profile page ───────────────────────────────────────────────────
   'public.recipes':      { es: 'Recetas',    en: 'Recipes' },
@@ -208,12 +210,12 @@ const TRANSLATIONS = {
   'public.follow':       { es: 'Seguir',     en: 'Follow' },
   'public.unfollow':     { es: 'Siguiendo',  en: 'Following' },
   'public.noRecipes':    { es: 'Aún no hay recetas publicadas.', en: 'No recipes published yet.' },
-  'public.noFollowers': { es: 'Aún no hay seguidores.', en: 'No followers yet.' },
-  'public.noFollowing': { es: 'No sigue a nadie todavía.', en: 'Not following anyone yet.' },
-  'public.rating':      { es: 'Valorar', en: 'Rate' },
-  'public.yourRating':  { es: 'Tu valoración:', en: 'Your rating:' },
-  'public.updated':     { es: '✓ Actualizada', en: '✓ Updated' },
-  'public.saved':       { es: '✓ Guardada', en: '✓ Saved' },
+  'public.noFollowers':  { es: 'Aún no hay seguidores.', en: 'No followers yet.' },
+  'public.noFollowing':  { es: 'No sigue a nadie todavía.', en: 'Not following anyone yet.' },
+  'public.rating':       { es: 'Valorar', en: 'Rate' },
+  'public.yourRating':   { es: 'Tu valoración:', en: 'Your rating:' },
+  'public.updated':      { es: '✓ Actualizada', en: '✓ Updated' },
+  'public.saved':        { es: '✓ Guardada', en: '✓ Saved' },
 };
 
 // ── Core helpers ──────────────────────────────────────────────────────────────
@@ -229,37 +231,29 @@ function t(key) {
 }
 
 // ── DOM application ───────────────────────────────────────────────────────────
-// Elements that carry a data-i18n attribute get their textContent replaced.
-// Elements with data-i18n-placeholder get their placeholder attribute replaced.
-// Elements with data-i18n-title get their title attribute replaced.
 function applyLanguage() {
   const lang = getLanguage();
 
-  // Text content
   document.querySelectorAll('[data-i18n]').forEach(el => {
     const key = el.getAttribute('data-i18n');
     const val = t(key);
     if (val !== key) el.textContent = val;
   });
 
-  // Placeholders
   document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
     const key = el.getAttribute('data-i18n-placeholder');
     const val = t(key);
     if (val !== key) el.placeholder = val;
   });
 
-  // Title attributes (tooltips)
   document.querySelectorAll('[data-i18n-title]').forEach(el => {
     const key = el.getAttribute('data-i18n-title');
     const val = t(key);
     if (val !== key) el.title = val;
   });
 
-  // Update <html lang="…"> for accessibility
   document.documentElement.lang = lang;
 
-  // Update the settings <select> to reflect the current choice
   const sel = document.querySelector('.lang-select');
   if (sel) sel.value = lang;
 }

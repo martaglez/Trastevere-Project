@@ -173,21 +173,9 @@
     </div>
 </div>
 
+<link rel="stylesheet" href="https://use.typekit.net/yof1ufo.css">
 <script src="{{ url_for('static', filename='i18n.js') }}"></script>
 <script>
-// ── Aplicar tema inmediatamente para evitar flash en móvil ──
-(function() {
-    const THEMES = {
-        default: {'--primary':'#ff6347','--primary-dark':'#e5533d','--primary-light':'#fff0ec','--bg':'#fdf6ee','--bar-bg':'#fff','--text':'#222','--text-muted':'#888','--border':'#eeebe6'},
-        green:   {'--primary':'#4caf82','--primary-dark':'#388f66','--primary-light':'#eaf7f0','--bg':'#f2f7f4','--bar-bg':'#fff','--text':'#1a2e24','--text-muted':'#7a9e8c','--border':'#d4e8dc'},
-        dark:    {'--primary':'#ff6347','--primary-dark':'#e5533d','--primary-light':'#3a1f18','--bg':'#1a1a1a','--bar-bg':'#242424','--text':'#f0f0f0','--text-muted':'#888','--border':'#333'}
-    };
-    const saved = localStorage.getItem('trastevere_theme') || 'default';
-    const theme = THEMES[saved] || THEMES.default;
-    Object.entries(theme).forEach(([k,v]) => document.documentElement.style.setProperty(k,v));
-    if (saved === 'dark') document.body && document.body.classList.add('theme-dark');
-})();
-
 // ── Branding premium ────────────────────────────────────────
 let _currentUser = null;
 async function updateBranding() {
@@ -499,15 +487,18 @@ function setThemeFromPremium(name,btn){
 
 // ── About ────────────────────────────────────────────────────
 async function openAbout() {
-    const aboutBox = document.getElementById('about-box');
-    aboutBox.style.display = 'flex';
-    aboutBox.style.pointerEvents = 'auto';
+    document.getElementById('about-box').style.display = 'flex';
+    applyLanguage();
     const response = await fetch('/user/about');
     const data = await response.json();
+
     document.getElementById('about-version').innerText = data.version;
     document.getElementById('about-build').innerText   = data.build;
     document.getElementById('about-authors').innerText = data.authors;
-    applyLanguage();
+
+    const aboutBox = document.getElementById('about-box');
+    aboutBox.style.display = 'block';
+    aboutBox.style.pointerEvents = 'auto';   // 👈 AÑADIR
 }
 
 function closeAbout() {
@@ -532,12 +523,7 @@ function _updatePremiumBtn(isPremium){
 // ── Eliminar cuenta ───────────────────────────────────────────
 async function requestDeleteAccount() {
     if (!confirm('¿Seguro que quieres eliminar tu cuenta? Recibirás un email de confirmación.')) return;
-    const lang = localStorage.getItem('trastevere_lang') || 'es';
-    const res  = await fetch('/auth/request-delete', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ lang })
-    });
+    const res  = await fetch('/auth/request-delete', { method: 'POST' });
     const data = await res.json();
     if (res.ok) {
         alert('📬 ' + data.message);

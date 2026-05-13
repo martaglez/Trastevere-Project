@@ -3,7 +3,8 @@
    Rediseño completo · Responsive · Sin bugs
    ============================================================ */
 
-@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800&family=DM+Sans:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap');
+@import url('https://use.typekit.net/yof1ufo.css');
 
 /* ── Variables ─────────────────────────────────────────────── */
 :root {
@@ -21,7 +22,7 @@
   --radius:       14px;
   --topbar-h:     64px;
   --bottombar-h:  66px;
-  --font-display: 'Playfair Display', Georgia, serif;
+  --font-display: 'the-seasons', Georgia, serif;
   --font-body:    'DM Sans', system-ui, sans-serif;
 }
 
