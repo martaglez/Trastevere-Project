@@ -4,11 +4,10 @@ import cloudinary
 import cloudinary.uploader
 from flask import Blueprint, request, jsonify, session, render_template
 from database.database import SessionLocal
-from database.schema.models import Publication, User, Collection, CollectionItem
+from database.schema.models import Publication, User, Collection, CollectionItem, Comment
 
 publications_bp = Blueprint('publications', __name__)
 
-# Configurar Cloudinary con variables de entorno
 cloudinary.config(
     cloud_name = os.environ.get("CLOUDINARY_CLOUD_NAME"),
     api_key    = os.environ.get("CLOUDINARY_API_KEY"),
@@ -17,7 +16,6 @@ cloudinary.config(
 )
 
 def upload_to_cloudinary(file, folder="trastevere/recipes"):
-    """Sube un archivo a Cloudinary y devuelve la URL segura."""
     result = cloudinary.uploader.upload(file, folder=folder, resource_type="image")
     return result["secure_url"]
 
@@ -77,7 +75,6 @@ def create_publication():
         return jsonify({"error": str(e)}), 500
     finally:
         db.close()
-
 
 
 @publications_bp.route('/save-draft', methods=['POST'])
@@ -153,6 +150,7 @@ def save_draft():
     finally:
         db.close()
 
+
 @publications_bp.route('/all', methods=['GET'])
 def all_publications():
     db = SessionLocal()
@@ -215,6 +213,7 @@ def publication_detail(pub_id):
 def publication_view(pub_id):
     return render_template("recipe_detail.html")
 
+
 @publications_bp.route('/delete/<int:pub_id>', methods=['POST'])
 def delete_publication(pub_id):
     user_id = session.get('user_id')
@@ -269,5 +268,102 @@ def edit_publication(pub_id):
         return jsonify({"status": "ok", "id": p.id})
     except Exception as e:
         db.rollback(); return jsonify({"error": str(e)}), 500
+    finally:
+        db.close()
+
+
+# ── Comments ───────────────────────────────────────────────────────────────────
+
+@publications_bp.route('/<int:pub_id>/comments', methods=['GET'])
+def get_comments(pub_id):
+    db = SessionLocal()
+    try:
+        comments = db.query(Comment).filter(
+            Comment.post_id == pub_id,
+            Comment.parent_id == None
+        ).order_by(Comment.id.asc()).all()
+
+        result = []
+        for c in comments:
+            result.append({
+                'id':       c.id,
+                'user_id':  c.user_id,
+                'username': c.user.username if c.user else 'Anónimo',
+                'avatar':   c.user.profile_pic if c.user else None,
+                'content':  c.content,
+                'replies':  [{
+                    'id':       r.id,
+                    'user_id':  r.user_id,
+                    'username': r.user.username if r.user else 'Anónimo',
+                    'avatar':   r.user.profile_pic if r.user else None,
+                    'content':  r.content,
+                } for r in c.replies]
+            })
+        return jsonify(result)
+    finally:
+        db.close()
+
+
+@publications_bp.route('/<int:pub_id>/comments', methods=['POST'])
+def post_comment(pub_id):
+    user_id = session.get('user_id')
+    if not user_id:
+        return jsonify({'error': 'Debes iniciar sesión'}), 401
+
+    data    = request.get_json() or {}
+    content = data.get('content', '').strip()
+    if not content:
+        return jsonify({'error': 'El comentario no puede estar vacío'}), 400
+    if len(content) > 500:
+        return jsonify({'error': 'Máximo 500 caracteres'}), 400
+
+    db = SessionLocal()
+    try:
+        pub = db.query(Publication).filter(Publication.id == pub_id).first()
+        if not pub:
+            return jsonify({'error': 'Receta no encontrada'}), 404
+
+        comment = Comment(post_id=pub_id, user_id=user_id, content=content, parent_id=None)
+        db.add(comment)
+        db.commit()
+        db.refresh(comment)
+
+        return jsonify({
+            'id':       comment.id,
+            'user_id':  comment.user_id,
+            'username': comment.user.username if comment.user else 'Anónimo',
+            'avatar':   comment.user.profile_pic if comment.user else None,
+            'content':  comment.content,
+            'replies':  []
+        }), 201
+    except Exception as e:
+        db.rollback()
+        return jsonify({'error': str(e)}), 500
+    finally:
+        db.close()
+
+
+@publications_bp.route('/comments/<int:comment_id>', methods=['DELETE'])
+def delete_comment(comment_id):
+    user_id = session.get('user_id')
+    if not user_id:
+        return jsonify({'error': 'Debes iniciar sesión'}), 401
+
+    db = SessionLocal()
+    try:
+        comment = db.query(Comment).filter(Comment.id == comment_id).first()
+        if not comment:
+            return jsonify({'error': 'Comentario no encontrado'}), 404
+
+        pub = db.query(Publication).filter(Publication.id == comment.post_id).first()
+        if comment.user_id != user_id and (not pub or pub.user_id != user_id):
+            return jsonify({'error': 'Sin permiso'}), 403
+
+        db.delete(comment)
+        db.commit()
+        return jsonify({'status': 'deleted'})
+    except Exception as e:
+        db.rollback()
+        return jsonify({'error': str(e)}), 500
     finally:
         db.close()

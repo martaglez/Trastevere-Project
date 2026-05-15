@@ -15,6 +15,47 @@
 
 <div class="recipe-detail" id="recipe-detail"></div>
 
+<!-- Sección de comentarios -->
+<div id="comments-section" style="display:none;max-width:680px;margin:0 auto;padding:0 16px 32px;">
+    <h3 style="font-family:var(--font-display);font-size:1.2rem;color:var(--text);
+               margin-bottom:16px;padding-top:24px;border-top:1px solid var(--border);">
+        💬 <span data-i18n="comments.title">Comentarios</span>
+    </h3>
+    <div id="comment-input-area" style="display:none;margin-bottom:20px;">
+        <div style="display:flex;gap:10px;align-items:flex-start;">
+            <img id="comment-avatar" src="/storage/images/default_user.jpg"
+                 style="width:36px;height:36px;border-radius:50%;object-fit:cover;
+                        border:2px solid var(--border);flex-shrink:0;">
+            <div style="flex:1;">
+                <textarea id="comment-text" rows="2"
+                          placeholder="Escribe un comentario..." data-i18n-placeholder="comments.placeholder"
+                          maxlength="500"
+                          style="width:100%;border:1.5px solid var(--border);border-radius:12px;
+                                 padding:10px 14px;font-family:var(--font-body);font-size:0.88rem;
+                                 color:var(--text);background:white;outline:none;resize:none;
+                                 transition:border-color 0.2s;box-sizing:border-box;"
+                          onfocus="this.style.borderColor='var(--primary)'"
+                          onblur="this.style.borderColor='var(--border)'"></textarea>
+                <div style="display:flex;justify-content:flex-end;margin-top:6px;gap:8px;align-items:center;">
+                    <span id="comment-char-count" style="font-size:0.72rem;color:var(--text-muted);">0/500</span>
+                    <button onclick="submitComment()"
+                            style="padding:7px 18px;background:var(--primary);color:white;border:none;
+                                   border-radius:10px;font-family:var(--font-body);font-size:0.82rem;
+                                   font-weight:700;cursor:pointer;transition:background 0.2s;"
+                            onmouseover="this.style.background='var(--primary-dark)'"
+                            onmouseout="this.style.background='var(--primary)'" data-i18n="comments.send">Enviar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div id="comment-login-hint" style="display:none;text-align:center;padding:12px;
+         background:var(--primary-light);border-radius:10px;margin-bottom:16px;font-size:0.85rem;color:var(--text);">
+        <span data-i18n="comments.loginHint">Inicia sesión para comentar</span>
+        <a href="/auth/login" style="color:var(--primary);font-weight:700;margin-left:6px;" data-i18n="comments.loginBtn">Iniciar sesión</a>
+    </div>
+    <div id="comments-list"></div>
+</div>
+
 <!-- Lightbox -->
 <div id="lightbox" style="display:none;" onclick="closeLightbox(event)">
     <div class="lightbox-overlay"></div>
@@ -53,9 +94,13 @@
 {% include 'bottom_bar.html' %}
 
 <script>
+let _pubId = null;
+let _meId  = null;
+
 async function loadRecipe() {
     const path = window.location.pathname.split('/');
     const id = path[path.length - 1];
+    _pubId = id;
 
     const response = await fetch('/publications/' + id);
     const data = await response.json();
@@ -122,14 +167,13 @@ async function loadRecipe() {
                 </div>
             </div>
 
-            <!-- Modal tables -->
             <div id="table-modal" class="modal" style="display:none;">
                 <div class="modal-content" style="position:relative;">
                     <button class="modal-close-btn" onclick="closeTableModal()" title="Cerrar">
                         <i class="fas fa-times"></i>
                     </button>
                     <h3>${t('recipe.saveTitle')}</h3>
-                    <p style="font-size:0.78rem;color:var(--text-muted);margin-bottom:12px;" data-i18n="recipe.chooseTable">Elige una table</p>
+                    <p style="font-size:0.78rem;color:var(--text-muted);margin-bottom:12px;">${t('recipe.chooseTable')}</p>
                     <div id="modal-tables-container"></div>
                 </div>
             </div>
@@ -163,34 +207,131 @@ async function loadRecipe() {
         </div>
     `;
 
-    // Wire author link
     const authorBtn = document.getElementById('detail-author-btn');
     if (authorBtn && data.author_id) {
         authorBtn.addEventListener('click', () => { window.location.href = '/user/' + data.author_id; });
     }
 
-    // Wire like button
     const likeBtn = document.getElementById('detail-like-btn');
     if (likeBtn) {
         likeBtn.addEventListener('click', () => toggleDetailLike(data.id));
     }
 
-    // Mostrar botones Editar/Borrar si soy el autor
     try {
         const meRes = await fetch('/user/profile');
         if (meRes.ok) {
             const me = await meRes.json();
+            _meId = me.id;
             const isAuthor = (data.author_id && me.id === data.author_id)
                           || (me.username && me.username === data.author);
             if (isAuthor) {
                 const od = document.getElementById('owner-actions');
                 if (od) od.style.display = 'flex';
             }
+            // Show comment input
+            document.getElementById('comment-avatar').src = me.profile_pic || '/storage/images/default_user.jpg';
+            document.getElementById('comment-input-area').style.display = 'block';
+        } else {
+            document.getElementById('comment-login-hint').style.display = 'block';
         }
-    } catch(e) {}
+    } catch(e) {
+        document.getElementById('comment-login-hint').style.display = 'block';
+    }
+
+    // Load comments
+    document.getElementById('comments-section').style.display = 'block';
+    loadComments();
+
+    // Char counter
+    const ta = document.getElementById('comment-text');
+    if (ta) ta.addEventListener('input', () => {
+        document.getElementById('comment-char-count').textContent = ta.value.length + '/500';
+    });
 }
 
-loadRecipe();
+// Run after DOM is ready so top_bar i18n.js is loaded
+document.addEventListener('DOMContentLoaded', loadRecipe);
+
+// Ticket 006 — refresh recipe content when language changes
+const _origSetLanguage = window.setLanguage;
+window.setLanguage = function(lang) {
+    if (_origSetLanguage) _origSetLanguage(lang);
+    // Reload recipe content with new language
+    loadRecipe();
+};
+
+// ── Comments ──────────────────────────────────────────────────────────────────
+async function loadComments() {
+    const res  = await fetch('/publications/' + _pubId + '/comments');
+    const list = await res.json();
+    renderComments(list);
+}
+
+function renderComments(list) {
+    const container = document.getElementById('comments-list');
+    if (!list || list.length === 0) {
+        container.innerHTML = '<p style="color:var(--text-muted);font-size:0.88rem;text-align:center;padding:20px 0;">' + t('comments.empty') + '</p>';
+        return;
+    }
+    container.innerHTML = list.map(c => commentHTML(c, false)).join('');
+}
+
+function commentHTML(c, isReply) {
+    const canDelete = _meId && c.user_id === _meId;
+    const avatar    = c.avatar || '/storage/images/default_user.jpg';
+    const replies   = (!isReply && c.replies && c.replies.length > 0)
+        ? c.replies.map(r => commentHTML(r, true)).join('') : '';
+    const safeContent = c.content.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    return `
+    <div id="comment-${c.id}" style="display:flex;gap:10px;margin-bottom:14px;${isReply ? 'margin-left:46px;' : ''}">
+        <img src="${avatar}" onerror="this.src='/storage/images/default_user.jpg'"
+             onclick="window.location.href='/user/${c.user_id}'"
+             style="width:${isReply?'28':'36'}px;height:${isReply?'28':'36'}px;border-radius:50%;
+                    object-fit:cover;border:2px solid var(--border);flex-shrink:0;cursor:pointer;">
+        <div style="flex:1;">
+            <div style="background:${isReply?'var(--bg)':'white'};border:1px solid var(--border);
+                        border-radius:12px;padding:10px 14px;">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
+                    <span onclick="window.location.href='/user/${c.user_id}'"
+                          style="font-weight:700;font-size:0.82rem;color:var(--text);cursor:pointer;">${c.username}</span>
+                    ${canDelete ? `<button onclick="deleteComment(${c.id})"
+                        style="background:none;border:none;color:#ccc;cursor:pointer;font-size:0.72rem;
+                               padding:2px 6px;border-radius:4px;line-height:1;"
+                        onmouseover="this.style.color='#e05252'" onmouseout="this.style.color='#ccc'">✕</button>` : ''}
+                </div>
+                <p style="font-size:0.88rem;color:var(--text);margin:0;line-height:1.5;white-space:pre-wrap;">${safeContent}</p>
+            </div>
+        </div>
+    </div>${replies}`;
+}
+
+async function submitComment() {
+    const ta = document.getElementById('comment-text');
+    const content = ta.value.trim();
+    if (!content) return;
+    const res = await fetch('/publications/' + _pubId + '/comments', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ content })
+    });
+    if (res.ok) {
+        ta.value = '';
+        document.getElementById('comment-char-count').textContent = '0/500';
+        loadComments();
+    } else {
+        const d = await res.json();
+        alert(d.error || 'Error al enviar el comentario');
+    }
+}
+
+async function deleteComment(commentId) {
+    if (!confirm(t('comments.delete'))) return;
+    const res = await fetch('/publications/comments/' + commentId, { method: 'DELETE' });
+    if (res.ok) {
+        const el = document.getElementById('comment-' + commentId);
+        if (el) el.remove();
+    }
+}
 
 // ── Edit & Delete ────────────────────────────────────────────
 window.deleteRecipe = async function() {

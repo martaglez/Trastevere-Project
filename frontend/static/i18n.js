@@ -74,6 +74,7 @@ const TRANSLATIONS = {
   'search.noUsers':      { es: 'No hay usuarios para', en: 'No users for' },
   'search.history':      { es: 'Búsquedas recientes',  en: 'Recent searches' },
   'search.clearHistory': { es: 'Borrar',               en: 'Clear' },
+  'search.tagsTitle':    { es: 'Tags disponibles',      en: 'Available tags' },
 
   // ── Login page ────────────────────────────────────────────────────────────
   'login.title':       { es: 'Iniciar Sesión - Trastevere', en: 'Login - Trastevere' },
@@ -216,6 +217,14 @@ const TRANSLATIONS = {
   'public.yourRating':   { es: 'Tu valoración:', en: 'Your rating:' },
   'public.updated':      { es: '✓ Actualizada', en: '✓ Updated' },
   'public.saved':        { es: '✓ Guardada', en: '✓ Saved' },
+  // ── Comments ──────────────────────────────────────────────────────────────
+  'comments.title':       { es: 'Comentarios',                   en: 'Comments' },
+  'comments.placeholder': { es: 'Escribe un comentario...',      en: 'Write a comment...' },
+  'comments.send':        { es: 'Enviar',                        en: 'Send' },
+  'comments.empty':       { es: 'Sé el primero en comentar 🍅',  en: 'Be the first to comment 🍅' },
+  'comments.loginHint':   { es: 'Inicia sesión para comentar',   en: 'Log in to comment' },
+  'comments.loginBtn':    { es: 'Iniciar sesión',                en: 'Log in' },
+  'comments.delete':      { es: '¿Borrar este comentario?',      en: 'Delete this comment?' },
 };
 
 // ── Core helpers ──────────────────────────────────────────────────────────────

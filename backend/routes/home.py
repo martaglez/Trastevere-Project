@@ -45,3 +45,25 @@ def get_feed():
         return jsonify([])
     finally:
         db.close()
+
+@home_bp.route('/api/tags', methods=['GET'])
+def get_all_tags():
+    db = SessionLocal()
+    try:
+        publications = db.query(Publication).all()
+        tag_set = set()
+        for pub in publications:
+            meta = pub.image_meta or {}
+            if isinstance(meta, str):
+                try:    meta = json.loads(meta)
+                except: meta = {}
+            tags = meta.get('tags', [])
+            for tag in tags:
+                tag_str = str(tag).lower().strip()
+                if tag_str and tag_str != 'draft':
+                    tag_set.add(tag_str)
+        return jsonify(sorted(list(tag_set)))
+    except Exception as e:
+        return jsonify([])
+    finally:
+        db.close()
