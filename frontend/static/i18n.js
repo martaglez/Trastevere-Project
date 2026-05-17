@@ -146,6 +146,7 @@ const TRANSLATIONS = {
   'profile.updated':       { es: 'Perfil actualizado', en: 'Profile updated' },
   'profile.uploadError':   { es: 'Error al subir la imagen', en: 'Error uploading image' },
   'profile.rate':          { es: 'Valorar',    en: 'Rate' },
+  'profile.softwareType': { es: 'Tipo de software:', en: 'Software type:' },
 
   // ── Create recipe page ────────────────────────────────────────────────────
   'create.title':        { es: 'Crear receta - Trastevere', en: 'Create recipe - Trastevere' },
