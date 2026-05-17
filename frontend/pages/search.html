@@ -19,8 +19,21 @@
     <div class="search-box">
         <i class="fas fa-search search-icon"></i>
         <input type="text" id="search-input"
-               placeholder="Buscar recetas o @usuarios..." data-i18n-placeholder="search.placeholder">
+               placeholder="Buscar recetas o @usuarios..." data-i18n-placeholder="search.placeholder"
+               onfocus="showHistory()" oninput="showHistory()">
         <button id="search-btn" onclick="doSearch()" data-i18n="search.btn">Buscar</button>
+    </div>
+    <div id="search-history" style="display:none;">
+        <div style="display:flex;justify-content:space-between;align-items:center;
+                    padding:8px 16px 4px;border-bottom:1px solid var(--border);">
+            <span style="font-size:0.72rem;font-weight:700;text-transform:uppercase;
+                         letter-spacing:0.06em;color:var(--text-muted);"
+                  data-i18n="search.history">Búsquedas recientes</span>
+            <button onclick="clearHistory()" style="background:none;border:none;font-size:0.75rem;
+                    color:var(--primary);cursor:pointer;font-weight:600;"
+                    data-i18n="search.clearHistory">Borrar</button>
+        </div>
+        <div id="history-list"></div>
     </div>
 </section>
 
@@ -60,6 +73,8 @@ function switchTab(tab) {
 async function doSearch() {
     const query = document.getElementById('search-input').value.trim();
     if (!query) return;
+    saveToHistory(query);
+    document.getElementById('search-history').style.display = 'none';
     // @ prefix → forzar tab de usuarios
     if (query.startsWith('@')) {
         switchTab('users');
@@ -151,7 +166,58 @@ if (params.get('q')) {
     doSearch();
 }
 
-// ── Tags cloud ────────────────────────────────────────────────
+// ── Search History ─────────────────────────────────────────────
+const HISTORY_KEY = 'trastevere_search_history';
+const MAX_HISTORY = 8;
+
+function getHistory() {
+    try { return JSON.parse(localStorage.getItem(HISTORY_KEY) || '[]'); } catch { return []; }
+}
+function saveToHistory(query) {
+    let h = getHistory().filter(q => q.toLowerCase() !== query.toLowerCase());
+    h.unshift(query);
+    if (h.length > MAX_HISTORY) h = h.slice(0, MAX_HISTORY);
+    localStorage.setItem(HISTORY_KEY, JSON.stringify(h));
+}
+function clearHistory() {
+    localStorage.removeItem(HISTORY_KEY);
+    document.getElementById('search-history').style.display = 'none';
+}
+function showHistory() {
+    const input = document.getElementById('search-input').value.trim();
+    const h = getHistory().filter(q => !input || q.toLowerCase().includes(input.toLowerCase()));
+    const container = document.getElementById('search-history');
+    const list = document.getElementById('history-list');
+    if (!h.length) { container.style.display = 'none'; return; }
+    list.innerHTML = h.map(q => `
+        <div onclick="pickHistory('${q.replace(/'/g, "\'")}')"
+             style="display:flex;align-items:center;gap:10px;padding:10px 16px;cursor:pointer;
+                    font-size:0.88rem;color:var(--text);transition:background 0.15s;"
+             onmouseover="this.style.background='var(--primary-light)'"
+             onmouseout="this.style.background=''">
+            <i class="fas fa-clock" style="color:var(--text-muted);font-size:0.75rem;flex-shrink:0;"></i>
+            <span style="flex:1;">${q}</span>
+            <button onclick="event.stopPropagation();removeFromHistory('${q.replace(/'/g, "\'")}');"
+                    style="background:none;border:none;color:#ccc;cursor:pointer;font-size:0.75rem;">✕</button>
+        </div>`).join('');
+    container.style.display = 'block';
+}
+function pickHistory(query) {
+    document.getElementById('search-input').value = query;
+    document.getElementById('search-history').style.display = 'none';
+    doSearch();
+}
+function removeFromHistory(query) {
+    localStorage.setItem(HISTORY_KEY, JSON.stringify(getHistory().filter(q => q !== query)));
+    showHistory();
+}
+document.addEventListener('click', e => {
+    const hero = document.querySelector('.search-hero');
+    if (hero && !hero.contains(e.target))
+        document.getElementById('search-history').style.display = 'none';
+});
+
+// ── Tags cloud ─────────────────────────────────────────────────
 async function loadTags() {
     try {
         const res  = await fetch('/home/api/tags');
@@ -174,13 +240,11 @@ async function loadTags() {
         document.getElementById('tags-section').style.display = 'none';
     }
 }
-
 function searchByTag(tag) {
     document.getElementById('search-input').value = tag;
     switchTab('recipes');
     doSearch();
 }
-
 document.addEventListener('DOMContentLoaded', loadTags);
 </script>
 

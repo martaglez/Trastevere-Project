@@ -145,6 +145,7 @@ const TRANSLATIONS = {
   'profile.close':         { es: 'Cerrar',     en: 'Close' },
   'profile.updated':       { es: 'Perfil actualizado', en: 'Profile updated' },
   'profile.uploadError':   { es: 'Error al subir la imagen', en: 'Error uploading image' },
+  'profile.rate':          { es: 'Valorar',    en: 'Rate' },
 
   // ── Create recipe page ────────────────────────────────────────────────────
   'create.title':        { es: 'Crear receta - Trastevere', en: 'Create recipe - Trastevere' },
@@ -217,6 +218,7 @@ const TRANSLATIONS = {
   'public.yourRating':   { es: 'Tu valoración:', en: 'Your rating:' },
   'public.updated':      { es: '✓ Actualizada', en: '✓ Updated' },
   'public.saved':        { es: '✓ Guardada', en: '✓ Saved' },
+
   // ── Comments ──────────────────────────────────────────────────────────────
   'comments.title':       { es: 'Comentarios',                   en: 'Comments' },
   'comments.placeholder': { es: 'Escribe un comentario...',      en: 'Write a comment...' },

@@ -173,7 +173,6 @@
     </div>
 </div>
 
-<link rel="stylesheet" href="https://use.typekit.net/yof1ufo.css">
 <script src="{{ url_for('static', filename='i18n.js') }}"></script>
 <script>
 // ── Branding premium ────────────────────────────────────────
@@ -487,24 +486,21 @@ function setThemeFromPremium(name,btn){
 
 // ── About ────────────────────────────────────────────────────
 async function openAbout() {
-    document.getElementById('about-box').style.display = 'flex';
+    const aboutBox = document.getElementById('about-box');
+    aboutBox.style.display = 'flex';
+    aboutBox.style.pointerEvents = 'auto';
     applyLanguage();
     const response = await fetch('/user/about');
     const data = await response.json();
-
     document.getElementById('about-version').innerText = data.version;
     document.getElementById('about-build').innerText   = data.build;
     document.getElementById('about-authors').innerText = data.authors;
-
-    const aboutBox = document.getElementById('about-box');
-    aboutBox.style.display = 'block';
-    aboutBox.style.pointerEvents = 'auto';   // 👈 AÑADIR
 }
 
 function closeAbout() {
     const aboutBox = document.getElementById('about-box');
     aboutBox.style.display = 'none';
-    aboutBox.style.pointerEvents = 'none';   // 👈 AÑADIR
+    aboutBox.style.pointerEvents = 'none';
 }
 
 // ── Premium btn visibility ───────────────────────────────────

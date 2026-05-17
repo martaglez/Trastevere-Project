@@ -324,7 +324,7 @@
             btn.classList.toggle('selected', n <= val);
         });
         const label = document.querySelector('.star-rating-label');
-        if (label) label.textContent = 'Tu valoración:';
+        if (label) label.textContent = t('public.yourRating');
     }
 
     async function submitRating(userId, stars) {
@@ -349,7 +349,7 @@
                 // Feedback message
                 const label = document.querySelector('.star-rating-label');
                 if (label) {
-                    const msg = data.action === 'updated' ? '✓ Actualizada' : '✓ Guardada';
+                    const msg = data.action === 'updated' ? t('public.updated') : t('public.saved');
                     label.textContent = msg;
                     label.style.color = 'var(--primary)';
                     setTimeout(() => { label.textContent = 'Tu valoración:'; label.style.color = ''; }, 2500);
@@ -381,6 +381,13 @@
     }
 
     document.addEventListener('DOMContentLoaded', loadPublicProfile);
+
+    // Ticket 006 — refresh when language changes
+    const _origSetLanguagePP = window.setLanguage;
+    window.setLanguage = function(lang) {
+        if (_origSetLanguagePP) _origSetLanguagePP(lang);
+        if (_profileData) renderProfile(_profileData);
+    };
     </script>
 </body>
 </html>
