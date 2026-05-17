@@ -162,8 +162,10 @@ document.getElementById('search-input').addEventListener('keypress', e => {
 
 const params = new URLSearchParams(window.location.search);
 if (params.get('q')) {
-    document.getElementById('search-input').value = params.get('q');
-    doSearch();
+    document.addEventListener('DOMContentLoaded', () => {
+        document.getElementById('search-input').value = params.get('q');
+        doSearch();
+    });
 }
 
 // ── Search History ─────────────────────────────────────────────
