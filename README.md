@@ -1,4 +1,5 @@
 # Trastevere Web App
+![](frontend/trastevere-logo.jpeg)
 A digital platform centered around the creation, sharing, and discovery of culinary recipes. The application connects users who wish to upload their own creations with a community eager to explore new culinary ideas.
 
 ## Tech Stack
