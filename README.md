@@ -50,3 +50,11 @@ python main.py
 
 ## License
 This project is licensed under Apache2.0 license. For more information, read `LICENSE.md`.
+
+## Trastevere Team
+* **Hugo Díaz** - [GitHub Profile](https://github.com/HugoDzP)
+* **Javier Fernández** - [GitHub Profile](https://github.com/javixfdez)
+* **María Ángeles Muñoz** - [GitHub Profile](https://github.com/chelesmjd)
+* **Marta González** - [GitHub Profile](https://github.com/martaglez)
+* **Marta Santomé** - [GitHub Profile](https://github.com/MartaSantome)
+* **Marcos E. Fernández** - [GitHub Profile](https://github.com/MarcoseFdz)
